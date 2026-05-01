@@ -1,0 +1,25 @@
+# ── Node / Build artifacts ────────────────────────────────────
+node_modules/
+dist/
+build/
+.cache/
+
+# ── Environment files (NEVER commit these) ────────────────────
+.env
+.env.local
+.env.production
+*.env
+Google_OAuth_client_secret_*.json
+
+# ── Logs ──────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+
+# ── OS files ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editor ────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
