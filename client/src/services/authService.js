@@ -9,11 +9,12 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 async function request(endpoint, options = {}) {
+  const { headers: optHeaders, body: optBody, ...restOptions } = options;
   const res = await fetch(`${BASE_URL}${endpoint}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    ...restOptions,
+    headers: { 'Content-Type': 'application/json', ...optHeaders },
     credentials: 'include',   // send/receive HttpOnly cookies
-    ...options,
-    body: options.body ? JSON.stringify(options.body) : undefined,
+    body: optBody ? JSON.stringify(optBody) : undefined,
   });
 
   const data = await res.json().catch(() => ({}));
@@ -73,4 +74,28 @@ export function forgotPassword(payload) {
  */
 export function resetPassword(payload) {
   return request('/auth/reset-password', { method: 'POST', body: payload });
+}
+
+/**
+ * getProfile — GET /api/user/profile
+ * @param {string} token — JWT access token
+ */
+export function getProfile(token) {
+  return request('/user/profile', {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+/**
+ * updateProfile — PUT /api/user/profile
+ * @param {string} token — JWT access token
+ * @param {object} payload — fields to update
+ */
+export function updateProfile(token, payload) {
+  return request('/user/profile', {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: payload,
+  });
 }

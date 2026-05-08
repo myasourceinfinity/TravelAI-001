@@ -10,7 +10,10 @@ const cookieParser = require('cookie-parser');
 // Import pool to trigger the startup connectivity test
 require('./config/db');
 
-const authRoutes = require('./routes/authRoutes');
+const authRoutes    = require('./routes/authRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const tripRoutes    = require('./routes/tripRoutes');
+const authMiddleware = require('./middleware/authMiddleware');
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +29,8 @@ app.use(cookieParser());
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
+app.use('/api/user', authMiddleware, profileRoutes);
+app.use('/api/trips', authMiddleware, tripRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) =>

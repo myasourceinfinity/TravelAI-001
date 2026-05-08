@@ -5,25 +5,23 @@
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
 
 export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
-  const { login, isLoading, authError, clearError } = useAuth();
+  const navigate = useNavigate();
+  const { login, loginWithGoogle, isLoading, authError, clearError } = useAuth();
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const [loginSuccess, setLoginSuccess] = useState(null);
 
   async function handleGoogleSuccess(credentialResponse) {
     try {
-      const authCtx = useAuth();
-      const data = await authCtx.loginWithGoogle(credentialResponse.credential);
-      if (data.isNewUser) {
-        setLoginSuccess({ isNewUser: true, email: data.user.email });
-      } else {
-        setLoginSuccess(data.user);
+      const data = await loginWithGoogle(credentialResponse.credential);
+      if (data.accessToken) {
+        navigate('/dashboard');
       }
     } catch (err) {
       // Error is handled by context
@@ -61,71 +59,14 @@ export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
     if (Object.keys(errs).length > 0) return;
 
     try {
-      const user = await login({
+      await login({
         email: form.email.trim().toLowerCase(),
         password: form.password,
       });
-      setLoginSuccess(user);
+      navigate('/dashboard');
     } catch (_err) {
       // authError is already set by AuthContext
     }
-  }
-
-  // ── Success state ─────────────────────────────────────────────────
-  if (loginSuccess) {
-    if (loginSuccess.isNewUser) {
-      return (
-        <div className="phase-enter flex flex-col items-center gap-5 text-center" style={{ padding: 'var(--sp-4) 0' }}>
-          <div style={{
-            width: 80, height: 80,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, hsl(158,65%,42%), hsl(158,75%,35%))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '2rem',
-            boxShadow: '0 0 32px hsla(158,70%,52%,0.4)',
-            animation: 'fadeSlideUp 0.5s cubic-bezier(0.4,0,0.2,1) both',
-          }}>
-            ✓
-          </div>
-
-          <div>
-            <h2 className="heading-md" style={{ marginBottom: 'var(--sp-2)' }}>
-              🎉 Welcome aboard!
-            </h2>
-            <p className="text-secondary" style={{ maxWidth: '340px', lineHeight: '1.7' }}>
-              Your account has been created. We've sent a verification link to{' '}
-              <strong style={{ color: 'var(--brand-300)' }}>{loginSuccess.email}</strong>.
-              Please check your inbox.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className="btn btn-primary btn-lg"
-            onClick={() => setLoginSuccess(null)}
-            style={{ minWidth: 200 }}
-          >
-            Go to Sign In →
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="phase-enter flex flex-col gap-5 text-center">
-        <p style={{ fontSize: '2.5rem', marginBottom: '4px' }}>🎉</p>
-        <h2 className="heading-md">Welcome back, {loginSuccess.first_name}!</h2>
-        <p className="text-sm text-secondary">
-          Signed in as <strong style={{ color: 'var(--brand-300)' }}>{loginSuccess.email}</strong>
-        </p>
-        <div className="alert alert-success">
-          ✅ Login successful — role: <strong>{loginSuccess.role_type}</strong>
-        </div>
-        <p className="text-xs text-muted mt-2">
-          Dashboard routing will be available in the next build phase.
-        </p>
-      </div>
-    );
   }
 
   return (

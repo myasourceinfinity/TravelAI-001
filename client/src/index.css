@@ -681,3 +681,658 @@ select.form-input {
   cursor: pointer;
 }
 select.form-input option { background: var(--bg-800); color: var(--text-primary); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Dashboard Styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+.dashboard-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--sp-6);
+}
+
+.dashboard-container {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-6) 0;
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.dashboard-error-card {
+  padding: var(--sp-8);
+  text-align: center;
+  max-width: 440px;
+  margin: 20vh auto;
+}
+
+/* ── Dashboard Header ────────────────────────────────────────────── */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-5) var(--sp-6);
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+.dashboard-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.dashboard-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.avatar-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-500), var(--accent-500));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 0 20px hsla(235, 70%, 50%, 0.3);
+}
+
+/* ── Dashboard Grid ──────────────────────────────────────────────── */
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.dashboard-section {
+  padding: var(--sp-6);
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--sp-5);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+/* ── Form Grid (2-column layout) ─────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .dashboard-header { flex-direction: column; align-items: flex-start; }
+  .dashboard-header-right { width: 100%; justify-content: flex-end; }
+}
+
+/* ── Badges ──────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  text-transform: capitalize;
+}
+
+.badge-role {
+  background: hsla(235, 70%, 50%, 0.18);
+  color: var(--brand-300);
+  border: 1px solid hsla(235, 70%, 50%, 0.3);
+}
+
+.badge-status {
+  text-transform: capitalize;
+}
+.badge-active {
+  background: hsla(158, 70%, 42%, 0.18);
+  color: var(--success-400);
+  border: 1px solid hsla(158, 70%, 42%, 0.3);
+}
+.badge-pending {
+  background: hsla(40, 95%, 58%, 0.15);
+  color: var(--warn-400);
+  border: 1px solid hsla(40, 95%, 58%, 0.3);
+}
+.badge-suspended {
+  background: hsla(0, 78%, 62%, 0.15);
+  color: var(--error-400);
+  border: 1px solid hsla(0, 78%, 62%, 0.3);
+}
+
+.badge-provider {
+  background: hsla(220, 40%, 60%, 0.12);
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border);
+}
+
+/* ── Account Info Grid ───────────────────────────────────────────── */
+.account-badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--sp-4);
+}
+
+.info-badge {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  background: hsla(228, 25%, 8%, 0.5);
+  border-radius: var(--radius-md);
+  border: 1px solid hsla(220, 30%, 35%, 0.2);
+}
+
+.info-badge-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Accent button (coral/amber) */
+.btn-accent {
+  background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-600) 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px hsla(18, 90%, 55%, 0.35);
+}
+.btn-accent:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--accent-400) 0%, var(--accent-500) 100%);
+  box-shadow: 0 6px 24px hsla(18, 90%, 55%, 0.5);
+  transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Trip Planner Styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+.trip-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--sp-6);
+}
+
+.trip-container {
+  width: 100%;
+  max-width: 1060px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-4) 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Top bar ──────────────────────────────────────────────────────── */
+.trip-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.trip-hero { margin-bottom: var(--sp-1); }
+
+/* ── Tab toggle ───────────────────────────────────────────────────── */
+.trip-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+}
+
+.trip-tab {
+  padding: 10px 28px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--glass-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-med);
+}
+.trip-tab.active {
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-600));
+  color: #fff;
+  border-color: var(--brand-500);
+  box-shadow: 0 4px 16px hsla(235, 70%, 50%, 0.4);
+}
+.trip-tab:not(.active):hover {
+  background: var(--glass-hover);
+  color: var(--text-primary);
+  border-color: hsla(220, 40%, 60%, 0.35);
+}
+
+/* ── Input card ───────────────────────────────────────────────────── */
+.trip-input-card {
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.trip-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: var(--sp-4);
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+.trip-textarea::placeholder { color: var(--text-muted); }
+
+.trip-input-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.trip-input-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+/* ── Upload button ────────────────────────────────────────────────── */
+.trip-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--glass-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.trip-upload-btn:hover:not(:disabled) {
+  border-color: var(--brand-400);
+  color: var(--text-primary);
+  background: hsla(235, 70%, 50%, 0.08);
+}
+.trip-upload-icon {
+  font-size: 1.1rem;
+}
+
+/* ── File chips ───────────────────────────────────────────────────── */
+.trip-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-4);
+}
+.trip-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: hsla(235, 70%, 50%, 0.12);
+  border: 1px solid hsla(235, 70%, 50%, 0.25);
+  color: var(--brand-200);
+  font-size: 0.78rem;
+}
+.trip-file-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0 2px;
+  line-height: 1;
+}
+.trip-file-remove:hover { color: var(--error-400); }
+
+/* ── Toggle switch ────────────────────────────────────────────────── */
+.trip-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  cursor: pointer;
+  user-select: none;
+}
+.trip-toggle-track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--bg-600);
+  transition: background var(--transition-fast);
+  display: inline-block;
+}
+.trip-toggle-track.on {
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-400));
+}
+.trip-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--transition-fast);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.trip-toggle-track.on .trip-toggle-thumb {
+  transform: translateX(18px);
+}
+
+/* ── Submit button extra ──────────────────────────────────────────── */
+.trip-submit-btn { min-width: 110px; }
+
+/* ── Results ──────────────────────────────────────────────────────── */
+.trip-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.trip-summary-card {
+  padding: var(--sp-5) var(--sp-6);
+}
+.trip-summary-text {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* ── Controls row ─────────────────────────────────────────────────── */
+.trip-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+.trip-controls-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.trip-dest-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--brand-500);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: var(--sp-2);
+}
+
+/* ── Content grid (destinations + map) ────────────────────────────── */
+.trip-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-5);
+  min-height: 420px;
+}
+
+@media (max-width: 768px) {
+  .trip-content-grid { grid-template-columns: 1fr; }
+  .trip-map-wrap { height: 300px; }
+}
+
+/* ── Destination list ─────────────────────────────────────────────── */
+.trip-dest-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.trip-start-city {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: hsla(228, 25%, 10%, 0.5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+}
+
+.trip-dest-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-3) var(--sp-4);
+  gap: var(--sp-3);
+  border-radius: var(--radius-lg) !important;
+}
+.trip-dest-card-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.trip-dest-emoji {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+.trip-dest-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: var(--sp-1);
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+.trip-dest-remove:hover {
+  color: var(--error-400);
+  background: hsla(0, 78%, 62%, 0.12);
+}
+
+.trip-add-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) 0;
+}
+
+/* ── Route options ────────────────────────────────────────────────── */
+.trip-route-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+.trip-route-option {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+}
+.trip-route-option.selected { color: var(--text-primary); }
+.trip-route-option input[type="radio"] { display: none; }
+
+/* ── Map wrapper ──────────────────────────────────────────────────── */
+.trip-map-wrap {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  min-height: 380px;
+}
+
+/* ── Bottom actions ───────────────────────────────────────────────── */
+.trip-bottom-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+.trip-bottom-left {
+  display: flex;
+  gap: var(--sp-2);
+}
+.trip-generate-btn {
+  min-width: 280px;
+}
+
+/* ── Preferences overlay + panel ──────────────────────────────────── */
+.trip-prefs-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: hsla(228, 28%, 6%, 0.6);
+  display: flex;
+  justify-content: flex-end;
+}
+.trip-prefs-panel {
+  width: 380px;
+  max-width: 90vw;
+  height: 100dvh;
+  overflow-y: auto;
+  padding: var(--sp-6);
+  border-radius: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.trip-prefs-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.trip-prefs-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: var(--sp-1);
+}
+.trip-prefs-close:hover { color: var(--text-primary); }
+
+.trip-prefs-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.trip-prefs-section-title {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--glass-border);
+}
+.trip-prefs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* ── Counter ──────────────────────────────────────────────────────── */
+.trip-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.trip-counter button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.trip-counter button:hover {
+  border-color: var(--brand-400);
+  color: var(--text-primary);
+  background: hsla(235, 70%, 50%, 0.1);
+}
+.trip-counter span {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ── Yes/No buttons ───────────────────────────────────────────────── */
+.trip-yn-btns {
+  display: inline-flex;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+}
+.trip-yn {
+  padding: 6px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.trip-yn.active {
+  background: var(--brand-500);
+  color: #fff;
+}
