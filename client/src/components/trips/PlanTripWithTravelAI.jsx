@@ -8,37 +8,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../context/AuthContext';
 import { planTrip } from '../../services/tripService';
 
-// ── Leaflet icon fix ────────────────────────────────────────────────────────
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-const createEmojiIcon = (emoji) => L.divIcon({
-  className: 'custom-emoji-marker',
-  html: `<div style="font-size:24px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5))">${emoji}</div>`,
-  iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15],
-});
-
-// ── Map auto-fit component ──────────────────────────────────────────────────
-function MapFitter({ destinations }) {
-  const map = useMap();
-  useEffect(() => {
-    if (destinations.length > 0) {
-      const bounds = L.latLngBounds(destinations.map(d => [d.lat, d.lng]));
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 7 });
-    }
-  }, [destinations, map]);
-  return null;
-}
+// Map removed as requested
 
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function PlanTripWithTravelAI() {
@@ -47,17 +20,17 @@ export default function PlanTripWithTravelAI() {
   const fileInputRef = useRef(null);
 
   // ── Input state ───────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab]       = useState('plan');    // 'plan' | 'ask'
-  const [description, setDescription]   = useState('');
-  const [files, setFiles]               = useState([]);
-  const [instantPlan, setInstantPlan]   = useState(true);
+  const [activeTab, setActiveTab] = useState('plan');    // 'plan' | 'ask'
+  const [description, setDescription] = useState('');
+  const [files, setFiles] = useState([]);
+  const [instantPlan, setInstantPlan] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError]               = useState(null);
+  const [error, setError] = useState(null);
 
   // ── Result state ──────────────────────────────────────────────────────────
-  const [plan, setPlan]                 = useState(null);
-  const [showPrefs, setShowPrefs]       = useState(false);
-  const [routeMode, setRouteMode]       = useState('auto');  // 'auto' | 'manual'
+  const [plan, setPlan] = useState(null);
+  const [showPrefs, setShowPrefs] = useState(false);
+  const [routeMode, setRouteMode] = useState('auto');  // 'auto' | 'manual'
 
   // ── Preferences state ─────────────────────────────────────────────────────
   const [prefs, setPrefs] = useState({
@@ -146,12 +119,12 @@ export default function PlanTripWithTravelAI() {
           >
             Plan a Trip
           </button>
-          <button
+          {/* <button
             className={`trip-tab${activeTab === 'ask' ? ' active' : ''}`}
             onClick={() => setActiveTab('ask')}
           >
             Ask TravelAI
-          </button>
+          </button> */}
         </div>
 
         {/* ═══ Input card ═════════════════════════════════════════════════════ */}
@@ -181,7 +154,7 @@ export default function PlanTripWithTravelAI() {
 
           {/* ── Bottom toolbar ────────────────────────────────────────────── */}
           <div className="trip-input-toolbar">
-            <button
+            {/* <button
               type="button"
               className="trip-upload-btn"
               onClick={() => fileInputRef.current?.click()}
@@ -197,11 +170,11 @@ export default function PlanTripWithTravelAI() {
               accept=".pdf,.jpg,.jpeg,.png,.eml"
               style={{ display: 'none' }}
               onChange={handleFileSelect}
-            />
+            /> */}
 
             <div className="trip-input-right">
               {/* Instant Plan toggle */}
-              <label className="trip-toggle-label">
+              {/* <label className="trip-toggle-label">
                 <span className={`trip-toggle-track${instantPlan ? ' on' : ''}`}>
                   <span className="trip-toggle-thumb" />
                 </span>
@@ -212,7 +185,7 @@ export default function PlanTripWithTravelAI() {
                 checked={instantPlan}
                 onChange={() => setInstantPlan(p => !p)}
                 style={{ display: 'none' }}
-              />
+              /> */}
 
               <button
                 className={`btn btn-primary btn-sm trip-submit-btn${!description.trim() ? ' disabled' : ''}`}
@@ -283,80 +256,126 @@ export default function PlanTripWithTravelAI() {
                 </p>
 
                 {plan.destinations.map(dest => (
-                  <div key={dest.id} className="glass-card trip-dest-card">
-                    <div className="trip-dest-card-left">
-                      <span className="trip-dest-emoji">{dest.emoji}</span>
-                      <div>
-                        <h3 className="text-sm" style={{ fontWeight: 600 }}>
-                          {dest.name} <span className="text-muted">{dest.country}</span>
-                        </h3>
-                        <p className="text-xs text-secondary">
-                          Highlights include {dest.highlights.slice(0, 2).join(', ')}
-                          {dest.highlights.length > 2 ? ` and ${dest.highlights.length - 2} more` : ''}
-                        </p>
+                  <div key={dest.id} className="glass-card trip-dest-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div className="trip-dest-card-left">
+                        <div style={{ position: 'relative' }}>
+                          <img 
+                            src={`https://picsum.photos/seed/${dest.id}/150/150`} 
+                            alt={dest.name}
+                            style={{
+                              width: '64px',
+                              height: '64px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '2px solid var(--brand-500)',
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                            }}
+                          />
+                          <span 
+                            style={{
+                              position: 'absolute',
+                              bottom: '-4px',
+                              right: '-4px',
+                              fontSize: '1.3rem',
+                              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+                              background: 'var(--bg-800)',
+                              borderRadius: '50%',
+                              padding: '2px',
+                              lineHeight: 1
+                            }}
+                          >
+                            {dest.emoji}
+                          </span>
+                        </div>
+                        <div>
+                          <h3 className="text-sm" style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '4px' }}>
+                            {dest.name} <span className="text-muted" style={{ fontSize: '0.85rem' }}>{dest.country}</span>
+                          </h3>
+                          <p className="text-xs text-secondary" style={{ lineHeight: '1.4' }}>
+                            Highlights include {dest.highlights.slice(0, 2).join(', ')}
+                            {dest.highlights.length > 2 ? ` and ${dest.highlights.length - 2} more` : ''}
+                          </p>
+                        </div>
                       </div>
+                      <button
+                        className="trip-dest-remove"
+                        onClick={() => removeDestination(dest.id)}
+                        title="Remove destination"
+                      >
+                        ✕
+                      </button>
                     </div>
-                    <button
-                      className="trip-dest-remove"
-                      onClick={() => removeDestination(dest.id)}
-                      title="Remove destination"
-                    >
-                      ✕
-                    </button>
+
+                    {/* ── Bookme Deals Carousel ── */}
+                    {dest.bookmeDeals && dest.bookmeDeals.length > 0 && (
+                      <div className="bookme-deals-container">
+                        <h4 className="bookme-deals-title">✨ Recommended Activities on Bookme</h4>
+                        <div className="bookme-deals-scroll">
+                          {dest.bookmeDeals.map((deal, i) => {
+                            // Generate sensible mock values for visual fidelity
+                            const rating = (4.5 + Math.random() * 0.4).toFixed(1);
+                            const reviews = Math.floor(Math.random() * 3000) + 100;
+                            const spaces = Math.floor(Math.random() * 10) + 2;
+                            const dateStr = "20 May – 09 Jun";
+                            
+                            let savingsStr = "Save up to $46.00";
+                            if (deal.originalPrice && deal.price) {
+                              const orig = parseFloat(deal.originalPrice.replace(/[^0-9.]/g, ''));
+                              const curr = parseFloat(deal.price.replace(/[^0-9.]/g, ''));
+                              if (orig > curr) savingsStr = `Save up to $${(orig - curr).toFixed(2)}`;
+                            }
+
+                            return (
+                              <a key={i} href={deal.link} target="_blank" rel="noreferrer" className="bookme-deal-card-new">
+                                <div className="bookme-deal-header-new">
+                                  <h5 className="bookme-deal-title-new">{deal.title}</h5>
+                                  <div className="bookme-deal-reviews-new">
+                                    <span className="bookme-stars">★★★★★</span> {rating} / {reviews} Reviews
+                                  </div>
+                                </div>
+                                
+                                <div className="bookme-deal-image-new" style={{ backgroundImage: `url(${deal.image})` }}></div>
+                                
+                                <div className="bookme-deal-body-new">
+                                  <div className="bookme-deal-dates">
+                                    <p>Best between: {dateStr}</p>
+                                    <p className="tap-through">Tap through for more</p>
+                                  </div>
+                                  
+                                  <div className="bookme-deal-footer-new">
+                                    <div className="bookme-deal-badges-new">
+                                      {deal.discount && (
+                                        <div className="bookme-badge-orange">
+                                          <span>Available from</span>
+                                          <strong>{deal.discount}</strong>
+                                        </div>
+                                      )}
+                                      <div className="bookme-badge-spaces">
+                                        <strong>{spaces}+</strong>
+                                        <span>Spaces</span>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="bookme-deal-pricing-new">
+                                      <div className="price-main">
+                                        <span className="from-text">From:</span>
+                                        <span className="price-value">{deal.price.replace('From ', '')}</span>
+                                      </div>
+                                      <div className="save-text">{savingsStr}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
 
-                {/* Add destination + suggestions */}
-                <div className="trip-add-row">
-                  <button className="link text-sm">⊕ Add Another Destination</button>
-                  {plan.suggestions.length > 0 && (
-                    <button className="link text-sm">
-                      {plan.suggestions.length} Suggestion{plan.suggestions.length !== 1 ? 's' : ''}
-                    </button>
-                  )}
-                </div>
 
-                {/* Route mode */}
-                <div className="trip-route-options">
-                  <label className={`trip-route-option${routeMode === 'auto' ? ' selected' : ''}`}>
-                    <input type="radio" name="routeMode" checked={routeMode === 'auto'} onChange={() => setRouteMode('auto')} />
-                    <span>◉ Suggest the best possible route</span>
-                  </label>
-                  <label className={`trip-route-option${routeMode === 'manual' ? ' selected' : ''}`}>
-                    <input type="radio" name="routeMode" checked={routeMode === 'manual'} onChange={() => setRouteMode('manual')} />
-                    <span>○ I'll choose the order</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* RIGHT: map */}
-              <div className="trip-map-wrap">
-                <MapContainer
-                  center={[35, 137]}
-                  zoom={5}
-                  scrollWheelZoom
-                  style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-lg)' }}
-                  zoomControl={false}
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com">CARTO</a>'
-                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                    subdomains="abcd"
-                    maxZoom={18}
-                  />
-                  <MapFitter destinations={plan.destinations} />
-                  {plan.destinations.map(dest => (
-                    <Marker key={dest.id} position={[dest.lat, dest.lng]} icon={createEmojiIcon(dest.emoji)}>
-                      <Popup className="custom-popup">
-                        <strong>{dest.name}</strong>, {dest.country}
-                        <br />
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                          {dest.highlights[0]}
-                        </span>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
               </div>
             </div>
 

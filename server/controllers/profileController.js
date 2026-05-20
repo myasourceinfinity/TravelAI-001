@@ -97,7 +97,7 @@ const updateProfile = async (req, res) => {
          updated_at     = NOW()`,
       [
         userId,
-        budget_amount != null ? parseFloat(budget_amount) : null,
+        (budget_amount !== '' && budget_amount != null) ? parseFloat(budget_amount) : null,
         currency || null,
         destination || null,
         location_types ? JSON.stringify(location_types) : null,

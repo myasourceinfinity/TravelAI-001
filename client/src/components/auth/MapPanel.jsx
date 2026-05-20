@@ -69,62 +69,9 @@ function MapController({ selectedCurrency }) {
 }
 
 export default function MapPanel({ selectedCurrency, onCurrencyChange }) {
-  const mapRef = useRef(null);
   return (
-    <div className="auth-map-container" style={{ width: '100%', height: '100%', position: 'relative' }}>
-      {/* Subtle overlay gradient to blend with the dark form panel on the left */}
-      <div 
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100px',
-          height: '100%',
-          background: 'linear-gradient(to right, var(--bg-900) 0%, transparent 100%)',
-          zIndex: 1000,
-          pointerEvents: 'none'
-        }}
-      />
-      
-      <MapContainer 
-        center={[20, 0]} 
-        zoom={2.5} 
-        scrollWheelZoom={false}
-        style={{ width: '100%', height: '100%', zIndex: 1 }}
-        zoomControl={false} // Hide default zoom control for cleaner look
-        ref={mapRef}
-      >
-        <MapResizer />
-        <MapController selectedCurrency={selectedCurrency} />
-        {/* CartoDB Voyager tiles (colorful) */}
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={20}
-        />
-
-        {MAP_DESTINATIONS.map(dest => (
-          <Marker 
-            key={dest.id} 
-            position={dest.pos} 
-            icon={createEmojiIcon(dest.emoji)}
-            eventHandlers={{
-              click: () => {
-                if (onCurrencyChange) onCurrencyChange(dest.id);
-              },
-            }}
-          >
-            <Popup className="custom-popup">
-              <strong>{dest.name}</strong>
-              <br />
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                Currency: {dest.id}
-              </span>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+    <div className="auth-map-container" style={{ width: '100%', height: '100%', position: 'relative', background: 'var(--bg-800)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+      Map placeholder (disabled for testing)
     </div>
   );
 }

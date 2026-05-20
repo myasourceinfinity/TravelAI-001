@@ -1076,11 +1076,16 @@ select.form-input option { background: var(--bg-800); color: var(--text-primary)
 
 .trip-summary-card {
   padding: var(--sp-5) var(--sp-6);
+  background: linear-gradient(145deg, hsla(235, 70%, 50%, 0.1), hsla(228, 25%, 14%, 0.8));
+  border-left: 4px solid var(--brand-500);
+  box-shadow: 0 8px 32px hsla(235, 70%, 20%, 0.2);
 }
 .trip-summary-text {
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 400;
   line-height: 1.7;
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 /* ── Controls row ─────────────────────────────────────────────────── */
@@ -1113,7 +1118,7 @@ select.form-input option { background: var(--bg-800); color: var(--text-primary)
 /* ── Content grid (destinations + map) ────────────────────────────── */
 .trip-content-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: var(--sp-5);
   min-height: 420px;
 }
@@ -1144,34 +1149,55 @@ select.form-input option { background: var(--bg-800); color: var(--text-primary)
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
   gap: var(--sp-3);
   border-radius: var(--radius-lg) !important;
+  background: linear-gradient(135deg, hsla(228, 25%, 16%, 0.7) 0%, hsla(228, 25%, 10%, 0.9) 100%);
+  border: 1px solid hsla(220, 40%, 60%, 0.15);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform var(--transition-med), box-shadow var(--transition-med), border-color var(--transition-med);
+}
+.trip-dest-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 16px hsla(235, 70%, 50%, 0.15);
+  border-color: hsla(220, 40%, 60%, 0.3);
 }
 .trip-dest-card-left {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--sp-4);
   min-width: 0;
 }
 .trip-dest-emoji {
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   flex-shrink: 0;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+  transition: transform 0.3s ease;
+}
+.trip-dest-card:hover .trip-dest-emoji {
+  transform: scale(1.1) rotate(5deg);
 }
 .trip-dest-remove {
-  background: none;
-  border: none;
-  color: var(--text-muted);
+  background: hsla(228, 25%, 20%, 0.5);
+  border: 1px solid hsla(220, 40%, 60%, 0.1);
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 1rem;
-  padding: var(--sp-1);
+  padding: var(--sp-2);
   border-radius: 50%;
   transition: all var(--transition-fast);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
 }
 .trip-dest-remove:hover {
-  color: var(--error-400);
-  background: hsla(0, 78%, 62%, 0.12);
+  color: #fff;
+  background: var(--error-500);
+  border-color: var(--error-400);
+  box-shadow: 0 0 12px hsla(0, 78%, 62%, 0.4);
 }
 
 .trip-add-row {
@@ -1335,4 +1361,185 @@ select.form-input option { background: var(--bg-800); color: var(--text-primary)
 .trip-yn.active {
   background: var(--brand-500);
   color: #fff;
+}
+/* -- Bookme Deals Carousel -- */
+.bookme-deals-container {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed hsla(220, 40%, 60%, 0.2);
+}
+.bookme-deals-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--brand-300);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: 0.02em;
+}
+.bookme-deals-scroll {
+  display: flex;
+  gap: 1.2rem;
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.bookme-deals-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.bookme-deals-scroll::-webkit-scrollbar-track {
+  background: hsla(220, 15%, 50%, 0.1);
+  border-radius: 4px;
+}
+.bookme-deals-scroll::-webkit-scrollbar-thumb {
+  background: hsla(235, 70%, 50%, 0.4);
+  border-radius: 4px;
+}
+.bookme-deals-scroll::-webkit-scrollbar-thumb:hover {
+  background: hsla(235, 70%, 50%, 0.7);
+}
+.bookme-deal-card-new {
+  flex: 0 0 340px;
+  scroll-snap-align: start;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.bookme-deal-card-new:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.4), 0 0 12px hsla(235, 70%, 50%, 0.2);
+  border-color: var(--brand-400);
+}
+.bookme-deal-header-new {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.bookme-deal-title-new {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+.bookme-deal-card-new:hover .bookme-deal-title-new {
+  color: var(--brand-300);
+}
+.bookme-deal-reviews-new {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.bookme-stars {
+  color: #fbbf24;
+  letter-spacing: -2px;
+}
+.bookme-deal-image-new {
+  width: 100%;
+  height: 180px;
+  border-radius: var(--radius-sm);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  transition: transform 0.4s ease;
+  overflow: hidden;
+}
+.bookme-deal-card-new:hover .bookme-deal-image-new {
+  transform: scale(1.02);
+}
+.bookme-deal-body-new {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.bookme-deal-dates {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.bookme-deal-dates .tap-through {
+  font-style: italic;
+  opacity: 0.8;
+}
+.bookme-deal-footer-new {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 0.5rem;
+}
+.bookme-deal-badges-new {
+  display: flex;
+  gap: 0.5rem;
+}
+.bookme-badge-orange {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  border-radius: 4px;
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  font-size: 0.65rem;
+  box-shadow: 0 2px 4px rgba(234, 88, 12, 0.3);
+}
+.bookme-badge-orange strong {
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+.bookme-badge-spaces {
+  background: transparent;
+  color: var(--brand-200);
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  font-size: 0.65rem;
+}
+.bookme-badge-spaces strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.bookme-deal-pricing-new {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+}
+.price-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+.from-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.price-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.save-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 0.25rem;
 }

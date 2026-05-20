@@ -12,8 +12,14 @@ import { localLogin, googleAuth, logout as apiLogout } from '../services/authSer
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user,        setUser]        = useState(null);
-  const [accessToken, setAccessToken] = useState(null);
+  const[user, setUser] = useState(() => {
+    const savedUser = sessionStorage.getItem('travelai_user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const[accessToken, setAccessToken] = useState(() => {
+    return sessionStorage.getItem('travelai_token') || null;
+  });
+
   const [isLoading,   setIsLoading]   = useState(false);
   const [authError,   setAuthError]   = useState(null);
 
@@ -25,6 +31,9 @@ export function AuthProvider({ children }) {
       const data = await localLogin({ email, password });
       setUser(data.user);
       setAccessToken(data.accessToken);
+      
+      sessionStorage.setItem('travelai_user', JSON.stringify(data.user));
+      sessionStorage.setItem('travelai_token', data.accessToken);
       return data.user;
     } catch (err) {
       setAuthError(err.message);
@@ -43,6 +52,8 @@ export function AuthProvider({ children }) {
       if (data.accessToken) {
         setUser(data.user);
         setAccessToken(data.accessToken);
+        sessionStorage.setItem('travelai_user', JSON.stringify(data.user));
+        sessionStorage.setItem('travelai_token', data.accessToken);
       }
       return data;
     } catch (err) {
@@ -59,6 +70,8 @@ export function AuthProvider({ children }) {
     setUser(null);
     setAccessToken(null);
     setAuthError(null);
+    sessionStorage.removeItem('travelai_user');
+    sessionStorage.removeItem('travelai_token');
   }, []);
 
   return (
