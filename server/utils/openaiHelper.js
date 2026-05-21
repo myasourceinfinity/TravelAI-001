@@ -2,10 +2,8 @@
  * openaiHelper.js
  *
  * Wrapper around the OpenAI API for AI-powered trip planning.
- * Uses GPT-4o with structured JSON output (response_format) to ensure
- * reliable, parseable trip recommendations.
- *
- * Falls back gracefully if OPENAI_API_KEY is not configured.
+ * Uses GPT-4o with structured JSON output (response_format: json_schema)
+ * to ensure reliable, parseable trip recommendations.
  */
 
 const OpenAI = require('openai');
@@ -27,6 +25,10 @@ function isConfigured() {
 }
 
 // ── JSON Schema for the trip plan response ──────────────────────────────────
+// NOTE: additionalProperties: false is required for strict mode.
+// bookmeDeals is intentionally excluded here — it is injected AFTER the
+// OpenAI call by the Bookme scraper in tripController.js. Do not add it
+// to the schema or GPT-4o will attempt to hallucinate deal data.
 const TRIP_PLAN_SCHEMA = {
   type: 'json_schema',
   json_schema: {
@@ -35,35 +37,46 @@ const TRIP_PLAN_SCHEMA = {
     schema: {
       type: 'object',
       properties: {
+
         summary: {
           type: 'string',
-          description: 'A 2-4 sentence narrative summary of the planned trip, written in first person as a travel agent.',
+          description:
+            'A 2–4 sentence narrative overview of the trip written in first person as a friendly travel agent. Mention the key destinations and the overall vibe (budget, adventure, culture, etc.).',
         },
+
         destinations: {
           type: 'array',
-          description: 'The recommended destinations (3-5) in visit order.',
+          description: 'Recommended destinations in visit order. 3–5 destinations for trips up to 10 days; up to 6 for longer trips.',
           items: {
             type: 'object',
             properties: {
-              id:         { type: 'string', description: 'Unique slug ID, e.g. "tokyo" or "lake-como".' },
-              name:       { type: 'string', description: 'City or area name.' },
-              country:    { type: 'string', description: 'Country name.' },
-              lat:        { type: 'number', description: 'Latitude coordinate.' },
-              lng:        { type: 'number', description: 'Longitude coordinate.' },
-              emoji:      { type: 'string', description: 'A single emoji representing this destination.' },
+              id: {
+                type: 'string',
+                description: 'Unique lowercase hyphenated slug, e.g. "auckland" or "tongariro-national-park".',
+              },
+              name:    { type: 'string', description: 'City, area, or park name.' },
+              country: { type: 'string', description: 'Country name.' },
+              lat:     { type: 'number', description: 'Accurate latitude in decimal degrees.' },
+              lng:     { type: 'number', description: 'Accurate longitude in decimal degrees.' },
+              emoji:   { type: 'string', description: 'One emoji representing this destination.' },
               highlights: {
                 type: 'array',
-                description: '3-5 must-see attractions or experiences.',
+                description: '3 must-see attractions or experiences at this destination.',
                 items: { type: 'string' },
+                minItems: 3,
+                maxItems: 3,
               },
             },
             required: ['id', 'name', 'country', 'lat', 'lng', 'emoji', 'highlights'],
             additionalProperties: false,
           },
+          minItems: 3,
+          maxItems: 6,
         },
+
         suggestions: {
           type: 'array',
-          description: '2-4 additional destinations the traveler might consider.',
+          description: '3 alternative destinations the traveller might consider adding or swapping in. Must not duplicate destinations already in the plan.',
           items: {
             type: 'object',
             properties: {
@@ -75,44 +88,63 @@ const TRIP_PLAN_SCHEMA = {
             required: ['id', 'name', 'country', 'emoji'],
             additionalProperties: false,
           },
+          minItems: 3,
+          maxItems: 3,
         },
+
         startCity: {
           type: 'string',
-          description: 'Recommended departure/return city based on the traveler description, or a sensible default.',
+          description: 'The recommended arrival/departure city for this itinerary (typically the first destination).',
         },
+
         travelers: {
           type: 'number',
-          description: 'Number of travelers detected from the description.',
+          description: 'Number of travelers. Parse from the description; default to 1 if not mentioned.',
         },
+
         days: {
           type: 'number',
-          description: 'Number of days for the trip.',
+          description: 'Total trip duration in days. Parse from the description; default to 7 if not mentioned.',
         },
+
+        // FIX: was an open string — now an enum so GPT-4o cannot return arbitrary values
         budgetLevel: {
           type: 'string',
-          description: 'One of: budget, moderate, luxury.',
+          enum: ['budget', 'moderate', 'luxury'],
+          description: 'Infer from the description. Use "budget" for low-cost trips, "moderate" for mid-range, "luxury" for premium.',
         },
+
       },
-      required: ['summary', 'destinations', 'suggestions', 'startCity', 'travelers', 'days', 'budgetLevel'],
+      required: [
+        'summary',
+        'destinations',
+        'suggestions',
+        'startCity',
+        'travelers',
+        'days',
+        'budgetLevel',
+      ],
       additionalProperties: false,
     },
   },
 };
 
-// ── System prompt ───────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are TravelAI, an expert AI travel planner acting as a backend API. 
-Your objective is to process a traveler's profile and output a highly personalized trip recommendation.
+// ── System prompt ────────────────────────────────────────────────────────────
+const SYSTEM_PROMPT = `You are TravelAI, an expert AI travel planner acting as a backend API.
+Your job is to process a traveller's trip request and return a highly personalised itinerary.
 
-CRITICAL INSTRUCTION: You must respond ONLY with a valid, parsable JSON object. Do not include markdown formatting, conversational text, preambles, or postscripts.
+CRITICAL: Respond ONLY with a valid JSON object matching the schema provided.
+No markdown, no backticks, no preamble, no explanation — raw JSON only.
 
-TRAVEL LOGIC RULES:
-1. Provide 3-5 daily activities matching user preferences and budget tier.
-2. Respect explicitly mentioned exclusions.
-3. Provide accurate latitude/longitude coordinates (decimal format) for each destination.
-4. Logistics: Ensure daily itineraries are geographically logical. Group activities by proximity and limit to 3 major sites per day.
-5. Infrastructure: All overnight destinations must have established commercial hotel infrastructure.
-6. Fallback: If the user's request is geographically or seasonally impossible, output the "error" JSON schema instead of the itinerary schema.
-7. Tone: Write the "summary_message" in the first person as a friendly, expert travel agent.`;
+PLANNING RULES:
+1. Choose 3–5 destinations (up to 6 for trips over 10 days) in logical geographic order.
+2. For budget trips: keep destinations regionally tight to minimise transport costs.
+3. Provide exactly 3 highlights per destination — real, well-known attractions.
+4. Use accurate lat/lng coordinates (decimal degrees). Never invent coordinates.
+5. Every destination must have established hotel infrastructure (no remote wilderness camps).
+6. Infer travelers, days, and budgetLevel from the description. Default: 1 traveler, 7 days, budget.
+7. suggestions must be real destinations NOT already in the plan.
+8. Write the summary in first person as a friendly travel agent — mention key places and the trip mood.`;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // generateTripPlan — call GPT-4o for a structured trip recommendation
@@ -134,20 +166,28 @@ async function generateTripPlan(description) {
     ],
   });
 
-  const content = completion.choices[0]?.message?.content;
+  // Check for refusal (GPT-4o structured output can return a refusal object)
+  const choice = completion.choices[0];
+  if (choice.finish_reason === 'refusal') {
+    throw new Error(`OpenAI refused the request: ${choice.message.refusal}`);
+  }
+
+  const content = choice.message?.content;
   if (!content) {
     throw new Error('Empty response from OpenAI.');
   }
 
-  // Debug log to see the exact response returned by OpenAI
-  console.log('[generateTripPlan] OpenAI raw response:', content);
+  console.log('[generateTripPlan] Raw OpenAI response:', content);
 
   const plan = JSON.parse(content);
 
-  // Ensure IDs are unique lowercase slugs
+  // Sanitise: ensure all IDs are valid lowercase slugs (defensive, schema should enforce this)
   plan.destinations = plan.destinations.map(d => ({
     ...d,
-    id: d.id || d.name.toLowerCase().replace(/\s+/g, '-'),
+    id: d.id
+      ? d.id.toLowerCase().replace(/\s+/g, '-')
+      : d.name.toLowerCase().replace(/\s+/g, '-'),
+    bookmeDeals: [], // initialise empty — filled by scraper in tripController.js
   }));
 
   return plan;

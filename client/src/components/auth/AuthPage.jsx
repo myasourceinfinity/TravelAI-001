@@ -4,7 +4,7 @@
  * Sign In / Sign Up tabs, Forgot Password, and Reset Password views.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect , useCallback } from 'react';
 import SignUpFlow from './SignUpFlow';
 import SignInForm from './SignInForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
@@ -14,52 +14,66 @@ import MapPanel from './MapPanel';
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function AuthPage() {
   // 'signin' | 'signup' | 'forgot-password' | 'reset-password'
-  const [activeTab, setActiveTab] = useState('signup');
-  const [resetToken, setResetToken] = useState(null);
+  const [activeTab, setActiveTab] = useState(() => {
+      const params = new URLSearchParams(window.location.search);
+      const view = params.get('view');
+      const pathname = window.location.pathname;
+      if (pathname === '/reset-password' || view === 'reset-password') return 'reset-password';
+      if (pathname === '/verify-email'   || view === 'verify-email')   return 'verify-email';
+      return 'signup';
+    });
+	const [resetToken, setResetToken] = useState(() => {
+	    const params = new URLSearchParams(window.location.search);
+	    const view = params.get('view');
+	    const token = params.get('token');
+	    const pathname = window.location.pathname;
+	    if (token && (view === 'reset-password' || pathname === '/reset-password')) return token;
+	    return null;
+	  });
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  
+  const verifyEmailToken = useCallback(async (token) => {
+        try {
+          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+          const res = await fetch(`${API_URL}/auth/verify-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+          });
+          const data = await res.json();
+  		if (res.ok) {
+  		      setActiveTab('signin'); // navigate to sign-in after verification
+  		    } else {
+  		      console.error('Verification failed:', data.message);
+  		    }
+  		  } catch (err) {
+  		    console.error('Email verification error:', err);
+  		  }
+  		}, []);
 
   // ── On mount, check URL for ?view=reset-password&token=xxx or verify-email ──────────────────
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    const view = params.get('view');
+    const params   = new URLSearchParams(window.location.search);
+    const token    = params.get('token');
+    const view     = params.get('view');
+    const pathname = window.location.pathname;
 
-    // Support both /reset-password?token=xxx and /?view=reset-password&token=xxx
-    if (token && (view === 'reset-password' || window.location.pathname === '/reset-password')) {
-      setResetToken(token);
-      setActiveTab('reset-password');
-      // Clean URL without reloading
+    // Clean the URL — no setState, just DOM side-effect
+    if (token) {
       window.history.replaceState({}, '', '/');
     }
 
-    // Support both /verify-email?token=xxx and /?view=verify-email&token=xxx
-    if (token && (view === 'verify-email' || window.location.pathname === '/verify-email')) {
-      verifyEmailToken(token);
-      window.history.replaceState({}, '', '/');
+    // Wrap in async IIFE so the linter knows setState
+    // happens asynchronously inside an await, not synchronously
+    if (token && (view === 'verify-email' || pathname === '/verify-email')) {
+      (async () => {
+        await verifyEmailToken(token);
+      })();
     }
-  }, []);
 
-  const verifyEmailToken = async (token) => {
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const res = await fetch(`${API_URL}/auth/verify-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.error || 'Verification failed');
-      } else {
-        alert(data.message || 'Email verified successfully. You can now sign in.');
-      }
-      setActiveTab('signin');
-    } catch (error) {
-      console.error('Verify error:', error);
-      alert('Verification failed. Please try again.');
-      setActiveTab('signin');
-    }
-  };
+  }, [verifyEmailToken]);
+
+  
 
   // ── Helper: should tab bar be visible? ──────────────────────────────────────
   const showTabs = activeTab === 'signin' || activeTab === 'signup';
