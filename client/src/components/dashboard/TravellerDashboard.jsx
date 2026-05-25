@@ -157,6 +157,9 @@ export default function TravellerDashboard() {
             </div>
           </div>
           <div className="dashboard-header-right">
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/my-trips')} style={{ marginRight: '8px' }}>
+              🗺️ My Trips
+            </button>
             <button className="btn btn-accent btn-sm" onClick={() => navigate('/plan-trip')}>
               ✈️ Plan a trip with TravelAI
             </button>

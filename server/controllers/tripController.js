@@ -7,9 +7,9 @@
  * Uses OpenAI GPT-4o with structured JSON output when OPENAI_API_KEY is set.
  * Falls back to a hardcoded mock plan when the key is not configured.
  */
-
 const { isConfigured, generateTripPlan } = require('../utils/openaiHelper');
 const { scrapeBookmeDeals } = require('../utils/bookmeScraper');
+const pool = require('../config/db');
 
 // ── Mock fallback (used when OPENAI_API_KEY is not set) ─────────────────────
 function generateMockPlan(description) {
@@ -314,4 +314,113 @@ const planTrip = async (req, res) => {
   }
 };
 
-module.exports = { planTrip };
+// ═══════════════════════════════════════════════════════════════════════════════
+// SAVE TRIP  —  POST /api/trips/save
+// ═══════════════════════════════════════════════════════════════════════════════
+const saveTrip = async (req, res) => {
+  const { userId } = req.user;
+  const { plan, title } = req.body;
+
+  if (!plan || !plan.destinations) {
+    return res.status(400).json({ error: 'Invalid trip plan data.' });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // 1. Insert the trip
+    const tripQuery = `
+      INSERT INTO trips (user_id, title, summary, start_city, travelers, days, budget_level, suggestions)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING id;
+    `;
+    const tripValues = [
+      userId,
+      title || null,
+      plan.summary,
+      plan.startCity,
+      plan.travelers || 1,
+      plan.days || 1,
+      plan.budgetLevel,
+      JSON.stringify(plan.suggestions || [])
+    ];
+    
+    const tripRes = await client.query(tripQuery, tripValues);
+    const tripId = tripRes.rows[0].id;
+
+    // 2. Insert destinations
+    const destQuery = `
+      INSERT INTO destinations (trip_id, destination_id, name, country, lat, lng, emoji, highlights, bookme_deals, sort_order)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+    `;
+
+    for (let i = 0; i < plan.destinations.length; i++) {
+      const dest = plan.destinations[i];
+      const destValues = [
+        tripId,
+        dest.id,
+        dest.name,
+        dest.country,
+        dest.lat,
+        dest.lng,
+        dest.emoji,
+        JSON.stringify(dest.highlights || []),
+        JSON.stringify(dest.bookmeDeals || []),
+        i
+      ];
+      await client.query(destQuery, destValues);
+    }
+
+    await client.query('COMMIT');
+    return res.status(201).json({ success: true, tripId });
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('[saveTrip] Transaction error:', err);
+    return res.status(500).json({ error: 'Failed to save trip to the database.' });
+  } finally {
+    client.release();
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GET USER TRIPS  —  GET /api/trips
+// ═══════════════════════════════════════════════════════════════════════════════
+const getUserTrips = async (req, res) => {
+  const { userId } = req.user;
+  
+  try {
+    const query = `
+      SELECT 
+        t.id, t.title, t.summary, t.start_city, t.travelers, t.days, t.budget_level, t.status, t.created_at,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', d.destination_id,
+              'name', d.name,
+              'country', d.country,
+              'emoji', d.emoji,
+              'highlights', d.highlights,
+              'bookmeDeals', d.bookme_deals
+            ) ORDER BY d.sort_order
+          ) FILTER (WHERE d.id IS NOT NULL),
+          '[]'
+        ) AS destinations
+      FROM trips t
+      LEFT JOIN destinations d ON t.id = d.trip_id
+      WHERE t.user_id = $1 
+      GROUP BY t.id
+      ORDER BY t.created_at DESC;
+    `;
+    const result = await pool.query(query, [userId]);
+    return res.status(200).json({ trips: result.rows });
+  } catch (err) {
+    console.error('[getUserTrips] Error:', err);
+    return res.status(500).json({ error: 'Failed to fetch saved trips.' });
+  }
+};
+
+module.exports = { planTrip, saveTrip, getUserTrips };
+

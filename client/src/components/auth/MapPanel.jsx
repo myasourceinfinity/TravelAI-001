@@ -70,8 +70,37 @@ function MapController({ selectedCurrency }) {
 
 export default function MapPanel({ selectedCurrency, onCurrencyChange }) {
   return (
-    <div className="auth-map-container" style={{ width: '100%', height: '100%', position: 'relative', background: 'var(--bg-800)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-      Map placeholder (disabled for testing)
+    <div className="auth-map-container" style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <MapContainer
+        center={[20, 0]}
+        zoom={2}
+        style={{ width: '100%', height: '100%', background: '#e5e5e5' }}
+        zoomControl={false}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <MapResizer />
+        <MapController selectedCurrency={selectedCurrency} />
+        
+        {MAP_DESTINATIONS.map(dest => (
+          <Marker
+            key={dest.id}
+            position={dest.pos}
+            icon={createEmojiIcon(dest.emoji)}
+            eventHandlers={{
+              click: () => onCurrencyChange && onCurrencyChange(dest.id)
+            }}
+          >
+            <Popup className="custom-popup" closeButton={false}>
+              <div style={{ padding: '4px 8px', fontWeight: '500', color: '#111' }}>
+                {dest.emoji} {dest.name}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
     </div>
   );
 }

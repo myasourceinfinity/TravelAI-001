@@ -11,6 +11,7 @@ import { lazy, Suspense } from 'react';
 const TravellerDashboard = lazy(() => import('./components/dashboard/TravellerDashboard'));
 const PlanTripWithTravelAI = lazy(() => import('./components/trips/PlanTripWithTravelAI'));
 const TripDetailPage        = lazy(() => import('./components/trips/TripDetailPage'));
+const MyTrips               = lazy(() => import('./components/trips/MyTrips'));
 
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -34,9 +35,7 @@ export default function App() {
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <BrowserRouter>
         <AuthProvider>
-		<Suspense fallback={<LoadingSpinner />}>
-					  <Routes>...</Routes>
-			</Suspense>
+        <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path="/" element={
               <GuestRoute><AuthPage /></GuestRoute>
@@ -47,15 +46,19 @@ export default function App() {
             <Route path="/plan-trip" element={
               <PrivateRoute><PlanTripWithTravelAI /></PrivateRoute>
             } />
-			<Route path="/trip/:id" element={
-			  <PrivateRoute><TripDetailPage /></PrivateRoute>
-			} />
-			<Route path="*" element={
-			  <PrivateRoute>
-			    <Navigate to="/dashboard" replace />
-			  </PrivateRoute>
-			} />
+            <Route path="/trip/:id" element={
+              <PrivateRoute><TripDetailPage /></PrivateRoute>
+            } />
+            <Route path="/my-trips" element={
+              <PrivateRoute><MyTrips /></PrivateRoute>
+            } />
+            <Route path="*" element={
+              <PrivateRoute>
+                <Navigate to="/dashboard" replace />
+              </PrivateRoute>
+            } />
           </Routes>
+        </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </GoogleOAuthProvider>

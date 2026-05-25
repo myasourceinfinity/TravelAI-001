@@ -30,7 +30,7 @@ export default function AuthPage() {
 	    if (token && (view === 'reset-password' || pathname === '/reset-password')) return token;
 	    return null;
 	  });
-  const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  const [selectedCurrency, setSelectedCurrency] = useState('NZD');
   
   const verifyEmailToken = useCallback(async (token) => {
         try {

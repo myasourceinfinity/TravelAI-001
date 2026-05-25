@@ -10,8 +10,10 @@
 const express = require('express');
 const router  = express.Router();
 
-const { planTrip } = require('../controllers/tripController');
+const { planTrip, saveTrip, getUserTrips } = require('../controllers/tripController');
 
+router.get('/', getUserTrips);
 router.post('/plan', planTrip);
+router.post('/save', saveTrip);
 
 module.exports = router;

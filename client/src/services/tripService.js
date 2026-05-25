@@ -37,3 +37,27 @@ export function planTrip(token, payload) {
     body: payload,
   });
 }
+
+/**
+ * saveTripToDB — POST /api/trips/save
+ * @param {string} token — JWT access token
+ * @param {{ plan: object, title?: string }} payload
+ */
+export function saveTripToDB(token, payload) {
+  return request('/trips/save', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: payload,
+  });
+}
+
+/**
+ * getSavedTrips — GET /api/trips
+ * @param {string} token — JWT access token
+ */
+export function getSavedTrips(token) {
+  return request('/trips', {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}

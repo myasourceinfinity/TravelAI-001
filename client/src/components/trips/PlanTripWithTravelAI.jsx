@@ -9,7 +9,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { planTrip } from '../../services/tripService';
+import { planTrip, saveTripToDB } from '../../services/tripService';
 
 // Map removed as requested
 
@@ -26,6 +26,21 @@ export default function PlanTripWithTravelAI() {
   const [instantPlan, setInstantPlan] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  
+  // ── Save state ────────────────────────────────────────────────────────────
+  const [tripTitle, setTripTitle] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Auto-redirect when saveSuccess becomes true
+  useEffect(() => {
+    if (saveSuccess) {
+      const timer = setTimeout(() => {
+        navigate('/my-trips');
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [saveSuccess, navigate]);
 
   // ── Result state ──────────────────────────────────────────────────────────
   const [plan, setPlan] = useState(null);
@@ -81,6 +96,34 @@ export default function PlanTripWithTravelAI() {
     setDescription('');
     setFiles([]);
     setError(null);
+    setTripTitle('');
+    setSaveSuccess(false);
+  }
+
+  async function handleSaveTrip() {
+    if (!plan) return;
+    setIsSaving(true);
+    setError(null);
+    setSaveSuccess(false);
+
+    try {
+      const response = await saveTripToDB(accessToken, { 
+        plan, 
+        title: tripTitle.trim() || `${plan.startCity} Trip` 
+      });
+      if (response.success) {
+        setSaveSuccess(true);
+      }
+    } catch (err) {
+      if (err.status === 401) {
+        await logout();
+        navigate('/');
+      } else {
+        setError(err.message || 'Failed to save trip.');
+      }
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function removeDestination(id) {
@@ -384,9 +427,29 @@ export default function PlanTripWithTravelAI() {
               <div className="trip-bottom-left">
                 <button className="btn btn-ghost btn-sm" onClick={handleReset}>↩ Undo</button>
               </div>
-              <button className="btn btn-primary btn-lg trip-generate-btn" disabled={plan.destinations.length === 0}>
-                ✦ Generate Trip with {plan.destinations.length} Destination{plan.destinations.length !== 1 ? 's' : ''}
-              </button>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="Trip Name (Optional)" 
+                  value={tripTitle}
+                  onChange={e => { setTripTitle(e.target.value); setSaveSuccess(false); }}
+                  style={{ width: '200px' }}
+                />
+                <button 
+                  className="btn btn-primary btn-lg trip-generate-btn" 
+                  disabled={plan.destinations.length === 0 || isSaving || saveSuccess}
+                  onClick={handleSaveTrip}
+                >
+                  {isSaving ? (
+                    <><span className="spinner" style={{marginRight: '8px'}}/> Saving...</>
+                  ) : saveSuccess ? (
+                    'Trip Saved! ✓'
+                  ) : (
+                    `✦ Save Trip (${plan.destinations.length} Destination${plan.destinations.length !== 1 ? 's' : ''})`
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* ═══ Preferences side panel ═════════════════════════════════════ */}
