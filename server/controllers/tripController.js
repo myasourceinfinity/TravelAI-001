@@ -3,6 +3,9 @@
  *
  * Handles AI trip planning:
  *  - planTrip: POST /api/trips/plan — accepts trip description, returns AI-generated plan
+ *	- saveTrip:      POST /api/trips/save      — persists a generated plan to the database
+ *  - getUserTrips:  GET  /api/trips           — returns all trips for the authenticated user
+ *  - modifyTrip:    PUT  /api/trips/:id       — updates an existing trip (partial or full)
  *
  * Uses OpenAI GPT-4o with structured JSON output when OPENAI_API_KEY is set.
  * Falls back to a hardcoded mock plan when the key is not configured.
@@ -319,7 +322,14 @@ const planTrip = async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 const saveTrip = async (req, res) => {
   const { userId } = req.user;
-  const { plan, title } = req.body;
+  const {
+    plan,
+    title,
+    selectedComponents,
+    totalPricePerPerson,
+    totalPriceAll,
+    selectedPackageIds,
+  } = req.body;
 
   if (!plan || !plan.destinations) {
     return res.status(400).json({ error: 'Invalid trip plan data.' });
@@ -332,19 +342,24 @@ const saveTrip = async (req, res) => {
 
     // 1. Insert the trip
     const tripQuery = `
-      INSERT INTO trips (user_id, title, summary, start_city, travelers, days, budget_level, suggestions)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING id;
-    `;
-    const tripValues = [
-      userId,
-      title || null,
-      plan.summary,
-      plan.startCity,
-      plan.travelers || 1,
-      plan.days || 1,
-      plan.budgetLevel,
-      JSON.stringify(plan.suggestions || [])
+	INSERT INTO trips (user_id, title, summary, start_city, travelers, days, budget_level, suggestions,
+	                         selected_components, total_price_per_person, total_price_all, selected_package_ids)
+	      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+	      RETURNING id;
+	    `;
+	    const tripValues = [
+	      userId,
+	      title || null,
+	      plan.summary,
+	      plan.startCity,
+	      plan.travelers || 1,
+	      plan.days || 1,
+	      plan.budgetLevel,
+	      JSON.stringify(plan.suggestions || []),
+	      JSON.stringify(selectedComponents || []),
+	      totalPricePerPerson || 0,
+	      totalPriceAll || 0,
+	      JSON.stringify(selectedPackageIds || []),
     ];
     
     const tripRes = await client.query(tripQuery, tripValues);
@@ -422,5 +437,262 @@ const getUserTrips = async (req, res) => {
   }
 };
 
-module.exports = { planTrip, saveTrip, getUserTrips };
+// ═══════════════════════════════════════════════════════════════════════════════
+// MODIFY TRIP  —  PUT /api/trips/:id
+// ═══════════════════════════════════════════════════════════════════════════════
+/**
+ * Supports partial updates. Any combination of the following fields may be sent:
+ *
+ *   title        {string}   — human-readable trip name
+ *   summary      {string}   — AI-generated or user-edited trip summary
+ *   days         {number}   — total trip duration
+ *   travelers    {number}   — number of travellers
+ *   budgetLevel  {string}   — 'budget' | 'moderate' | 'luxury'
+ *   suggestions  {array}    — array of suggested-but-not-included destination objects
+ *   destinations {array}    — full replacement of the destination list (atomic swap)
+ *
+ * Omitted fields are left unchanged. If `destinations` is supplied it must be a
+ * non-empty array; the existing destination rows are deleted and replaced inside a
+ * single transaction so the operation is all-or-nothing.
+ */
+const modifyTrip = async (req, res) => {
+  const { userId } = req.user;
+  const tripId = req.params.id;
+
+  if (!tripId) {
+    return res.status(400).json({ error: 'Invalid trip ID.' });
+  }
+
+  const { title, summary, days, travelers, budgetLevel, suggestions, destinations } = req.body;
+
+  // Must supply at least one field to update
+  const hasScalarUpdate = [title, summary, days, travelers, budgetLevel, suggestions].some(
+    (v) => v !== undefined
+  );
+  const hasDestinationUpdate = destinations !== undefined;
+
+  if (!hasScalarUpdate && !hasDestinationUpdate) {
+    return res.status(400).json({ error: 'No updatable fields provided.' });
+  }
+
+  // Basic validation for destinations when supplied
+  if (hasDestinationUpdate) {
+    if (!Array.isArray(destinations) || destinations.length === 0) {
+      return res.status(400).json({ error: 'destinations must be a non-empty array.' });
+    }
+	for (const dest of destinations) {
+	      if (!dest.name || !dest.name.trim()) {
+	        return res.status(400).json({
+	          error: 'Each destination must include a name.',
+        });
+      }
+    }
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // ── 1. Ownership check ───────────────────────────────────────────────────
+    const ownerCheck = await client.query(
+      'SELECT id FROM trips WHERE id = $1 AND user_id = $2',
+      [tripId, userId]
+    );
+    if (ownerCheck.rowCount === 0) {
+      await client.query('ROLLBACK');
+      // Return 404 regardless of whether the row exists — avoids ID enumeration
+      return res.status(404).json({ error: 'Trip not found.' });
+    }
+
+    // ── 2. Build the scalar UPDATE dynamically (only changed fields) ─────────
+    if (hasScalarUpdate) {
+      const setClauses = [];
+      const values = [];
+      let idx = 1;
+
+      if (title !== undefined)       { setClauses.push(`title = $${idx++}`);        values.push(title); }
+      if (summary !== undefined)     { setClauses.push(`summary = $${idx++}`);      values.push(summary); }
+      if (days !== undefined)        { setClauses.push(`days = $${idx++}`);         values.push(days); }
+      if (travelers !== undefined)   { setClauses.push(`travelers = $${idx++}`);    values.push(travelers); }
+      if (budgetLevel !== undefined) { setClauses.push(`budget_level = $${idx++}`); values.push(budgetLevel); }
+      if (suggestions !== undefined) { setClauses.push(`suggestions = $${idx++}`);  values.push(JSON.stringify(suggestions)); }
+
+      // Always bump updated_at if the column exists on the table
+      setClauses.push(`updated_at = NOW()`);
+
+      values.push(tripId); // final param for WHERE clause
+      await client.query(
+        `UPDATE trips SET ${setClauses.join(', ')} WHERE id = $${idx}`,
+        values
+      );
+    }
+
+    // ── 3. Atomic destination swap ───────────────────────────────────────────
+    if (hasDestinationUpdate) {
+      // Delete all existing destination rows for this trip
+      await client.query('DELETE FROM destinations WHERE trip_id = $1', [tripId]);
+
+      const destInsert = `
+        INSERT INTO destinations
+          (trip_id, destination_id, name, country, lat, lng, emoji, highlights, bookme_deals, sort_order)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `;
+
+      for (let i = 0; i < destinations.length; i++) {
+        const dest = destinations[i];
+		const lat = dest.lat != null && dest.lat !== '' && !isNaN(Number(dest.lat)) ? Number(dest.lat) : null;
+		const lng = dest.lng != null && dest.lng !== '' && !isNaN(Number(dest.lng)) ? Number(dest.lng) : null;
+        await client.query(destInsert, [
+          tripId,
+          dest.id   || dest.name.toLowerCase().replace(/\s+/g, '-'),
+          dest.name,
+          dest.country  || null,
+		  lat,
+		  lng,
+          dest.emoji    || null,
+          JSON.stringify(dest.highlights   || []),
+          JSON.stringify(dest.bookmeDeals  || []),
+          i,
+        ]);
+      }
+    }
+
+    await client.query('COMMIT');
+
+    // ── 4. Return the full updated trip ──────────────────────────────────────
+    const updatedTrip = await pool.query(
+      `
+      SELECT
+        t.id, t.title, t.summary, t.start_city, t.travelers, t.days,
+        t.budget_level, t.status, t.created_at, t.updated_at,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id',          d.destination_id,
+              'name',        d.name,
+              'country',     d.country,
+              'lat',         d.lat,
+              'lng',         d.lng,
+              'emoji',       d.emoji,
+              'highlights',  d.highlights,
+              'bookmeDeals', d.bookme_deals
+            ) ORDER BY d.sort_order
+          ) FILTER (WHERE d.id IS NOT NULL),
+          '[]'
+        ) AS destinations
+      FROM trips t
+      LEFT JOIN destinations d ON t.id = d.trip_id
+      WHERE t.id = $1
+      GROUP BY t.id
+      `,
+      [tripId]
+    );
+
+    return res.status(200).json({
+      message: 'Trip updated successfully.',
+      trip: updatedTrip.rows[0],
+    });
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('[modifyTrip] Transaction error:', err);
+    return res.status(500).json({ error: 'Failed to update trip.' });
+  } finally {
+    client.release();
+  }
+};
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DELETE TRIP  —  DELETE /api/trips/:id
+// ═══════════════════════════════════════════════════════════════════════════════
+const deleteTrip = async (req, res) => {
+  const { userId } = req.user;
+  const tripId = req.params.id;
+
+  if (!tripId) {
+    return res.status(400).json({ error: 'Invalid trip ID.' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Ownership check
+    const ownerCheck = await client.query(
+      'SELECT id FROM trips WHERE id = $1 AND user_id = $2',
+      [tripId, userId]
+    );
+    if (ownerCheck.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Trip not found.' });
+    }
+
+    // Delete destinations first (FK), then the trip
+    await client.query('DELETE FROM destinations WHERE trip_id = $1', [tripId]);
+    await client.query('DELETE FROM trips WHERE id = $1', [tripId]);
+
+    await client.query('COMMIT');
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('[deleteTrip] Error:', err);
+    return res.status(500).json({ error: 'Failed to delete trip.' });
+  } finally {
+    client.release();
+  }
+};
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GET SINGLE TRIP  —  GET /api/trips/:id
+// ═══════════════════════════════════════════════════════════════════════════════
+const getTripById = async (req, res) => {
+  const { userId } = req.user;
+  const tripId = req.params.id;
+
+  if (!tripId) return res.status(400).json({ error: 'Invalid trip ID.' });
+
+  try {
+    const result = await pool.query(
+      `SELECT
+        t.id, t.title, t.summary, t.start_city, t.travelers, t.days,
+        t.budget_level, t.status, t.created_at,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id',          d.destination_id,
+              'name',        d.name,
+              'country',     d.country,
+              'lat',         d.lat,
+              'lng',         d.lng,
+              'emoji',       d.emoji,
+              'highlights',  d.highlights,
+              'bookmeDeals', d.bookme_deals
+            ) ORDER BY d.sort_order
+          ) FILTER (WHERE d.id IS NOT NULL),
+          '[]'
+        ) AS destinations
+      FROM trips t
+      LEFT JOIN destinations d ON t.id = d.trip_id
+      WHERE t.id = $1 AND t.user_id = $2
+      GROUP BY t.id`,
+      [tripId, userId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Trip not found.' });
+    }
+    return res.status(200).json({ trip: result.rows[0] });
+  } catch (err) {
+    console.error('[getTripById] Error:', err);
+    return res.status(500).json({ error: 'Failed to fetch trip.' });
+  }
+};
+
+module.exports = { planTrip, saveTrip, getUserTrips, getTripById, modifyTrip, deleteTrip };
+
+
+
 

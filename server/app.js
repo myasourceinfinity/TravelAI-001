@@ -14,6 +14,9 @@ const authRoutes    = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const tripRoutes    = require('./routes/tripRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
+const packageRoutes = require('./routes/packageRoutes');
+
+
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +34,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/user', authMiddleware, profileRoutes);
 app.use('/api/trips', authMiddleware, tripRoutes);
+app.use('/api/packages', authMiddleware, packageRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) =>
