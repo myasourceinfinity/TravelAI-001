@@ -12,6 +12,7 @@ const TravellerDashboard = lazy(() => import('./components/dashboard/TravellerDa
 const PlanTripWithTravelAI = lazy(() => import('./components/trips/PlanTripWithTravelAI'));
 const TripDetailPage        = lazy(() => import('./components/trips/TripDetailPage'));
 const MyTrips               = lazy(() => import('./components/trips/MyTrips'));
+const HomePage              = lazy(() => import('./components/home/HomePage'));
 
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -21,13 +22,13 @@ if (!GOOGLE_CLIENT_ID) console.warn('[App] VITE_GOOGLE_CLIENT_ID is not set — 
 function PrivateRoute({ children }) {
   const { user, isLoading } = useAuth();
   if (isLoading) return null; // or <LoadingSpinner />
-  return user ? children : <Navigate to="/" replace />;
+  return user ? children : <Navigate to="/login" replace />;
 }
 
 function GuestRoute({ children }) {
   const { user, isLoading } = useAuth();
   if (isLoading) return null;
-  return user ? <Navigate to="/dashboard" replace /> : children;
+  return user ? <Navigate to="/" replace /> : children;
 }
 
 export default function App() {
@@ -37,7 +38,17 @@ export default function App() {
         <AuthProvider>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            <Route path="/" element={
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={
+              <GuestRoute><AuthPage /></GuestRoute>
+            } />
+            <Route path="/signup" element={
+              <GuestRoute><AuthPage /></GuestRoute>
+            } />
+            <Route path="/verify-email" element={
+              <GuestRoute><AuthPage /></GuestRoute>
+            } />
+            <Route path="/reset-password" element={
               <GuestRoute><AuthPage /></GuestRoute>
             } />
             <Route path="/dashboard" element={
@@ -54,7 +65,7 @@ export default function App() {
             } />
             <Route path="*" element={
               <PrivateRoute>
-                <Navigate to="/dashboard" replace />
+                <Navigate to="/" replace />
               </PrivateRoute>
             } />
           </Routes>

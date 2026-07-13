@@ -10,7 +10,7 @@
  * Uses OpenAI GPT-4o with structured JSON output when OPENAI_API_KEY is set.
  * Falls back to a hardcoded mock plan when the key is not configured.
  */
-const { isConfigured, generateTripPlan } = require('../utils/openaiHelper');
+const { isConfigured, generateTripPlan, generateChatResponse } = require('../utils/openaiHelper');
 const { scrapeBookmeDeals } = require('../utils/bookmeScraper');
 const pool = require('../config/db');
 
@@ -67,7 +67,7 @@ const HARDCODED_NZ_RESPONSE = {
   "message": "Your Trip plan generated successfully.",
   "source": "ai",
   "plan": {
-    "summary": "Get ready to explore the breathtaking landscapes of Kiwi Land (New Zealand) on a budget-friendly adventure. We'll start our journey in Auckland, experiencing its vibrant culture, before heading to the geothermal wonders of Rotorua. Then, it's off to the stunning natural beauty of Tongariro National Park and the relaxing beaches of Tauranga. Finally, we'll wrap up with a visit to the artistic and cultural hub of Wellington.",
+    "summary": "Get ready to explore the breathtaking landscapes of Kiwi Land (New Zealand) and Dubai on a budget-friendly adventure. We'll start our journey in Auckland, experiencing its vibrant culture, before heading to the geothermal wonders of Rotorua. Then, it's off to the stunning natural beauty of Tongariro National Park and the relaxing beaches of Tauranga. Finally, we'll wrap up with a visit to the artistic and cultural hub of Wellington.",
     "destinations": [
       {
         "id": "auckland",
@@ -691,7 +691,167 @@ const getTripById = async (req, res) => {
   }
 };
 
-module.exports = { planTrip, saveTrip, getUserTrips, getTripById, modifyTrip, deleteTrip };
+function generateMockChatResponse(messages) {
+  const latestMessage = messages[messages.length - 1]?.content || '';
+  const desc = latestMessage.toLowerCase();
+  
+  let destination = '';
+  if (desc.includes('japan') || desc.includes('tokyo') || desc.includes('kyoto')) destination = 'Japan';
+  else if (desc.includes('europe') || desc.includes('paris') || desc.includes('rome')) destination = 'Europe';
+  else if (desc.includes('new zealand') || desc.includes('nz') || desc.includes('auckland')) destination = 'New Zealand';
+  
+  const travelerMatch = desc.match(/(\d+)\s*(person|people|traveler|travelers|pax)/);
+  const dayMatch = desc.match(/(\d+)\s*(day|days|night|nights)/);
+  
+  let budgetLevel = '';
+  if (desc.includes('budget')) budgetLevel = 'budget';
+  else if (desc.includes('luxury')) budgetLevel = 'luxury';
+  else if (desc.includes('moderate')) budgetLevel = 'moderate';
+  
+  let location_types = [];
+  if (desc.includes('beach')) location_types.push('Beach');
+  if (desc.includes('mountain') || desc.includes('hiking')) location_types.push('Mountain');
+  if (desc.includes('city') || desc.includes('shopping')) location_types.push('City');
+  if (desc.includes('history') || desc.includes('culture')) location_types.push('Culture');
+  if (desc.includes('food') || desc.includes('eating')) location_types.push('Food');
+
+  const extractedPreferences = {
+    destination: destination || '',
+    days: dayMatch ? parseInt(dayMatch[1], 10) : 0,
+    travelers: travelerMatch ? parseInt(travelerMatch[1], 10) : 0,
+    budgetLevel: budgetLevel || '',
+    location_types: location_types
+  };
+  
+  let responseText = '';
+  let readyToPlan = false;
+  
+  if (!destination) {
+    responseText = "Hello! I am your interactive TravelAI consultant. Where are you planning to go for your next adventure?";
+  } else if (!dayMatch) {
+    responseText = `Awesome, ${destination} is a fantastic choice! How many days are you planning to spend there?`;
+  } else if (!travelerMatch) {
+    responseText = `Got it, a ${dayMatch[1]}-day trip to ${destination}. How many travelers will be joining you?`;
+  } else if (!budgetLevel) {
+    responseText = `Understood. What is your budget style? Are we looking at a 'budget', 'moderate', or 'luxury' trip?`;
+  } else {
+    responseText = `Perfect! I have all the details: a ${dayMatch[1]}-day ${budgetLevel} trip to ${destination} for ${travelerMatch[1]} traveler(s). Let me put together the perfect itinerary for you!`;
+    readyToPlan = true;
+  }
+  
+  // If ready, we can return the mock plan
+  let plan = {
+    summary: '',
+    destinations: [],
+    suggestions: [],
+    startCity: '',
+    travelers: 0,
+    days: 0,
+    budgetLevel: ''
+  };
+  
+  if (readyToPlan) {
+    // Generate a quick mock plan
+    let region = 'default';
+    if (destination.toLowerCase().includes('japan')) region = 'japan';
+    else if (destination.toLowerCase().includes('europe')) region = 'europe';
+    
+    const MOCK = {
+      japan: [
+        { id: 'tokyo', name: 'Tokyo', country: 'Japan', lat: 35.6762, lng: 139.6503, emoji: '⛩️', highlights: ['Senso-ji Temple', 'Shibuya Crossing', 'Meiji Shrine'] },
+        { id: 'takayama', name: 'Takayama', country: 'Japan', lat: 36.1461, lng: 137.2522, emoji: '🏔️', highlights: ['Matsumoto Castle', 'Japanese Alps', 'Old Town streets'] },
+        { id: 'hakone', name: 'Hakone', country: 'Japan', lat: 35.2326, lng: 139.1070, emoji: '♨️', highlights: ['Lake Ashi', 'Mt. Fuji views', 'Hot springs'] },
+      ],
+      europe: [
+        { id: 'paris', name: 'Paris', country: 'France', lat: 48.8566, lng: 2.3522, emoji: '🗼', highlights: ['Eiffel Tower', 'Louvre Museum', 'Montmartre'] },
+        { id: 'rome', name: 'Rome', country: 'Italy', lat: 41.9028, lng: 12.4964, emoji: '🏛️', highlights: ['Colosseum', 'Vatican City', 'Trevi Fountain'] },
+      ],
+      default: [
+        { id: 'auckland', name: 'Auckland', country: 'New Zealand', lat: -36.8485, lng: 174.7633, emoji: '🌆', highlights: ['Sky Tower', 'Auckland War Memorial Museum', 'Waiheke Island'] },
+        { id: 'rotorua', name: 'Rotorua', country: 'New Zealand', lat: -38.1368, lng: 176.2497, emoji: '🌋', highlights: ['Te Puia', 'Rotorua Museum', 'Redwoods Treewalk'] },
+      ]
+    };
+    
+    plan = {
+      summary: `I've put together a wonderful custom itinerary for your trip to ${destination}.`,
+      destinations: MOCK[region],
+      suggestions: [{ id: 'queenstown', name: 'Queenstown', country: 'New Zealand', emoji: '🏔️' }],
+      startCity: MOCK[region][0].name,
+      travelers: travelerMatch ? parseInt(travelerMatch[1], 10) : 2,
+      days: dayMatch ? parseInt(dayMatch[1], 10) : 7,
+      budgetLevel: budgetLevel || 'moderate'
+    };
+  }
+  
+  return {
+    message: responseText,
+    extractedPreferences,
+    readyToPlan,
+    plan
+  };
+}
+
+const chatWithAI = async (req, res) => {
+  const { userId } = req.user;
+  const { messages } = req.body;
+
+  if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Invalid messages history.' });
+  }
+
+  try {
+    let result;
+    if (isConfigured()) {
+      result = await generateChatResponse(messages);
+    } else {
+      result = generateMockChatResponse(messages);
+    }
+
+    // Save extracted preferences to user_preferences table in DB if we extracted any fields
+    const { destination, days, budgetLevel, location_types } = result.extractedPreferences || {};
+    
+    if (destination || days || budgetLevel || (location_types && location_types.length > 0)) {
+      // Find or upsert user_preferences
+      await pool.query(
+        `INSERT INTO user_preferences (user_id, destination, budget_amount, location_types, travel_style, updated_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())
+         ON CONFLICT (user_id) DO UPDATE SET
+           destination    = COALESCE(NULLIF($2, ''), user_preferences.destination),
+           budget_amount  = COALESCE($3, user_preferences.budget_amount),
+           location_types = CASE WHEN jsonb_array_length($4::jsonb) > 0 THEN $4::jsonb ELSE user_preferences.location_types END,
+           travel_style   = COALESCE($5, user_preferences.travel_style),
+           updated_at     = NOW()`,
+        [
+          userId,
+          destination || null,
+          budgetLevel === 'budget' ? 1000 : budgetLevel === 'luxury' ? 5000 : budgetLevel === 'moderate' ? 2500 : null,
+          JSON.stringify(location_types || []),
+          JSON.stringify({ budgetLevel: budgetLevel || null, days: days || null })
+        ]
+      );
+    }
+
+    // If ready to plan, scrape Bookme deals for destinations
+    if (result.readyToPlan && result.plan && result.plan.destinations && Array.isArray(result.plan.destinations)) {
+      console.log('[chatWithAI] Fetching Bookme deals for destinations...');
+      await Promise.all(result.plan.destinations.map(async (destinationObj) => {
+        if (destinationObj.name) {
+          const deals = await scrapeBookmeDeals(destinationObj.name);
+          if (deals && deals.length > 0) {
+            destinationObj.bookmeDeals = deals;
+          }
+        }
+      }));
+    }
+
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error('[chatWithAI] Error:', err.message);
+    return res.status(500).json({ error: 'Failed to process chat conversation.' });
+  }
+};
+
+module.exports = { planTrip, saveTrip, getUserTrips, getTripById, modifyTrip, deleteTrip, chatWithAI };
 
 
 

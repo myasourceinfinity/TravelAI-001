@@ -39,6 +39,19 @@ export function planTrip(token, payload) {
 }
 
 /**
+ * chatWithAI — POST /api/trips/chat
+ * @param {string} token — JWT access token
+ * @param {{ messages: object[] }} payload
+ */
+export function chatWithAI(token, payload) {
+  return request('/trips/chat', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: payload,
+  });
+}
+
+/**
  * saveTripToDB — POST /api/trips/save
  * @param {string} token — JWT access token
  * @param {{ plan: object, title?: string }} payload

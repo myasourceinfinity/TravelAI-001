@@ -15,6 +15,7 @@ const profileRoutes = require('./routes/profileRoutes');
 const tripRoutes    = require('./routes/tripRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
 const packageRoutes = require('./routes/packageRoutes');
+const chatRoutes    = require('./routes/chatRoutes');
 
 
 
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', authMiddleware, profileRoutes);
 app.use('/api/trips', authMiddleware, tripRoutes);
 app.use('/api/packages', authMiddleware, packageRoutes);
+app.use('/api/chat', authMiddleware, chatRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) =>

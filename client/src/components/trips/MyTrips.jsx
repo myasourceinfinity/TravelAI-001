@@ -306,7 +306,7 @@ export default function MyTrips() {
 
   if (isLoading) {
     return (
-      <div className="dashboard-page page-bg">
+      <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start' }}>
         <div className="dashboard-loader text-center mt-12">
           <span className="spinner" style={{ width: 32, height: 32 }} />
           <p className="text-secondary mt-4">Loading your trips…</p>
@@ -316,8 +316,8 @@ export default function MyTrips() {
   }
 
   return (
-    <div className="dashboard-page page-bg">
-      <div className="dashboard-container">
+    <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start', padding: '0 5%' }}>
+      <div className="dashboard-container" style={{ maxWidth: '100%', width: '100%' }}>
 
         <header className="dashboard-header glass-card" style={{ marginBottom: '2rem' }}>
           <div className="dashboard-header-left">
@@ -328,11 +328,24 @@ export default function MyTrips() {
             </div>
           </div>
           <div className="dashboard-header-right">
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/dashboard')}>
-              ← Back to Dashboard
-            </button>
-            <button className="btn btn-primary btn-sm" onClick={() => navigate('/plan-trip')}>
-              ✦ Plan a New Trip
+            <button
+              onClick={() => navigate('/')}
+              style={{
+                background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
+                color: 'white',
+                fontWeight: 600,
+                fontSize: '0.9375rem',
+                padding: '0.625rem 1.75rem',
+                borderRadius: '9999px',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(79, 70, 229, 0.35)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.25)'; }}
+            >
+              ← Back to Home
             </button>
           </div>
         </header>

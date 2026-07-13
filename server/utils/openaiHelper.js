@@ -193,7 +193,183 @@ async function generateTripPlan(description) {
   return plan;
 }
 
+const CHAT_RESPONSE_SCHEMA = {
+  type: 'json_schema',
+  json_schema: {
+    name: 'chat_response',
+    strict: true,
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          description: 'A friendly and conversational response from a travel consultant. Do not expose raw JSON. Welcome the user, ask clarifying questions to pull their interests/location preferences, budget level, destination, or duration. If they ask about trip info/itinerary, politely explain that you are tailoring it for them first.'
+        },
+        extractedPreferences: {
+          type: 'object',
+          description: 'Extract any known fields from the user messages. Use empty string for destination/budgetLevel, 0 for days/travelers, and empty array for location_types if not yet specified.',
+          properties: {
+            destination: { type: 'string' },
+            days: { type: 'number' },
+            travelers: { type: 'number' },
+            budgetLevel: { type: 'string' },
+            location_types: {
+              type: 'array',
+              items: { type: 'string' }
+            }
+          },
+          required: ['destination', 'days', 'travelers', 'budgetLevel', 'location_types'],
+          additionalProperties: false
+        },
+        readyToPlan: {
+          type: 'boolean',
+          description: 'Set to true ONLY when we have a clear destination, duration (days), number of travelers, budget level, and some location/interest types.'
+        },
+        plan: {
+          type: 'object',
+          description: 'Only generate a real plan when readyToPlan is true. Otherwise, return default empty/placeholder values.',
+          properties: {
+            summary: { type: 'string' },
+            destinations: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  country: { type: 'string' },
+                  lat: { type: 'number' },
+                  lng: { type: 'number' },
+                  emoji: { type: 'string' },
+                  highlights: { type: 'array', items: { type: 'string' } }
+                },
+                required: ['id', 'name', 'country', 'lat', 'lng', 'emoji', 'highlights'],
+                additionalProperties: false
+              }
+            },
+            suggestions: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  country: { type: 'string' },
+                  emoji: { type: 'string' }
+                },
+                required: ['id', 'name', 'country', 'emoji'],
+                additionalProperties: false
+              }
+            },
+            startCity: { type: 'string' },
+            travelers: { type: 'number' },
+            days: { type: 'number' },
+            budgetLevel: { type: 'string' }
+          },
+          required: ['summary', 'destinations', 'suggestions', 'startCity', 'travelers', 'days', 'budgetLevel'],
+          additionalProperties: false
+        }
+      },
+      required: ['message', 'extractedPreferences', 'readyToPlan', 'plan'],
+      additionalProperties: false
+    }
+  }
+};
+
+const CHAT_SYSTEM_PROMPT = `You are a certified travel consultant working for New Zealand and Dubai travel agencies. You only provide services for travel to New Zealand and Dubai from anywhere in the world.
+
+## Scope
+- All travel planning, itineraries, quotes, and advice must be for New Zealand or Dubai only.
+- If the customer asks about another country/region, politely redirect them to NZ or Dubai travel.
+
+## Core Knowledge (internal)
+**Visa & Entry**
+- New Zealand: Visitor Visa (typically 9 months or less; must show funds, onward ticket, and health/character requirements); NZeTA (required for visa waiver travelers before travel); Working Holiday Visa (for eligible ages/countries); Transit Visa (when applicable); strict agricultural/biosecurity quarantine rules.
+- Dubai (UAE): Visa on Arrival (for eligible nationalities) and standard pre-arranged Tourist Visas; strict minimum 6-month passport validity rule; smart gate entry availability.
+
+**Popular Itineraries**
+- New Zealand North Island: Auckland, Hamilton, Taupo, Rotorua, Waitomo Caves, Wellington.
+- New Zealand South Island: Christchurch, Queenstown, Dunedin, Wanaka, Milford Sound, Franz Josef / Fox Glaciers, Tekapo.
+- Dubai City: Downtown Dubai (Burj Khalifa, Dubai Mall, Fountains), Palm Jumeirah, Dubai Marina.
+- Old Dubai & Beyond: Deira, Gold & Spice Souks, Dubai Creek Abras, Desert Safaris, and optional day trips to Abu Dhabi (Sheikh Zayed Grand Mosque).
+- Classic mixes: 10–21 days for NZ (self-drive vs. escorted), 3–7 days for Dubai (luxury stopovers vs. deep exploration), family vs. adventure.
+
+**Transport**
+- New Zealand: Domestic flights (Air NZ, Jetstar); Car/Campervan rental (one-way fees, age restrictions, freedom camping rules); Coach tours (InterCity, GreatSights); Public transport basics in major cities.
+- Dubai: Dubai Metro and Nol cards for public transit; Ride-hailing (Careem, Uber) and RTA Taxis; Hub connections via Emirates and Flydubai.
+
+**Accommodation & Tours**
+- New Zealand: Hotels, lodges, motels, holiday parks; Adventure (bungy, skydive, jet boat); Wildlife (whale watching, penguins, kiwi sanctuaries); Maori cultural experiences.
+- Dubai: Ultra-luxury resorts, city-center high-rises, desert conservation reserves (e.g., Al Maha); Theme parks (Aquaventure, IMG); Luxury shopping festivals and observation decks.
+
+**Planning and Culture**
+- Seasonality: NZ's seasons are opposite to the Northern Hemisphere (best times by region/activity). Dubai experiences extreme summer heat (June–September); peak travel is during the cooler winter months. 
+Budget levels: Budget, mid-range, luxury.
+- Dubai Cultural Nuances: Advise on modest dress codes in public spaces, public affection rules, Ramadan travel considerations (dining hours, cultural respect), and hotel-based alcohol licensing rules.
+- General: Accessibility, dietary needs, family travel, insurance, and cancellation advice.
+
+
+## Required Behavior
+1. Greet like a professional consultant and ask short discovery questions ONE-BY-ONE.
+2. Clarify the traveler profile: destination choice (NZ or Dubai), group size, dates (duration), departure city, interests, and budget level.
+3. Provide structured recommendations with rationale and suggest interesting facts or things to do at potential destinations.
+4. DO NOT give trip itineraries or destinations list directly to the user at the start. Build it interactively.
+5. Set readyToPlan to true ONLY when you have collected enough info: destination, duration, number of travelers, budget level.
+6. In extractedPreferences: update the fields as soon as you find them in user messages. Location types should be a clean array of interests (e.g., ["Beach", "Adventure", "History", "Food", "Luxury"]).
+
+
+## Tone
+- Friendly, clear, accurate.
+- Use simple English; translate complex terms when needed.
+- Avoid jargon; never provide unsafe travel or culturally insensitive advice.
+- If unsure, say you'll check and ask for more details.`;
+
+async function generateChatResponse(messages) {
+  const client = getClient();
+  if (!client) {
+    throw new Error('OPENAI_NOT_CONFIGURED');
+  }
+
+  const completion = await client.chat.completions.create({
+    model: 'gpt-4o',
+    temperature: 0.7,
+    max_tokens: 2000,
+    response_format: CHAT_RESPONSE_SCHEMA,
+    messages: [
+      { role: 'system', content: CHAT_SYSTEM_PROMPT },
+      ...messages,
+    ],
+  });
+
+  const choice = completion.choices[0];
+  if (choice.finish_reason === 'refusal') {
+    throw new Error(`OpenAI refused the request: ${choice.message.refusal}`);
+  }
+
+  const content = choice.message?.content;
+  if (!content) {
+    throw new Error('Empty response from OpenAI.');
+  }
+
+  console.log('[generateChatResponse] Raw OpenAI response:', content);
+  const result = JSON.parse(content);
+  
+  if (result.readyToPlan && result.plan && result.plan.destinations) {
+    result.plan.destinations = result.plan.destinations.map(d => ({
+      ...d,
+      id: d.id
+        ? d.id.toLowerCase().replace(/\s+/g, '-')
+        : d.name.toLowerCase().replace(/\s+/g, '-'),
+      bookmeDeals: [],
+    }));
+  }
+  
+  return result;
+}
+
 module.exports = {
   isConfigured,
   generateTripPlan,
+  getClient,
+  generateChatResponse,
 };

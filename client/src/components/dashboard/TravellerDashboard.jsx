@@ -117,7 +117,7 @@ export default function TravellerDashboard() {
   // ── Loading / Error states ──────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="dashboard-page page-bg">
+      <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start' }}>
         <div className="dashboard-loader">
           <span className="spinner" style={{ width: 32, height: 32 }} />
           <p className="text-secondary mt-4">Loading your dashboard…</p>
@@ -128,7 +128,7 @@ export default function TravellerDashboard() {
 
   if (error) {
     return (
-      <div className="dashboard-page page-bg">
+      <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start' }}>
         <div className="glass-card dashboard-error-card">
           <p className="text-secondary">⚠️ {error}</p>
           <button className="btn btn-primary mt-4" onClick={fetchProfile}>Retry</button>
@@ -140,16 +140,21 @@ export default function TravellerDashboard() {
   const initials = `${(profile?.first_name?.[0] || '').toUpperCase()}${(profile?.last_name?.[0] || '').toUpperCase()}`;
 
   return (
-    <div className="dashboard-page page-bg">
-      <div className="dashboard-container">
+    <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start', padding: '0 5%' }}>
+      <div className="dashboard-container" style={{ maxWidth: '100%', width: '100%' }}>
 
         {/* ═══ Header ═══════════════════════════════════════════════════════════ */}
-        <header className="dashboard-header glass-card">
+        <header className="dashboard-header glass-card" style={{ background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', boxShadow: '0 4px 20px rgba(15,23,42,0.05)' }}>
           <div className="dashboard-header-left">
             <div className="avatar-circle">{initials || '✈️'}</div>
             <div>
               <h1 className="heading-lg">
-                Welcome back, <span className="gradient-text">{profile?.first_name}</span>!
+                Welcome back, <span style={{
+                  background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}>{profile?.first_name}</span>!
               </h1>
               <p className="text-sm text-secondary">
                 {profile?.email} · <span className="badge badge-role">{profile?.role_type}</span>
@@ -157,12 +162,6 @@ export default function TravellerDashboard() {
             </div>
           </div>
           <div className="dashboard-header-right">
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/my-trips')} style={{ marginRight: '8px' }}>
-              🗺️ My Trips
-            </button>
-            <button className="btn btn-accent btn-sm" onClick={() => navigate('/plan-trip')}>
-              ✈️ Plan a trip with TravelAI
-            </button>
             {!isEditing ? (
               <button className="btn btn-primary btn-sm" onClick={() => setIsEditing(true)}>
                 ✏️ Edit Profile
@@ -177,9 +176,6 @@ export default function TravellerDashboard() {
                 </button>
               </div>
             )}
-            <button className="btn btn-ghost btn-sm" onClick={handleLogout}>
-              🚪 Logout
-            </button>
           </div>
         </header>
 

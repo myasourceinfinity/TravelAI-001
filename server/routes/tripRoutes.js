@@ -13,11 +13,12 @@
 const express = require('express');
 const router  = express.Router();
 
-const { planTrip, saveTrip, getUserTrips, getTripById, modifyTrip, deleteTrip } = require('../controllers/tripController');
+const { planTrip, saveTrip, getUserTrips, getTripById, modifyTrip, deleteTrip, chatWithAI } = require('../controllers/tripController');
 
 router.get('/',         getUserTrips);
 router.post('/plan',    planTrip);
 router.post('/save',    saveTrip);
+router.post('/chat',    chatWithAI);
 router.get('/:id',      getTripById);
 router.put('/:id',      modifyTrip);
 router.delete('/:id',   deleteTrip);
