@@ -210,20 +210,32 @@ const CHAT_RESPONSE_SCHEMA = {
           description: 'Extract any known fields from the user messages. Use empty string for destination/budgetLevel, 0 for days/travelers, and empty array for location_types if not yet specified.',
           properties: {
             destination: { type: 'string' },
+            originCity: {
+              type: 'string',
+              description: 'The city the traveller is flying FROM (their departure city). Empty string if not yet mentioned. This is MANDATORY before readyToPlan can be true — required for flight search.'
+            },
             days: { type: 'number' },
             travelers: { type: 'number' },
             budgetLevel: { type: 'string' },
+            departDate: {
+              type: 'string',
+              description: 'Trip departure date in YYYY-MM-DD format if the traveller has given one (even approximately, e.g. "mid September" should be resolved to a specific date in the current or next occurrence). Empty string if not yet known.'
+            },
+            returnDate: {
+              type: 'string',
+              description: 'Trip return date in YYYY-MM-DD format if known or derivable from days + departDate. Empty string if not yet known.'
+            },
             location_types: {
               type: 'array',
               items: { type: 'string' }
             }
           },
-          required: ['destination', 'days', 'travelers', 'budgetLevel', 'location_types'],
+          required: ['destination', 'originCity', 'days', 'travelers', 'budgetLevel', 'departDate', 'returnDate', 'location_types'],
           additionalProperties: false
         },
         readyToPlan: {
           type: 'boolean',
-          description: 'Set to true ONLY when we have a clear destination, duration (days), number of travelers, budget level, and some location/interest types.'
+          description: 'Set to true ONLY when ALL of the following are known: destination, originCity (departure city — mandatory, flights cannot be searched without it), duration (days) or explicit dates, number of travelers, and budget level. If originCity is missing, you MUST ask for it explicitly before setting this true — never assume or default it.'
         },
         plan: {
           type: 'object',
@@ -314,8 +326,15 @@ Budget levels: Budget, mid-range, luxury.
 2. Clarify the traveler profile: destination choice (NZ or Dubai), group size, dates (duration), departure city, interests, and budget level.
 3. Provide structured recommendations with rationale and suggest interesting facts or things to do at potential destinations.
 4. DO NOT give trip itineraries or destinations list directly to the user at the start. Build it interactively.
-5. Set readyToPlan to true ONLY when you have collected enough info: destination, duration, number of travelers, budget level.
-6. In extractedPreferences: update the fields as soon as you find them in user messages. Location types should be a clean array of interests (e.g., ["Beach", "Adventure", "History", "Food", "Luxury"]).
+5. MANDATORY FIELDS before readyToPlan can be true — ALL of these must be known:
+   - destination (NZ or Dubai)
+   - originCity — the city the traveller is flying FROM. This is REQUIRED for flight search and must NEVER be skipped, assumed, or defaulted. If the traveller has not stated where they are flying from, you MUST explicitly ask them (e.g. "Which city will you be flying from?") before proceeding. Do not set readyToPlan to true until this is answered.
+   - duration (days) or explicit departure/return dates
+   - number of travelers
+   - budget level
+   If ANY of these are missing, set readyToPlan to false and ask for the missing field(s) directly and conversationally — one or two at a time, not all at once.
+6. Dates: if the traveller gives a date without a year (e.g. "10 September" or "next month"), resolve it to the next future occurrence of that date. Never assume a past year. Populate departDate and returnDate in YYYY-MM-DD format once known or derivable.
+7. In extractedPreferences: update the fields as soon as you find them in user messages. Location types should be a clean array of interests (e.g., ["Beach", "Adventure", "History", "Food", "Luxury"]).
 
 
 ## Tone
@@ -330,13 +349,18 @@ async function generateChatResponse(messages) {
     throw new Error('OPENAI_NOT_CONFIGURED');
   }
 
+  // Inject today's real date so the model never resolves relative dates
+  // ("next month", "10 September") against a stale training-data year.
+  const todayStr = new Date().toISOString().split('T')[0];
+  const dateAwareSystemPrompt = CHAT_SYSTEM_PROMPT + `\n\n## Today's date\nToday's real date is ${todayStr}. Always use this as the reference point for "today", "tomorrow", "next month", etc. Never assume a year from your training data when the traveller doesn't state one explicitly — if they say a date like "10 September" without a year, assume the NEXT occurrence of that date on or after ${todayStr}, not a past year.`;
+
   const completion = await client.chat.completions.create({
     model: 'gpt-4o',
     temperature: 0.7,
     max_tokens: 2000,
     response_format: CHAT_RESPONSE_SCHEMA,
     messages: [
-      { role: 'system', content: CHAT_SYSTEM_PROMPT },
+      { role: 'system', content: dateAwareSystemPrompt },
       ...messages,
     ],
   });

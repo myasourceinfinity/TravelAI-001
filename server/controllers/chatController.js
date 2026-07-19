@@ -67,7 +67,20 @@ const sendMessage = async (req, res) => {
 
     // 3. Call OpenAI chat helper
     const aiResponse = await generateChatResponse(messages);
-    
+
+    // 3b. Server-side safety net: never trust readyToPlan blindly.
+    // originCity is mandatory for flight search — if the model ever slips
+    // and marks readyToPlan true without it, force it back to false here
+    // rather than letting a plan through with no way to search flights.
+    const originCity = aiResponse.extractedPreferences?.originCity;
+    if (aiResponse.readyToPlan && (!originCity || !originCity.trim())) {
+      console.warn('[sendMessage] readyToPlan was true but originCity missing — overriding to false.');
+      aiResponse.readyToPlan = false;
+      if (!aiResponse.message || !aiResponse.message.toLowerCase().includes('flying from')) {
+        aiResponse.message += ' Also, which city will you be flying from? I need this to find your flights.';
+      }
+    }
+
     // 4. Save AI reply message to DB
     await pool.query(
       "INSERT INTO chat_messages (session_id, role, content) VALUES ($1, 'assistant', $2)",
@@ -87,8 +100,8 @@ const sendMessage = async (req, res) => {
         await client.query('BEGIN');
 
         const tripQuery = `
-          INSERT INTO trips (user_id, title, summary, start_city, travelers, days, budget_level, suggestions)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          INSERT INTO trips (user_id, title, summary, start_city, travelers, days, budget_level, suggestions, origin_city, depart_date, return_date)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
           RETURNING id;
         `;
         const tripValues = [
@@ -99,7 +112,10 @@ const sendMessage = async (req, res) => {
           plan.travelers || 1,
           plan.days || 1,
           plan.budgetLevel,
-          JSON.stringify(plan.suggestions || [])
+          JSON.stringify(plan.suggestions || []),
+          originCity || null,
+          aiResponse.extractedPreferences?.departDate || null,
+          aiResponse.extractedPreferences?.returnDate || null,
         ];
         
         const tripRes = await client.query(tripQuery, tripValues);
@@ -142,6 +158,8 @@ const sendMessage = async (req, res) => {
         return res.status(200).json({
           message: aiResponse.message,
           extractedPreferences: aiResponse.extractedPreferences,
+          readyToPlan: true,
+          plan: aiResponse.plan,
           tripGenerated: true,
           tripId
         });
@@ -152,6 +170,8 @@ const sendMessage = async (req, res) => {
     return res.status(200).json({
       message: aiResponse.message,
       extractedPreferences: aiResponse.extractedPreferences,
+      readyToPlan: aiResponse.readyToPlan,
+      plan: aiResponse.readyToPlan ? aiResponse.plan : null,
       tripGenerated: false
     });
     
