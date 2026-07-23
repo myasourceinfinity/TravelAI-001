@@ -157,7 +157,7 @@ function PackageCard({ pkg, onEdit }) {
 
 export default function AgentDashboard() {
   const navigate = useNavigate();
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, logout } = useAuth();
 
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({});
