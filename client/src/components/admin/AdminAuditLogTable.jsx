@@ -16,17 +16,23 @@ const EVENT_COLORS = {
   signup:               { bg: 'rgba(52,211,153,0.1)',  color: '#065f46' },
 };
 
-export default function AdminAuditLogTable({ token }) {
+export default function AdminAuditLogTable({ token, eventTypeFilter = '', onFilterChange }) {
   const [logs,      setLogs]      = useState([]);
   const [total,     setTotal]     = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error,     setError]     = useState(null);
 
-  const [eventType, setEventType] = useState('');
+  const [eventType, setEventType] = useState(eventTypeFilter);
   const [from,      setFrom]      = useState('');
   const [to,        setTo]        = useState('');
   const [page,      setPage]      = useState(1);
   const LIMIT = 50;
+
+  // Sync when parent drives a new filter via stat card click
+  useEffect(() => {
+    setEventType(eventTypeFilter);
+    setPage(1);
+  }, [eventTypeFilter]);
 
   const fetchLogs = useCallback(async () => {
     if (!token) return;
@@ -49,14 +55,27 @@ export default function AdminAuditLogTable({ token }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-        📋 Audit Logs <span style={{ fontSize: 13, color: '#64748b', fontWeight: 400 }}>({total} entries)</span>
-      </h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+          📋 Audit Logs <span style={{ fontSize: 13, color: '#64748b', fontWeight: 400 }}>({total} entries)</span>
+        </h2>
+        {eventType && (
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 999, background: 'rgba(79,70,229,0.1)', color: '#4f46e5', fontWeight: 700 }}>
+              {eventType}
+            </span>
+            <button
+              onClick={() => { setEventType(''); setPage(1); onFilterChange?.(); }}
+              style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'none', border: '1px solid rgba(15,23,42,0.15)', color: '#64748b', cursor: 'pointer', fontWeight: 600 }}
+            >✕ Clear</button>
+          </div>
+        )}
+      </div>
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <select
-          value={eventType} onChange={e => { setEventType(e.target.value); setPage(1); }}
+          value={eventType} onChange={e => { setEventType(e.target.value); setPage(1); onFilterChange?.(); }}
           style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(15,23,42,0.15)', outline: 'none', fontSize: 13 }}
         >
           <option value="">All Events</option>

@@ -5,9 +5,22 @@ import Navbar              from '../common/Navbar';
 import AdminAgentsList     from './AdminAgentsList';
 import AdminAuditLogTable  from './AdminAuditLogTable';
 
-function StatCard({ label, value, sub, color, bg, icon }) {
+function StatCard({ label, value, sub, color, bg, icon, onClick, isActive }) {
   return (
-    <div style={{ padding: '20px', borderRadius: 16, background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', boxShadow: '0 4px 20px rgba(15,23,42,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div
+      onClick={onClick}
+      style={{
+        padding: '20px', borderRadius: 16, background: '#ffffff',
+        border: `2px solid ${isActive ? color : 'rgba(15,23,42,0.08)'}`,
+        boxShadow: isActive ? `0 4px 20px ${bg}` : '0 4px 20px rgba(15,23,42,0.03)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'all 0.18s',
+        transform: isActive ? 'translateY(-2px)' : 'none',
+      }}
+      onMouseEnter={e => { if (onClick) e.currentTarget.style.transform = 'translateY(-2px)'; }}
+      onMouseLeave={e => { if (onClick && !isActive) e.currentTarget.style.transform = 'none'; }}
+    >
       <div>
         <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>{label}</div>
         <div style={{ fontSize: '2rem', fontWeight: 800, color, marginTop: 4 }}>{value ?? '—'}</div>
@@ -21,9 +34,21 @@ function StatCard({ label, value, sub, color, bg, icon }) {
 export default function AdminDashboard() {
   const { user, accessToken } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('agents');
-  const [stats,     setStats]     = useState(null);
-  const [statsErr,  setStatsErr]  = useState(null);
+  const [activeTab,    setActiveTab]    = useState('agents');
+  const [stats,        setStats]        = useState(null);
+  const [statsErr,     setStatsErr]     = useState(null);
+
+  // Lifted filter state — driven by stat card clicks
+  const [agentFilter,  setAgentFilter]  = useState({ status: 'all', sort: 'created_at_desc' });
+  const [auditFilter,  setAuditFilter]  = useState({ eventType: '' });
+  const [activeCard,   setActiveCard]   = useState(null); // tracks which card is highlighted
+
+  function handleCardClick(tab, agentOpts, auditOpts, cardKey) {
+    setActiveTab(tab);
+    setActiveCard(cardKey);
+    if (agentOpts) setAgentFilter(prev => ({ ...prev, ...agentOpts }));
+    if (auditOpts) setAuditFilter(prev => ({ ...prev, ...auditOpts }));
+  }
 
   const fetchStats = useCallback(async () => {
     if (!accessToken) return;
@@ -79,12 +104,37 @@ export default function AdminDashboard() {
           <div style={{ padding: '10px 14px', background: '#fee2e2', color: '#991b1b', borderRadius: 8, fontSize: 13, marginBottom: 16 }}>⚠️ Stats unavailable: {statsErr}</div>
         )}
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: '1.5rem' }}>
-          <StatCard label="Total Agents"   value={agentStats.total}                   color="#3b82f6" bg="rgba(59,130,246,0.1)"  icon="🧑‍💼" />
-          <StatCard label="Active Agents"  value={agentStats.byStatus?.active ?? 0}   color="#10b981" bg="rgba(16,185,129,0.1)"  icon="✅" />
-          <StatCard label="Suspended"      value={agentStats.byStatus?.suspended ?? 0} color="#ef4444" bg="rgba(239,68,68,0.1)"   icon="🚫" />
-          <StatCard label="Total Packages" value={pkgStats.total_packages}             color="#4f46e5" bg="rgba(79,70,229,0.1)"   icon="📦" />
-          <StatCard label="Active Packages" value={pkgStats.active_packages}           color="#059669" bg="rgba(5,150,105,0.1)"   icon="🟢" sub={`${pkgStats.agents_with_packages ?? 0} agents with packages`} />
-          <StatCard label="Logins (7d)"    value={stats?.loginsLast7Days}             color="#0369a1" bg="rgba(3,105,161,0.1)"   icon="🔐" />
+          <StatCard
+            label="Total Agents" value={agentStats.total} color="#3b82f6" bg="rgba(59,130,246,0.1)" icon="🧑‍💼"
+            isActive={activeCard === 'all'}
+            onClick={() => handleCardClick('agents', { status: 'all', sort: 'created_at_desc' }, null, 'all')}
+          />
+          <StatCard
+            label="Active Agents" value={agentStats.byStatus?.active ?? 0} color="#10b981" bg="rgba(16,185,129,0.1)" icon="✅"
+            isActive={activeCard === 'active'}
+            onClick={() => handleCardClick('agents', { status: 'active', sort: 'created_at_desc' }, null, 'active')}
+          />
+          <StatCard
+            label="Suspended" value={agentStats.byStatus?.suspended ?? 0} color="#ef4444" bg="rgba(239,68,68,0.1)" icon="🚫"
+            isActive={activeCard === 'suspended'}
+            onClick={() => handleCardClick('agents', { status: 'suspended', sort: 'created_at_desc' }, null, 'suspended')}
+          />
+          <StatCard
+            label="Total Packages" value={pkgStats.total_packages} color="#4f46e5" bg="rgba(79,70,229,0.1)" icon="📦"
+            isActive={activeCard === 'total_packages'}
+            onClick={() => handleCardClick('agents', { status: 'all', sort: 'total_packages_desc' }, null, 'total_packages')}
+          />
+          <StatCard
+            label="Active Packages" value={pkgStats.active_packages} color="#059669" bg="rgba(5,150,105,0.1)" icon="🟢"
+            sub={`${pkgStats.agents_with_packages ?? 0} agents with packages`}
+            isActive={activeCard === 'active_packages'}
+            onClick={() => handleCardClick('agents', { status: 'active', sort: 'total_packages_desc' }, null, 'active_packages')}
+          />
+          <StatCard
+            label="Logins (7d)" value={stats?.loginsLast7Days} color="#0369a1" bg="rgba(3,105,161,0.1)" icon="🔐"
+            isActive={activeCard === 'logins'}
+            onClick={() => handleCardClick('audit', null, { eventType: 'login_success' }, 'logins')}
+          />
         </section>
 
         {/* Workspace */}
@@ -101,11 +151,21 @@ export default function AdminDashboard() {
           <div style={{ padding: 24, background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 16, boxShadow: '0 4px 20px rgba(15,23,42,0.04)', minHeight: 400 }}>
 
             {activeTab === 'agents' && (
-              <AdminAgentsList token={accessToken} userRole={user?.role_type} />
+              <AdminAgentsList
+                token={accessToken}
+                userRole={user?.role_type}
+                statusFilter={agentFilter.status}
+                sortFilter={agentFilter.sort}
+                onFilterChange={() => setActiveCard(null)}
+              />
             )}
 
             {activeTab === 'audit' && (
-              <AdminAuditLogTable token={accessToken} />
+              <AdminAuditLogTable
+                token={accessToken}
+                eventTypeFilter={auditFilter.eventType}
+                onFilterChange={() => setActiveCard(null)}
+              />
             )}
 
             {activeTab === 'analytics' && (

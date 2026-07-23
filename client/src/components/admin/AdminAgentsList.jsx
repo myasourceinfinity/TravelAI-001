@@ -19,16 +19,32 @@ function StatusBadge({ status }) {
   );
 }
 
-export default function AdminAgentsList({ token, userRole }) {
+const SORT_LABELS = {
+  'created_at_desc':       'Newest first',
+  'created_at_asc':        'Oldest first',
+  'first_name_asc':        'Name A–Z',
+  'last_login_at_desc':    'Last login',
+  'total_packages_desc':   'Most packages',
+};
+
+export default function AdminAgentsList({ token, userRole, statusFilter: propStatus = 'all', sortFilter: propSort = 'created_at_desc', onFilterChange }) {
   const [agents,      setAgents]      = useState([]);
   const [total,       setTotal]       = useState(0);
   const [isLoading,   setIsLoading]   = useState(true);
   const [error,       setError]       = useState(null);
 
   const [q,           setQ]           = useState('');
-  const [statusFilter,setStatusFilter]= useState('all');
+  const [statusFilter,setStatusFilter]= useState(propStatus);
+  const [sort,        setSort]        = useState(propSort);
   const [page,        setPage]        = useState(1);
   const LIMIT = 20;
+
+  // Sync when parent drives a new filter via stat card click
+  useEffect(() => {
+    setStatusFilter(propStatus);
+    setSort(propSort);
+    setPage(1);
+  }, [propStatus, propSort]);
 
   const [selectedId,  setSelectedId]  = useState(null);   // detail modal
   const [showCreate,  setShowCreate]  = useState(false);  // create modal
@@ -38,7 +54,7 @@ export default function AdminAgentsList({ token, userRole }) {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await listAdminAgents(token, { q, status: statusFilter, page, limit: LIMIT });
+      const data = await listAdminAgents(token, { q, status: statusFilter, sort, page, limit: LIMIT });
       setAgents(data.agents || []);
       setTotal(data.total  || 0);
     } catch (err) {
@@ -46,7 +62,7 @@ export default function AdminAgentsList({ token, userRole }) {
     } finally {
       setIsLoading(false);
     }
-  }, [token, q, statusFilter, page]);
+  }, [token, q, statusFilter, sort, page]);
 
   useEffect(() => { fetchAgents(); }, [fetchAgents]);
 
@@ -63,9 +79,30 @@ export default function AdminAgentsList({ token, userRole }) {
 
       {/* Toolbar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-          🧑‍💼 Agents <span style={{ fontSize: 13, color: '#64748b', fontWeight: 400 }}>({total} total)</span>
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+            🧑‍💼 Agents <span style={{ fontSize: 13, color: '#64748b', fontWeight: 400 }}>({total} total)</span>
+          </h2>
+          {/* Active filter badge */}
+          {(statusFilter !== 'all' || sort !== 'created_at_desc') && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {statusFilter !== 'all' && (
+                <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 999, background: 'rgba(79,70,229,0.1)', color: '#4f46e5', fontWeight: 700, textTransform: 'uppercase' }}>
+                  {statusFilter}
+                </span>
+              )}
+              {sort !== 'created_at_desc' && (
+                <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 999, background: 'rgba(79,70,229,0.06)', color: '#6366f1', fontWeight: 600 }}>
+                  {SORT_LABELS[sort] || sort}
+                </span>
+              )}
+              <button
+                onClick={() => { setStatusFilter('all'); setSort('created_at_desc'); setPage(1); onFilterChange?.(); }}
+                style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'none', border: '1px solid rgba(15,23,42,0.15)', color: '#64748b', cursor: 'pointer', fontWeight: 600 }}
+              >✕ Clear</button>
+            </div>
+          )}
+        </div>
         <button
           onClick={() => setShowCreate(true)}
           style={{ padding: '8px 16px', background: 'linear-gradient(135deg,#4f46e5,#3b82f6)', color: 'white', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
@@ -83,13 +120,24 @@ export default function AdminAgentsList({ token, userRole }) {
         />
         <select
           value={statusFilter}
-          onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+          onChange={e => { setStatusFilter(e.target.value); setPage(1); onFilterChange?.(); }}
           style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(15,23,42,0.15)', outline: 'none', fontSize: 13 }}
         >
           <option value="all">All Statuses</option>
           <option value="active">Active</option>
           <option value="suspended">Suspended</option>
           <option value="pending">Pending</option>
+        </select>
+        <select
+          value={sort}
+          onChange={e => { setSort(e.target.value); setPage(1); onFilterChange?.(); }}
+          style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(15,23,42,0.15)', outline: 'none', fontSize: 13 }}
+        >
+          <option value="created_at_desc">Newest first</option>
+          <option value="created_at_asc">Oldest first</option>
+          <option value="first_name_asc">Name A–Z</option>
+          <option value="last_login_at_desc">Last login</option>
+          <option value="total_packages_desc">Most packages</option>
         </select>
         <button type="submit" style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
           🔍 Search

@@ -46,7 +46,7 @@ const listAgents = async (req, res) => {
     ? [sort.replace('_asc', ''), 'ASC']
     : [sort.replace('_desc', ''), 'DESC'];
 
-  const allowedSorts = { created_at: 'u.created_at', first_name: 'u.first_name', email: 'u.email', last_login_at: 'u.last_login_at' };
+  const allowedSorts = { created_at: 'u.created_at', first_name: 'u.first_name', email: 'u.email', last_login_at: 'u.last_login_at', total_packages: 'COUNT(ap.id)' };
   const orderBy = `${allowedSorts[sortCol] || 'u.created_at'} ${sortDir}`;
 
   const conditions = [`u.role_type = 'agent'`];
