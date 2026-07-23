@@ -9,6 +9,10 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import { lazy, Suspense } from 'react';
 
 const TravellerDashboard = lazy(() => import('./components/dashboard/TravellerDashboard'));
+const AgentDashboard     = lazy(() => import('./components/dashboard/AgentDashboard'));
+const AgentProfilePage   = lazy(() => import('./components/dashboard/AgentProfilePage'));
+const AdminDashboard     = lazy(() => import('./components/admin/AdminDashboard'));
+const AgentsList         = lazy(() => import('./components/agents/AgentsList'));
 const PlanTripWithTravelAI = lazy(() => import('./components/trips/PlanTripWithTravelAI'));
 const TripDetailPage        = lazy(() => import('./components/trips/TripDetailPage'));
 const MyTrips               = lazy(() => import('./components/trips/MyTrips'));
@@ -19,9 +23,11 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 if (!GOOGLE_CLIENT_ID) console.warn('[App] VITE_GOOGLE_CLIENT_ID is not set — Google login will fail.');
 
 // ── Route guard: redirects based on auth state ──────────────────────────────
+const ADMIN_ROLES = ['admin', 'useradmin', 'superadmin'];
+
 function PrivateRoute({ children }) {
   const { user, isLoading } = useAuth();
-  if (isLoading) return null; // or <LoadingSpinner />
+  if (isLoading) return null;
   return user ? children : <Navigate to="/login" replace />;
 }
 
@@ -29,6 +35,25 @@ function GuestRoute({ children }) {
   const { user, isLoading } = useAuth();
   if (isLoading) return null;
   return user ? <Navigate to="/" replace /> : children;
+}
+
+function AdminRoute({ children }) {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!ADMIN_ROLES.includes(user.role_type)) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
+function DashboardRoute() {
+  const { user } = useAuth();
+  if (ADMIN_ROLES.includes(user?.role_type)) return <Navigate to="/admin" replace />;
+  return user?.role_type === 'agent' ? <AgentDashboard /> : <TravellerDashboard />;
+}
+
+function ProfileRoute() {
+  const { user } = useAuth();
+  return user?.role_type === 'agent' ? <AgentProfilePage /> : <TravellerDashboard />;
 }
 
 export default function App() {
@@ -52,7 +77,10 @@ export default function App() {
               <GuestRoute><AuthPage /></GuestRoute>
             } />
             <Route path="/dashboard" element={
-              <PrivateRoute><TravellerDashboard /></PrivateRoute>
+              <PrivateRoute><DashboardRoute /></PrivateRoute>
+            } />
+            <Route path="/profile" element={
+              <PrivateRoute><ProfileRoute /></PrivateRoute>
             } />
             <Route path="/plan-trip" element={
               <PrivateRoute><PlanTripWithTravelAI /></PrivateRoute>
@@ -62,6 +90,10 @@ export default function App() {
             } />
             <Route path="/my-trips" element={
               <PrivateRoute><MyTrips /></PrivateRoute>
+            } />
+            <Route path="/agents" element={<AgentsList />} />
+            <Route path="/admin" element={
+              <AdminRoute><AdminDashboard /></AdminRoute>
             } />
             <Route path="*" element={
               <PrivateRoute>

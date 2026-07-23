@@ -39,6 +39,8 @@ const googleAuth = async (req, res) => {
 
     await dbClient.query('BEGIN');
 
+    let isNewUser = false;
+
     // 2. Check if user exists
     let { rows } = await dbClient.query(
       `SELECT id, first_name, last_name, email, password_hash,
@@ -82,10 +84,11 @@ const googleAuth = async (req, res) => {
 
     } else {
       // 3. User doesn't exist, create them
+      isNewUser = true;
       const { rows: newUserRows } = await dbClient.query(
         `INSERT INTO users
            (first_name, last_name, email, role_type, status, auth_provider, provider_id, email_verified)
-         VALUES ($1, $2, $3, 'traveler', 'pending', 'google', $4, FALSE)
+         VALUES ($1, $2, $3, 'traveler', 'active', 'google', $4, TRUE)
          RETURNING id, first_name, last_name, email, role_type, status, auth_provider`,
         [given_name || 'User', family_name || null, userEmail, googleId]
       );
@@ -108,21 +111,6 @@ const googleAuth = async (req, res) => {
         userAgent,
         metadata: { email: user.email, auth_provider: 'google' },
       });
-
-      await dbClient.query('COMMIT');
-
-      // Trigger email verification
-      sendVerificationEmail({
-        to: user.email,
-        firstName: user.first_name,
-        token: user.id,
-      }).catch(err => console.error('Email send failed:', err.message));
-
-      return res.status(201).json({
-        message: 'Account created successfully. Please check your email to verify your account.',
-        user: user,
-        isNewUser: true
-      });
     }
 
     // 4. Create Session
@@ -140,6 +128,7 @@ const googleAuth = async (req, res) => {
       message: 'Login successful.',
       accessToken: session.accessToken,
       user: session.user,
+      isNewUser,
     });
 
   } catch (err) {

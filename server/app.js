@@ -17,6 +17,9 @@ const authMiddleware = require('./middleware/authMiddleware');
 const packageRoutes = require('./routes/packageRoutes');
 const chatRoutes    = require('./routes/chatRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const adminRoutes   = require('./routes/adminRoutes');
+const publicRoutes  = require('./routes/publicRoutes');
+const { requireRole, ADMIN_ROLES } = require('./middleware/requireRole');
 
 
 
@@ -39,6 +42,8 @@ app.use('/api/trips', authMiddleware, tripRoutes);
 app.use('/api/packages', authMiddleware, packageRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
 app.use('/api/booking', authMiddleware, bookingRoutes);
+app.use('/api/admin',  authMiddleware, requireRole(...ADMIN_ROLES), adminRoutes);
+app.use('/api/public', publicRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) =>

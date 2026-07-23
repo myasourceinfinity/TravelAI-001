@@ -27,7 +27,7 @@ export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
   async function handleGoogleSuccess(credentialResponse) {
     try {
       const data = await loginWithGoogle(credentialResponse.credential);
-      if (data.accessToken) {
+      if (data?.accessToken || data?.user) {
         navigate(sessionStorage.getItem('pending_trip_description') ? '/plan-trip' : '/');
       }
     } catch (_) { /* handled by context */ }

@@ -1,19 +1,16 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import Navbar from '../common/Navbar';
 import './HomePage.css';
 
-// ── Custom inline SVG Logo matching prototype ────────────────────────────────
+// ── Inline Logo for footer (Navbar has its own) ──────────────────────────────
 const Logo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
     <div style={{
-      width: '32px',
-      height: '32px',
-      borderRadius: '8px',
+      width: '32px', height: '32px', borderRadius: '8px',
       background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
       boxShadow: '0 4px 10px rgba(79, 70, 229, 0.25)'
     }}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -49,32 +46,7 @@ export default function HomePage() {
   return (
     <div className="home-page-container">
       {/* ── Navigation Header ──────────────────────────────────────────────── */}
-      <nav className="home-nav">
-        <Logo />
-        <div className="home-nav-links">
-          <Link to="/" className="home-nav-link active">Home</Link>
-          <a href="#explore" className="home-nav-link">Explore</a>
-          {user ? (
-            <>
-              <Link to="/my-trips" className="home-nav-link">My Trips</Link>
-              <Link to="/plan-trip" className="home-nav-link">AI Planner</Link>
-              <Link to="/dashboard" className="home-nav-link">Edit Profile</Link>
-              <button onClick={handleLogout} className="home-nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}>Logout</button>
-            </>
-          ) : (
-            <>
-              <Link to="/plan-trip" className="home-nav-link">AI Planner</Link>
-              <a href="#pricing" className="home-nav-link">Pricing</a>
-              <a href="#about" className="home-nav-link">About Us</a>
-            </>
-          )}
-        </div>
-        {!user && (
-          <button className="home-nav-cta" onClick={() => navigate('/login')}>
-            Login
-          </button>
-        )}
-      </nav>
+      <Navbar />
 
       {/* ── Hero Section ──────────────────────────────────────────────────── */}
       <header className="home-hero-section">

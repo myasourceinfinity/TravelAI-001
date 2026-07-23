@@ -689,9 +689,8 @@ select.form-input option { background: var(--bg-800); color: var(--text-primary)
 .dashboard-page {
   min-height: 100dvh;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: var(--sp-6);
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .dashboard-container {
@@ -703,6 +702,7 @@ select.form-input option { background: var(--bg-800); color: var(--text-primary)
   padding: var(--sp-6) 0;
   position: relative;
   z-index: 1;
+  margin: 0 auto;
 }
 
 .dashboard-loader {

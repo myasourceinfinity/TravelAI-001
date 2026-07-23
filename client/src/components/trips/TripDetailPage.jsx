@@ -12,13 +12,14 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../context/AuthContext';
+import Navbar from '../common/Navbar';
 
 // ── Fix default Leaflet marker icons broken by Vite/Webpack ─────────────────
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
 // ── Coloured marker factory ──────────────────────────────────────────────────
@@ -35,9 +36,9 @@ function makeIcon(colour = '#38bdf8', label = '') {
       ">
         <span style="transform:rotate(45deg);font-size:13px;line-height:1">${label}</span>
       </div>`,
-    iconSize:   [32, 32],
+    iconSize: [32, 32],
     iconAnchor: [16, 32],
-    popupAnchor:[0, -34],
+    popupAnchor: [0, -34],
   });
 }
 
@@ -55,9 +56,9 @@ function FitBounds({ positions }) {
 // ── Budget badge colour ───────────────────────────────────────────────────────
 function BudgetBadge({ level }) {
   const colours = {
-    budget:   { bg: '#16a34a22', color: '#4ade80',  border: '#16a34a' },
-    moderate: { bg: '#0ea5e922', color: '#38bdf8',  border: '#0ea5e9' },
-    luxury:   { bg: '#a855f722', color: '#c084fc',  border: '#a855f7' },
+    budget: { bg: '#16a34a22', color: '#4ade80', border: '#16a34a' },
+    moderate: { bg: '#0ea5e922', color: '#38bdf8', border: '#0ea5e9' },
+    luxury: { bg: '#a855f722', color: '#c084fc', border: '#a855f7' },
   };
   const s = colours[level] || colours.moderate;
   return (
@@ -73,13 +74,13 @@ function BudgetBadge({ level }) {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function TripDetailPage() {
-  const { id }       = useParams();
-  const navigate     = useNavigate();
+  const { id } = useParams();
+  const navigate = useNavigate();
   const { accessToken, logout } = useAuth();
 
-  const [trip,      setTrip]      = useState(null);
+  const [trip, setTrip] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error,     setError]     = useState(null);
+  const [error, setError] = useState(null);
   const [activeIdx, setActiveIdx] = useState(0); // which destination is highlighted
 
   // ── Fetch single trip ────────────────────────────────────────────────────
@@ -111,16 +112,16 @@ export default function TripDetailPage() {
   const validDests = (trip?.destinations || []).filter(
     d => d.lat != null && d.lng != null && !isNaN(Number(d.lat)) && !isNaN(Number(d.lng))
   );
-  const positions  = validDests.map(d => [Number(d.lat), Number(d.lng)]);
-  const mapCenter  = positions.length > 0 ? positions[0] : [-36.85, 174.76];
-  const COLOURS    = ['#38bdf8','#f472b6','#34d399','#fb923c','#a78bfa','#facc15'];
+  const positions = validDests.map(d => [Number(d.lat), Number(d.lng)]);
+  const mapCenter = positions.length > 0 ? positions[0] : [-36.85, 174.76];
+  const COLOURS = ['#38bdf8', '#f472b6', '#34d399', '#fb923c', '#a78bfa', '#facc15'];
 
   // ─────────────────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="dashboard-page page-bg" style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh' }}>
+      <div className="dashboard-page page-bg" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div className="text-center">
-          <span className="spinner" style={{ width:40, height:40 }} />
+          <span className="spinner" style={{ width: 40, height: 40 }} />
           <p className="text-secondary mt-4">Loading your trip…</p>
         </div>
       </div>
@@ -129,9 +130,9 @@ export default function TripDetailPage() {
 
   if (error || !trip) {
     return (
-      <div className="dashboard-page page-bg" style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh' }}>
-        <div className="glass-card text-center" style={{ padding:'3rem 2rem', maxWidth:400 }}>
-          <div style={{ fontSize:48, marginBottom:16 }}>😕</div>
+      <div className="dashboard-page page-bg" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div className="glass-card text-center" style={{ padding: '3rem 2rem', maxWidth: 400 }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>😕</div>
           <h2 className="heading-md mb-2">Trip not found</h2>
           <p className="text-secondary mb-6">{error || 'This trip does not exist or was deleted.'}</p>
           <button className="btn btn-primary" onClick={() => navigate('/my-trips')}>← Back to My Trips</button>
@@ -142,24 +143,17 @@ export default function TripDetailPage() {
 
   return (
     <div className="trip-page page-bg">
+      <Navbar />
       <div className="trip-container" style={{ maxWidth: 1100 }}>
-
-        {/* ── Top bar ───────────────────────────────────────────────────────── */}
-        <header className="trip-topbar" style={{ marginBottom: '1.5rem' }}>
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate('/my-trips')}>
-            ← Back to My Trips
-          </button>
-          <h1 className="heading-md gradient-text">TravelAI</h1>
-        </header>
 
         {/* ── Trip header card ──────────────────────────────────────────────── */}
         <div className="glass-card" style={{ padding: '24px 28px', marginBottom: '1.5rem' }}>
-          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <h2 style={{ margin:'0 0 8px', fontSize:24, fontWeight:700, color:'var(--text-main)' }}>
+              <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 700, color: 'var(--text-main)' }}>
                 {trip.title || `${trip.start_city} Trip`}
               </h2>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:16, fontSize:14, color:'var(--text-secondary, #94a3b8)' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 14, color: 'var(--text-secondary, #94a3b8)' }}>
                 <span>📍 {trip.start_city}</span>
                 <span>📅 {trip.days} Days</span>
                 <span>👥 {trip.travelers} {trip.travelers === 1 ? 'Traveler' : 'Travelers'}</span>
@@ -170,7 +164,7 @@ export default function TripDetailPage() {
           </div>
 
           {trip.summary && (
-            <p style={{ margin:'16px 0 0', fontSize:14, color:'var(--text-secondary, #94a3b8)', lineHeight:1.7, maxWidth:800 }}>
+            <p style={{ margin: '16px 0 0', fontSize: 14, color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.7, maxWidth: 800 }}>
               {trip.summary}
             </p>
           )}
@@ -178,11 +172,11 @@ export default function TripDetailPage() {
 
         {/* ── Map ───────────────────────────────────────────────────────────── */}
         {validDests.length > 0 && (
-          <div className="glass-card" style={{ padding:0, overflow:'hidden', borderRadius:12, marginBottom:'1.5rem', height:380 }}>
+          <div className="glass-card" style={{ padding: 0, overflow: 'hidden', borderRadius: 12, marginBottom: '1.5rem', height: 380 }}>
             <MapContainer
               center={mapCenter}
               zoom={5}
-              style={{ width:'100%', height:'100%' }}
+              style={{ width: '100%', height: '100%' }}
               scrollWheelZoom={false}
             >
               <TileLayer
@@ -195,7 +189,7 @@ export default function TripDetailPage() {
               {positions.length > 1 && (
                 <Polyline
                   positions={positions}
-                  pathOptions={{ color:'#38bdf8', weight:2, dashArray:'6 6', opacity:0.7 }}
+                  pathOptions={{ color: '#38bdf8', weight: 2, dashArray: '6 6', opacity: 0.7 }}
                 />
               )}
 
@@ -209,9 +203,9 @@ export default function TripDetailPage() {
                 >
                   <Popup>
                     <strong>{dest.emoji} {dest.name}</strong><br />
-                    <span style={{ fontSize:12, color:'#64748b' }}>{dest.country}</span>
+                    <span style={{ fontSize: 12, color: '#64748b' }}>{dest.country}</span>
                     {dest.highlights?.length > 0 && (
-                      <><br /><span style={{ fontSize:11 }}>{dest.highlights.slice(0,2).join(' • ')}</span></>
+                      <><br /><span style={{ fontSize: 11 }}>{dest.highlights.slice(0, 2).join(' • ')}</span></>
                     )}
                   </Popup>
                 </Marker>
@@ -221,11 +215,11 @@ export default function TripDetailPage() {
         )}
 
         {/* ── Destination cards ─────────────────────────────────────────────── */}
-        <h3 style={{ margin:'0 0 16px', fontSize:16, fontWeight:700, color:'var(--text-main)' }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--text-main)' }}>
           📍 Destinations ({trip.destinations?.length || 0})
         </h3>
 
-        <div style={{ display:'flex', flexDirection:'column', gap:16, marginBottom:'2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: '2rem' }}>
           {(trip.destinations || []).map((dest, idx) => {
             const isActive = idx === activeIdx;
             return (
@@ -234,37 +228,37 @@ export default function TripDetailPage() {
                 onClick={() => setActiveIdx(idx)}
                 className="glass-card"
                 style={{
-                  padding:'20px 24px',
-                  cursor:'pointer',
+                  padding: '20px 24px',
+                  cursor: 'pointer',
                   border: isActive
                     ? `1px solid ${COLOURS[idx % COLOURS.length]}`
                     : '1px solid var(--glass-border)',
-                  transition:'border-color 0.2s',
+                  transition: 'border-color 0.2s',
                 }}
               >
                 {/* Card header */}
-                <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom: dest.bookmeDeals?.length > 0 ? 16 : 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: dest.bookmeDeals?.length > 0 ? 16 : 0 }}>
                   <div style={{
-                    width:44, height:44, borderRadius:12,
+                    width: 44, height: 44, borderRadius: 12,
                     background: `${COLOURS[idx % COLOURS.length]}22`,
                     border: `1px solid ${COLOURS[idx % COLOURS.length]}`,
-                    display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0,
                   }}>
                     {dest.emoji || '📍'}
                   </div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                      <span style={{ fontSize:16, fontWeight:700, color:'var(--text-main)' }}>{dest.name}</span>
-                      <span style={{ fontSize:13, color:'var(--text-secondary, #94a3b8)' }}>{dest.country}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-main)' }}>{dest.name}</span>
+                      <span style={{ fontSize: 13, color: 'var(--text-secondary, #94a3b8)' }}>{dest.country}</span>
                       <span style={{
-                        fontSize:11, padding:'1px 8px', borderRadius:999,
-                        background:`${COLOURS[idx % COLOURS.length]}22`,
+                        fontSize: 11, padding: '1px 8px', borderRadius: 999,
+                        background: `${COLOURS[idx % COLOURS.length]}22`,
                         color: COLOURS[idx % COLOURS.length],
-                        border:`1px solid ${COLOURS[idx % COLOURS.length]}44`,
+                        border: `1px solid ${COLOURS[idx % COLOURS.length]}44`,
                       }}>Stop {idx + 1}</span>
                     </div>
                     {dest.highlights?.length > 0 && (
-                      <p style={{ margin:'4px 0 0', fontSize:13, color:'var(--text-secondary, #94a3b8)' }}>
+                      <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-secondary, #94a3b8)' }}>
                         {dest.highlights.join(' • ')}
                       </p>
                     )}
@@ -274,17 +268,17 @@ export default function TripDetailPage() {
                 {/* Bookme deals */}
                 {dest.bookmeDeals?.length > 0 && (
                   <div>
-                    <p style={{ fontSize:11, color:'var(--text-secondary, #94a3b8)', marginBottom:10, textTransform:'uppercase', letterSpacing:'0.05em' }}>
+                    <p style={{ fontSize: 11, color: 'var(--text-secondary, #94a3b8)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Activities &amp; Deals
                     </p>
-                    <div style={{ display:'flex', gap:10, overflowX:'auto', paddingBottom:4 }}>
+                    <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
                       {dest.bookmeDeals.map((deal, i) => {
-                        const rating  = (3.5 + Math.random() * 1.5).toFixed(1);
+                        const rating = (3.5 + Math.random() * 1.5).toFixed(1);
                         const reviews = Math.floor(50 + Math.random() * 200);
-                        const spaces  = Math.floor(5  + Math.random() * 20);
-                        const months  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-                        const m1 = months[Math.floor(Math.random()*6)];
-                        const m2 = months[6 + Math.floor(Math.random()*6)];
+                        const spaces = Math.floor(5 + Math.random() * 20);
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const m1 = months[Math.floor(Math.random() * 6)];
+                        const m2 = months[6 + Math.floor(Math.random() * 6)];
                         const savingsStr = deal.discount ? `Save ${deal.discount}` : 'Great Value';
                         return (
                           <a
@@ -294,7 +288,7 @@ export default function TripDetailPage() {
                             rel="noreferrer"
                             onClick={e => e.stopPropagation()}
                             className="bookme-deal-card-new"
-                            style={{ minWidth:200, flexShrink:0 }}
+                            style={{ minWidth: 200, flexShrink: 0 }}
                           >
                             <div className="bookme-deal-header-new">
                               <h5 className="bookme-deal-title-new">{deal.title}</h5>
@@ -303,7 +297,7 @@ export default function TripDetailPage() {
                               </div>
                             </div>
                             {deal.image && (
-                              <div className="bookme-deal-image-new" style={{ backgroundImage:`url(${deal.image})` }} />
+                              <div className="bookme-deal-image-new" style={{ backgroundImage: `url(${deal.image})` }} />
                             )}
                             <div className="bookme-deal-body-new">
                               <div className="bookme-deal-dates">
@@ -326,7 +320,7 @@ export default function TripDetailPage() {
                                 <div className="bookme-deal-pricing-new">
                                   <div className="price-main">
                                     <span className="from-text">From:</span>
-                                    <span className="price-value">{deal.price?.replace('From ','')}</span>
+                                    <span className="price-value">{deal.price?.replace('From ', '')}</span>
                                   </div>
                                   <div className="save-text">{savingsStr}</div>
                                 </div>

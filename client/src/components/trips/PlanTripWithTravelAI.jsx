@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { chatWithAI, saveTripToDB } from '../../services/tripService';
 import FlightCard from './FlightCard';
 import HotelCard  from './HotelCard';
+import Navbar from '../common/Navbar';
 import '../home/HomePage.css';
 
 const API = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -503,14 +504,7 @@ export default function PlanTripWithTravelAI() {
       </div>
 
       {/* Header */}
-      <header className="trip-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 2rem', background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)', position: 'relative', zIndex: 1 }}>
-        <button onClick={() => navigate('/')} style={{ background: 'linear-gradient(135deg,#4f46e5,#3b82f6)', color: 'white', fontWeight: 600, fontSize: '0.85rem', padding: '0.5rem 1.25rem', borderRadius: 9999, border: 'none', cursor: 'pointer' }}>
-          ← Home
-        </button>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(135deg,#38bdf8,#818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>
-          TravelAI Buddy
-        </h1>
-      </header>
+      <Navbar />
 
       {/* Main split view */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'row', padding: '1.5rem', gap: '1.5rem', height: 'calc(100vh - 80px)', overflow: 'hidden', minHeight: 0, position: 'relative', zIndex: 1 }}>

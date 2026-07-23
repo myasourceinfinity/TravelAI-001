@@ -19,6 +19,7 @@ async function request(endpoint, options = {}) {
   if (!res.ok) {
     const err = new Error(data.error || data.message || 'Request failed');
     err.status = res.status;
+    err.details = data.details;
     throw err;
   }
 
@@ -113,3 +114,58 @@ export function deleteTrip(token, tripId) {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
+
+export function getAgentPackages(token) {
+  return request('/packages/my', {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function createSinglePackage(token, packageData) {
+  return request('/packages/single', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: packageData,
+  });
+}
+
+export async function validateBulkPackages(token, file, overwrite = false) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('overwrite', overwrite ? 'true' : 'false');
+
+  const res = await fetch(`${BASE_URL}/packages/bulk/validate`, {
+    method: 'POST',
+    headers: { 
+      Authorization: `Bearer ${token}`
+    },
+    body: formData,
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'Bulk validation failed');
+    err.details = data.details;
+    throw err;
+  }
+  return data;
+}
+
+export function confirmBulkPackages(token, packages, overwrite = false) {
+  return request('/packages/bulk/confirm', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: { packages, overwrite },
+  });
+}
+
+export function updateSinglePackage(token, packageId, packageData) {
+  return request(`/packages/${packageId}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: packageData,
+  });
+}
+
+

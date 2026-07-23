@@ -21,10 +21,12 @@
     "express": "^5.2.1",
     "google-auth-library": "^10.6.2",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
     "nodemailer": "^8.0.7",
     "nodemon": "^3.1.14",
     "openai": "^6.37.0",
     "pg": "^8.20.0",
-    "puppeteer": "^24.43.1"
+    "puppeteer": "^24.43.1",
+    "xlsx": "^0.18.5"
   }
 }

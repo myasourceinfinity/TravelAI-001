@@ -49,10 +49,12 @@ export function AuthProvider({ children }) {
     setAuthError(null);
     try {
       const data = await googleAuth({ credential });
-      if (data.accessToken) {
+      if (data?.user) {
         setUser(data.user);
-        setAccessToken(data.accessToken);
         sessionStorage.setItem('travelai_user', JSON.stringify(data.user));
+      }
+      if (data?.accessToken) {
+        setAccessToken(data.accessToken);
         sessionStorage.setItem('travelai_token', data.accessToken);
       }
       return data;

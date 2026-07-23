@@ -123,7 +123,7 @@ export default function SignUpFlow({ onGoToLogin }) {
     try {
       setGoogleError(null);
       const data = await loginWithGoogle(credentialResponse.credential);
-      if (data.accessToken) {
+      if (data?.accessToken || data?.user) {
         navigate(sessionStorage.getItem('pending_trip_description') ? '/plan-trip' : '/');
       }
     } catch (err) {

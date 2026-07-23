@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getProfile, updateProfile } from '../../services/authService';
+import Navbar from '../common/Navbar';
 
 // ── Location type options (matches signup Phase 1) ──────────────────────────
 const LOCATION_TYPE_OPTIONS = [
@@ -140,8 +141,9 @@ export default function TravellerDashboard() {
   const initials = `${(profile?.first_name?.[0] || '').toUpperCase()}${(profile?.last_name?.[0] || '').toUpperCase()}`;
 
   return (
-    <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start', padding: '0 5%' }}>
-      <div className="dashboard-container" style={{ maxWidth: '100%', width: '100%' }}>
+    <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)' }}>
+      <Navbar />
+      <div className="dashboard-container" style={{ maxWidth: '100%', width: '100%', padding: '0 5%' }}>
 
         {/* ═══ Header ═══════════════════════════════════════════════════════════ */}
         <header className="dashboard-header glass-card" style={{ background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', boxShadow: '0 4px 20px rgba(15,23,42,0.05)' }}>

@@ -41,7 +41,7 @@ export default function SignUpPhase1({ data, onChange, onNext, selectedCurrency,
     try {
       setGoogleError(null);
       const data = await loginWithGoogle(credentialResponse.credential);
-      if (onGoogleSuccess) onGoogleSuccess(data.user, data.isNewUser);
+      if (data?.user && onGoogleSuccess) onGoogleSuccess(data.user, data.isNewUser);
     } catch (err) {
       setGoogleError(err.message || 'Google signup failed');
     }
