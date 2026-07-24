@@ -40,6 +40,48 @@ const COMPONENT_META = {
   transfer: { icon: '🚌', colour: '#fb923c' },
 };
 
+// ── Curated destination hero images (Unsplash direct CDN, no key needed) ─────
+const DEST_IMAGES = {
+  'auckland':           'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=600&q=75',
+  'wellington':         'https://images.unsplash.com/photo-1577048982768-5cb3e7ddfa23?w=600&q=75',
+  'rotorua':            'https://images.unsplash.com/photo-1583236070780-6ece19db7fa7?w=600&q=75',
+  'queenstown':         'https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?w=600&q=75',
+  'christchurch':       'https://images.unsplash.com/photo-1547300352-2c6fee46e3a2?w=600&q=75',
+  'dunedin':            'https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?w=600&q=75',
+  'tauranga':           'https://images.unsplash.com/photo-1570737209810-87a8e7245f88?w=600&q=75',
+  'napier':             'https://images.unsplash.com/photo-1608490531175-57e6c6c26ae6?w=600&q=75',
+  'milford sound':      'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&q=75',
+  'fiordland':          'https://images.unsplash.com/photo-1589196728941-5f04fc59d7f3?w=600&q=75',
+  'tongariro':          'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=75',
+  'waiheke':            'https://images.unsplash.com/photo-1493219686142-5a8641badc78?w=600&q=75',
+  'coromandel':         'https://images.unsplash.com/photo-1467377791767-c929b5dc9a23?w=600&q=75',
+  'dubai':              'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=75',
+  'abu dhabi':          'https://images.unsplash.com/photo-1578895101408-1a36b834405b?w=600&q=75',
+  'new zealand':        'https://images.unsplash.com/photo-1467377791767-c929b5dc9a23?w=600&q=75',
+};
+
+function getDestImage(dest) {
+  const key = (dest.name || '').toLowerCase();
+  // exact match first
+  if (DEST_IMAGES[key]) return DEST_IMAGES[key];
+  // partial match
+  for (const [k, url] of Object.entries(DEST_IMAGES)) {
+    if (key.includes(k) || k.includes(key)) return url;
+  }
+  // generic NZ/Dubai fallback based on country
+  if ((dest.country || '').toLowerCase().includes('zealand'))
+    return 'https://images.unsplash.com/photo-1467377791767-c929b5dc9a23?w=600&q=75';
+  if ((dest.country || '').toLowerCase().includes('emirates') || (dest.country || '').toLowerCase().includes('dubai'))
+    return 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=75';
+  return 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=600&q=75'; // generic travel
+}
+
+const BUDGET_COLORS = {
+  budget:   { bg: 'rgba(52,211,153,0.85)',  text: '#065f46' },
+  moderate: { bg: 'rgba(251,191,36,0.85)',  text: '#78350f' },
+  luxury:   { bg: 'rgba(167,139,250,0.85)', text: '#2e1065' },
+};
+
 function packageEmoji(pkg) {
   const name = (pkg.destination_name || '').toLowerCase();
   if (name.includes('auckland'))     return '🌆';
@@ -52,76 +94,139 @@ function packageEmoji(pkg) {
 }
 
 // ── Destination card (itinerary panel) ───────────────────────────────────────
-function DestinationCard({ dest, onRemove, agentPkg, bookingData, selectedFlight, selectedHotel, onSelectFlight, onSelectHotel }) {
+function DestinationCard({ dest, onRemove, agentPkg, bookingData, selectedFlight, selectedHotel, onSelectFlight, onSelectHotel, budgetLevel }) {
   const cheapestFlight = bookingData?.flights?.length
     ? Math.min(...bookingData.flights.map(f => f.price ?? Infinity))
     : null;
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(30,41,59,0.5)', backdropFilter: 'blur(10px)', marginBottom: '0.75rem', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
+  // Determine displayed price: live booking > agent package > AI estimate
+  const liveFlightPrice  = cheapestFlight && isFinite(cheapestFlight) ? cheapestFlight : null;
+  const liveHotelPrice   = bookingData?.hotels?.[0]?.price ?? null;
+  const liveTotalPrice   = (liveFlightPrice || 0) + (liveHotelPrice || 0);
+  const agentPkgPrice    = agentPkg ? parseFloat(agentPkg.price_per_person ?? agentPkg.base_price ?? 0) : null;
+  const estimatedTotal   = dest.estimatedPrice?.total ?? null;
 
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div style={{ position: 'relative' }}>
-            <img src={`https://picsum.photos/seed/${dest.id}/150/150`} alt={dest.name}
-              style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--brand-500)' }} />
-            <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: '1rem', background: 'var(--bg-800)', borderRadius: '50%', padding: 2, lineHeight: 1 }}>
-              {dest.emoji}
-            </span>
+  const displayPrice = liveTotalPrice > 0
+    ? { amount: liveTotalPrice, label: 'Live estimate', live: true }
+    : agentPkgPrice > 0
+    ? { amount: agentPkgPrice, label: 'Agent package', live: false }
+    : estimatedTotal > 0
+    ? { amount: estimatedTotal, label: dest.estimatedPrice?.note || 'Estimate', live: false }
+    : null;
+
+  const heroImg  = getDestImage(dest);
+  const budgetSt = BUDGET_COLORS[budgetLevel] || BUDGET_COLORS.moderate;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(15,23,42,0.7)', backdropFilter: 'blur(10px)', marginBottom: '0.75rem', minWidth: 0, width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+
+      {/* ── Hero image with overlays ── */}
+      <div style={{ position: 'relative', height: 130, flexShrink: 0 }}>
+        <img
+          src={heroImg}
+          alt={dest.name}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          onError={e => { e.target.src = 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=600&q=75'; }}
+        />
+        {/* Gradient overlay */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 100%)' }} />
+
+        {/* Remove button */}
+        <button
+          onClick={() => onRemove(dest.id)}
+          style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.15)', color: '#f1f5f9', cursor: 'pointer', fontSize: '0.8rem', borderRadius: 6, width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}
+        >✕</button>
+
+        {/* Price badge */}
+        {displayPrice && (
+          <div style={{ position: 'absolute', top: 8, left: 8, background: displayPrice.live ? 'rgba(52,211,153,0.92)' : 'rgba(15,23,42,0.85)', color: displayPrice.live ? '#064e3b' : '#f1f5f9', fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: 20, border: displayPrice.live ? 'none' : '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(4px)' }}>
+            {displayPrice.live ? '📡' : '💰'} NZD {Math.round(displayPrice.amount).toLocaleString()}
           </div>
-          <div>
-            <h3 style={{ fontWeight: 600, fontSize: '0.95rem', margin: 0, color: '#f8fafc' }}>
-              {dest.name} <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{dest.country}</span>
+        )}
+
+        {/* Duration badge */}
+        {dest.estimatedDays > 0 && (
+          <div style={{ position: 'absolute', top: 8, left: displayPrice ? 'auto' : 8, right: displayPrice ? 'auto' : 'auto', ...(displayPrice ? { left: 8, top: 34 } : {}), background: 'rgba(79,70,229,0.85)', color: 'white', fontSize: '0.68rem', fontWeight: 600, padding: '2px 7px', borderRadius: 20, backdropFilter: 'blur(4px)' }}>
+            {dest.estimatedDays}d
+          </div>
+        )}
+
+        {/* Destination name on image */}
+        <div style={{ position: 'absolute', bottom: 8, left: 10, right: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>{dest.emoji}</span>
+            <h3 style={{ fontWeight: 700, fontSize: '0.95rem', margin: 0, color: '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
+              {dest.name}
             </h3>
-            <p style={{ margin: '3px 0 0 0', fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.4 }}>
-              {dest.highlights?.slice(0, 2).join(' · ')}
-            </p>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)', marginLeft: 2 }}>{dest.country}</span>
           </div>
         </div>
-        <button style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.9rem' }}
-          onClick={() => onRemove(dest.id)}>✕</button>
       </div>
 
-      {/* Agent package inclusions */}
-      {agentPkg?.components?.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-          {agentPkg.components.map((comp, i) => {
-            const meta = COMPONENT_META[comp.component_type] || { icon: '📌', colour: '#94a3b8' };
-            return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 8px', borderRadius: 6, background: `${meta.colour}0f`, border: `1px solid ${meta.colour}22` }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <span style={{ fontSize: 13 }}>{meta.icon}</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#f1f5f9' }}>{comp.title}</span>
-                </div>
-                <span style={{ fontSize: 11, color: meta.colour, fontWeight: 700 }}>
-                  NZD ${parseFloat(comp.price_per_person ?? comp.pricePerPerson ?? 0).toFixed(0)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* ── Card body ── */}
+      <div style={{ padding: '0.75rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
 
-      {/* Bookme deals */}
-      {!agentPkg && dest.bookmeDeals?.length > 0 && (
-        <div>
-          <h4 style={{ fontSize: '0.75rem', color: '#38bdf8', margin: '0 0 6px 0', fontWeight: 600 }}>✨ Recommended on Bookme</h4>
-          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, minWidth: 0, maxWidth: '100%' }}>
-            {dest.bookmeDeals.map((deal, i) => (
-              <a key={i} href={deal.link} target="_blank" rel="noreferrer"
-                style={{ minWidth: 160, flexShrink: 0, background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 8, padding: 7, display: 'block', textDecoration: 'none' }}>
-                <div style={{ height: 70, borderRadius: 5, backgroundImage: `url(${deal.image})`, backgroundSize: 'cover', backgroundPosition: 'center', marginBottom: 5 }} />
-                <h5 style={{ fontSize: '0.7rem', fontWeight: 600, margin: '0 0 3px 0', color: '#f1f5f9', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{deal.title}</h5>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.65rem', color: '#34d399', fontWeight: 700 }}>{deal.price}</span>
-                  {deal.discount && <span style={{ fontSize: '0.6rem', background: '#f97316', color: '#fff', padding: '1px 4px', borderRadius: 4 }}>{deal.discount}</span>}
+        {/* AI-generated highlights (replaces bookmeDeals) */}
+        {dest.highlights?.length > 0 && !agentPkg && (
+          <div>
+            <h4 style={{ fontSize: '0.7rem', color: '#818cf8', margin: '0 0 5px 0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>🤖 AI Highlights</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {dest.highlights.map((h, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: '0.75rem', color: '#e2e8f0', lineHeight: 1.4 }}>
+                  <span style={{ color: '#818cf8', fontSize: '0.6rem', marginTop: 4, flexShrink: 0 }}>✦</span>
+                  <span>{h}</span>
                 </div>
-              </a>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Price breakdown */}
+        {displayPrice && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+            {dest.estimatedPrice?.flight > 0 && !liveFlightPrice && (
+              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.2)', color: '#38bdf8' }}>
+                ✈️ est. NZD {dest.estimatedPrice.flight.toLocaleString()}
+              </span>
+            )}
+            {liveFlightPrice && (
+              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(56,189,248,0.12)', border: '1px solid rgba(56,189,248,0.25)', color: '#38bdf8' }}>
+                ✈️ NZD {Math.round(liveFlightPrice).toLocaleString()}
+              </span>
+            )}
+            {dest.estimatedPrice?.hotel > 0 && !liveHotelPrice && (
+              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.2)', color: '#a78bfa' }}>
+                🏨 est. NZD {dest.estimatedPrice.hotel.toLocaleString()}
+              </span>
+            )}
+            {liveHotelPrice && (
+              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa' }}>
+                🏨 NZD {Math.round(liveHotelPrice).toLocaleString()}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Agent package inclusions */}
+        {agentPkg?.components?.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <h4 style={{ fontSize: '0.7rem', color: '#34d399', margin: '0 0 4px 0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>📦 Agent Package</h4>
+            {agentPkg.components.map((comp, i) => {
+              const meta = COMPONENT_META[comp.component_type] || { icon: '📌', colour: '#94a3b8' };
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 8px', borderRadius: 6, background: `${meta.colour}0f`, border: `1px solid ${meta.colour}22` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <span style={{ fontSize: 13 }}>{meta.icon}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: '#f1f5f9' }}>{comp.title}</span>
+                  </div>
+                  <span style={{ fontSize: 11, color: meta.colour, fontWeight: 700 }}>
+                    NZD ${parseFloat(comp.price_per_person ?? comp.pricePerPerson ?? 0).toFixed(0)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
       {/* ── FLIGHTS (shown after itinerary confirmed) ── */}
       {bookingData?.flights?.length > 0 && (
@@ -654,6 +759,32 @@ export default function PlanTripWithTravelAI() {
                   </div>
                 )}
 
+                {/* ── Trip cost summary ── */}
+                {plan && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '8px 10px', borderRadius: 8, background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    <div style={{ display: 'flex', align: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span style={{
+                        fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: 20, textTransform: 'capitalize',
+                        background: BUDGET_COLORS[plan.budgetLevel]?.bg || 'rgba(251,191,36,0.8)',
+                        color: BUDGET_COLORS[plan.budgetLevel]?.text || '#78350f',
+                      }}>
+                        {plan.budgetLevel}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                        {plan.days || preferences.days || '?'} days · {plan.travelers || preferences.travelers || 1} traveller{(plan.travelers || preferences.travelers || 1) > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Est. total per person</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#38bdf8' }}>
+                        NZD {(
+                          plan.destinations?.reduce((sum, d) => sum + (d.estimatedPrice?.total || 0), 0) || 0
+                        ).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ maxHeight: '50vh', overflowY: 'auto', paddingRight: 4, minWidth: 0, width: '100%' }}>
                   {allDestCards.map(({ dest, agentPkg }) => (
                     <DestinationCard
@@ -666,6 +797,7 @@ export default function PlanTripWithTravelAI() {
                       selectedHotel={selectedHotels[dest.id]}
                       onSelectFlight={handleSelectFlight}
                       onSelectHotel={handleSelectHotel}
+                      budgetLevel={plan?.budgetLevel || preferences.budgetLevel}
                     />
                   ))}
                 </div>

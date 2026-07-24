@@ -20,7 +20,7 @@ const getProfile = async (req, res) => {
          u.id, u.first_name, u.last_name, u.email, u.phone,
          u.role_type, u.status, u.auth_provider, u.email_verified,
          u.last_login_at, u.created_at,
-         pr.id AS profile_id, pr.dob, pr.nationality, pr.avatar_url, pr.bio,
+         pr.id AS profile_id, pr.dob, pr.nationality, pr.avatar_url, pr.bio, pr.specialties,
          p.budget_amount, p.currency, p.destination,
          p.location_types, p.travel_style
        FROM users u
@@ -113,7 +113,7 @@ const updateProfile = async (req, res) => {
          u.id, u.first_name, u.last_name, u.email, u.phone,
          u.role_type, u.status, u.auth_provider, u.email_verified,
          u.last_login_at, u.created_at,
-         pr.dob, pr.nationality, pr.avatar_url, pr.bio,
+         pr.dob, pr.nationality, pr.avatar_url, pr.bio, pr.specialties,
          p.budget_amount, p.currency, p.destination,
          p.location_types, p.travel_style
        FROM users u
