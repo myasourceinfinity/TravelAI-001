@@ -13,6 +13,7 @@ const AgentDashboard     = lazy(() => import('./components/dashboard/AgentDashbo
 const AgentProfilePage   = lazy(() => import('./components/dashboard/AgentProfilePage'));
 const AdminDashboard     = lazy(() => import('./components/admin/AdminDashboard'));
 const AgentsList         = lazy(() => import('./components/agents/AgentsList'));
+const AgentDetailPublic  = lazy(() => import('./components/agents/AgentDetailPublic'));
 const PlanTripWithTravelAI = lazy(() => import('./components/trips/PlanTripWithTravelAI'));
 const TripDetailPage        = lazy(() => import('./components/trips/TripDetailPage'));
 const MyTrips               = lazy(() => import('./components/trips/MyTrips'));
@@ -92,6 +93,7 @@ export default function App() {
               <PrivateRoute><MyTrips /></PrivateRoute>
             } />
             <Route path="/agents" element={<AgentsList />} />
+            <Route path="/agents/:id" element={<AgentDetailPublic />} />
             <Route path="/admin" element={
               <AdminRoute><AdminDashboard /></AdminRoute>
             } />
