@@ -428,8 +428,7 @@ export default function MyTrips() {
                                         <tr>
                                           <th>Destination</th>
                                           <th>Country</th>
-                                          <th>Highlights</th>
-                                          <th>Activities (Bookme Deals)</th>
+                                          <th>AI Highlights</th>
                                         </tr>
                                       </thead>
                                       <tbody>
@@ -443,28 +442,13 @@ export default function MyTrips() {
                                             </td>
                                             <td className="text-muted text-sm" style={{ whiteSpace: 'nowrap' }}>{dest.country}</td>
                                             <td className="text-sm text-secondary">
-                                              {dest.highlights && dest.highlights.length > 0 ? dest.highlights.join(' • ') : '—'}
-                                            </td>
-                                            <td>
-                                              {dest.bookmeDeals && dest.bookmeDeals.length > 0 ? (
-                                                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', maxWidth: '300px' }}>
-                                                  {dest.bookmeDeals.map((deal, i) => (
-                                                    <a key={i} href={deal.link} target="_blank" rel="noreferrer" title={deal.title}
-                                                      style={{ minWidth: '120px', background: 'var(--bg-800)', borderRadius: '4px', padding: '6px', textDecoration: 'none', border: '1px solid var(--glass-border)' }}
-                                                    >
-                                                      <div className="text-xs font-medium" style={{ color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '2px' }}>
-                                                        {deal.title}
-                                                      </div>
-                                                      <div className="text-xs" style={{ color: 'var(--brand-400)', display: 'flex', justifyContent: 'space-between' }}>
-                                                        <span>{deal.price}</span>
-                                                        {deal.discount && <span style={{ color: 'var(--brand-500)', fontSize: '0.65rem' }}>{deal.discount}</span>}
-                                                      </div>
-                                                    </a>
-                                                  ))}
-                                                </div>
-                                              ) : (
-                                                <span className="text-xs text-muted">No activities found</span>
-                                              )}
+                                              {dest.highlights && dest.highlights.length > 0
+                                                ? dest.highlights.map((h, i) => (
+                                                    <span key={i} style={{ display: 'inline-block', marginRight: 6 }}>
+                                                      <span style={{ color: '#818cf8', fontSize: 10, marginRight: 3 }}>✦</span>{h}
+                                                    </span>
+                                                  ))
+                                                : <span style={{ color: '#64748b' }}>—</span>}
                                             </td>
                                           </tr>
                                         ))}

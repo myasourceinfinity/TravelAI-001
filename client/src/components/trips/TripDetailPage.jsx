@@ -257,78 +257,22 @@ export default function TripDetailPage() {
                         border: `1px solid ${COLOURS[idx % COLOURS.length]}44`,
                       }}>Stop {idx + 1}</span>
                     </div>
-                    {dest.highlights?.length > 0 && (
-                      <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-secondary, #94a3b8)' }}>
-                        {dest.highlights.join(' • ')}
-                      </p>
-                    )}
                   </div>
                 </div>
 
-                {/* Bookme deals */}
-                {dest.bookmeDeals?.length > 0 && (
-                  <div>
-                    <p style={{ fontSize: 11, color: 'var(--text-secondary, #94a3b8)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Activities &amp; Deals
+                {/* AI Highlights (replaces old Bookme deals) */}
+                {dest.highlights?.length > 0 && (
+                  <div style={{ marginTop: 12 }}>
+                    <p style={{ fontSize: 11, color: 'var(--text-secondary, #94a3b8)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                      🤖 AI Highlights
                     </p>
-                    <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
-                      {dest.bookmeDeals.map((deal, i) => {
-                        const rating = (3.5 + Math.random() * 1.5).toFixed(1);
-                        const reviews = Math.floor(50 + Math.random() * 200);
-                        const spaces = Math.floor(5 + Math.random() * 20);
-                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        const m1 = months[Math.floor(Math.random() * 6)];
-                        const m2 = months[6 + Math.floor(Math.random() * 6)];
-                        const savingsStr = deal.discount ? `Save ${deal.discount}` : 'Great Value';
-                        return (
-                          <a
-                            key={i}
-                            href={deal.link}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={e => e.stopPropagation()}
-                            className="bookme-deal-card-new"
-                            style={{ minWidth: 200, flexShrink: 0 }}
-                          >
-                            <div className="bookme-deal-header-new">
-                              <h5 className="bookme-deal-title-new">{deal.title}</h5>
-                              <div className="bookme-deal-reviews-new">
-                                <span className="bookme-stars">★★★★★</span> {rating} / {reviews} Reviews
-                              </div>
-                            </div>
-                            {deal.image && (
-                              <div className="bookme-deal-image-new" style={{ backgroundImage: `url(${deal.image})` }} />
-                            )}
-                            <div className="bookme-deal-body-new">
-                              <div className="bookme-deal-dates">
-                                <p>Best between: {m1}–{m2}</p>
-                                <p className="tap-through">Tap through for more</p>
-                              </div>
-                              <div className="bookme-deal-footer-new">
-                                <div className="bookme-deal-badges-new">
-                                  {deal.discount && (
-                                    <div className="bookme-badge-orange">
-                                      <span>Available from</span>
-                                      <strong>{deal.discount}</strong>
-                                    </div>
-                                  )}
-                                  <div className="bookme-badge-spaces">
-                                    <strong>{spaces}+</strong>
-                                    <span>Spaces</span>
-                                  </div>
-                                </div>
-                                <div className="bookme-deal-pricing-new">
-                                  <div className="price-main">
-                                    <span className="from-text">From:</span>
-                                    <span className="price-value">{deal.price?.replace('From ', '')}</span>
-                                  </div>
-                                  <div className="save-text">{savingsStr}</div>
-                                </div>
-                              </div>
-                            </div>
-                          </a>
-                        );
-                      })}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {dest.highlights.map((h, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.5 }}>
+                          <span style={{ color: '#818cf8', fontSize: 10, marginTop: 4, flexShrink: 0 }}>✦</span>
+                          <span>{h}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

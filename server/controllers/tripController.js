@@ -831,18 +831,7 @@ const chatWithAI = async (req, res) => {
       );
     }
 
-    // If ready to plan, scrape Bookme deals for destinations
-    if (result.readyToPlan && result.plan && result.plan.destinations && Array.isArray(result.plan.destinations)) {
-      console.log('[chatWithAI] Fetching Bookme deals for destinations...');
-      await Promise.all(result.plan.destinations.map(async (destinationObj) => {
-        if (destinationObj.name) {
-          const deals = await scrapeBookmeDeals(destinationObj.name);
-          if (deals && deals.length > 0) {
-            destinationObj.bookmeDeals = deals;
-          }
-        }
-      }));
-    }
+    // bookmeDeals scraping removed — UI now shows AI highlights + live Booking.com prices instead
 
     return res.status(200).json(result);
   } catch (err) {
