@@ -301,6 +301,7 @@ function DestinationCard({ dest, onRemove, agentPkg, bookingData, selectedFlight
           ⚠️ Live flights &amp; hotels unavailable for {dest.name} right now — you can still save this itinerary.
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -660,6 +661,114 @@ export default function PlanTripWithTravelAI() {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* ✨ Itinerary panel — appears inside chat panel when plan is ready */}
+          {readyToPlan && plan && (
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(15,23,42,0.5)', maxHeight: '52vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem' }}>
+
+              {/* Header row */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, flexShrink: 0 }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: '#38bdf8' }}>✨ Your Itinerary</h3>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {loadingPkgs && (
+                    <span style={{ fontSize: '0.68rem', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span className="spinner" style={{ width: 10, height: 10 }} /> packages...
+                    </span>
+                  )}
+                  {!bookingSearched ? (
+                    <button
+                      onClick={() => triggerBookingSearch(plan, preferences)}
+                      style={{ fontSize: '0.7rem', fontWeight: 700, color: '#0f172a', background: '#38bdf8', border: 'none', padding: '4px 12px', borderRadius: 20, cursor: 'pointer' }}
+                    >
+                      ✈️ Find Flights &amp; Hotels
+                    </button>
+                  ) : Object.values(bookingResults).includes('loading') ? (
+                    <span style={{ fontSize: '0.68rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span className="spinner" style={{ width: 10, height: 10 }} /> Searching...
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '0.68rem', color: '#34d399', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', padding: '2px 10px', borderRadius: 20 }}>
+                      ✈️ Loaded
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Plan summary */}
+              <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0, lineHeight: 1.5, flexShrink: 0 }}>{plan.summary}</p>
+
+              {/* Cost summary bar */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '7px 10px', borderRadius: 8, background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 7px', borderRadius: 20, textTransform: 'capitalize', background: BUDGET_COLORS[plan.budgetLevel]?.bg || 'rgba(251,191,36,0.8)', color: BUDGET_COLORS[plan.budgetLevel]?.text || '#78350f' }}>
+                    {plan.budgetLevel}
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                    {plan.days || preferences.days || '?'}d · {plan.travelers || preferences.travelers || 1} traveller{(plan.travelers || preferences.travelers || 1) !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.6rem', color: '#64748b' }}>Est. per person</div>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#38bdf8' }}>
+                    NZD {(plan.destinations?.reduce((s, d) => s + (d.estimatedPrice?.total || 0), 0) || 0).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Destination cards */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {allDestCards.map(({ dest, agentPkg }) => (
+                  <DestinationCard
+                    key={dest.id}
+                    dest={dest}
+                    agentPkg={agentPkg}
+                    onRemove={removeDestination}
+                    bookingData={bookingResults[dest.name]}
+                    selectedFlight={selectedFlights[dest.id]}
+                    selectedHotel={selectedHotels[dest.id]}
+                    onSelectFlight={handleSelectFlight}
+                    onSelectHotel={handleSelectHotel}
+                    budgetLevel={plan?.budgetLevel || preferences.budgetLevel}
+                  />
+                ))}
+              </div>
+
+              {/* Booking selection summary */}
+              {hasBookingSelections && (
+                <div style={{ background: 'rgba(56,189,248,0.07)', border: '1px solid rgba(56,189,248,0.2)', borderRadius: 8, padding: '8px 12px', fontSize: '0.78rem', flexShrink: 0 }}>
+                  <div style={{ fontWeight: 600, color: '#38bdf8', marginBottom: 5 }}>Selection summary</div>
+                  {selectedComponents.map((c, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', color: '#e2e8f0', marginBottom: 2 }}>
+                      <span>{c.componentType === 'flight' ? '✈️' : '🏨'} {c.title}</span>
+                      <span style={{ color: '#34d399', fontWeight: 700 }}>NZD ${c.pricePerPerson?.toFixed(0)}</span>
+                    </div>
+                  ))}
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 6, paddingTop: 6, display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+                    <span style={{ color: '#f8fafc' }}>Total · {preferences.travelers || 1} traveller{preferences.travelers > 1 ? 's' : ''}</span>
+                    <span style={{ color: '#38bdf8' }}>NZD ${totalAll?.toFixed(0)}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Save bar */}
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0, paddingTop: 4 }}>
+                <input
+                  type="text"
+                  placeholder="Itinerary name (optional)"
+                  value={tripTitle}
+                  onChange={e => setTripTitle(e.target.value)}
+                  style={{ flex: 1, background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '0.45rem 0.75rem', color: 'white', fontSize: '0.78rem', outline: 'none' }}
+                />
+                <button
+                  onClick={handleSaveTrip}
+                  disabled={isSaving || saveSuccess || allDestCards.length === 0}
+                  style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: 'white', fontWeight: 700, fontSize: '0.78rem', padding: '0.45rem 1rem', borderRadius: 8, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                >
+                  {isSaving ? 'Saving...' : saveSuccess ? 'Saved! ✓' : '💾 Save'}
+                </button>
+              </div>
+            </div>
+          )}
+
           {error && (
             <div style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', borderTop: '1px solid rgba(239,68,68,0.2)', padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
               ⚠️ {error}
@@ -729,120 +838,12 @@ export default function PlanTripWithTravelAI() {
             </div>
           </div>
 
-          {/* Itinerary Panel */}
-          {readyToPlan && plan ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, minWidth: 0 }}>
-              <div style={{ padding: '1.25rem', background: '#1e293b', borderRadius: 16, border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '1rem', boxShadow: '0 8px 32px rgba(0,0,0,0.24)', minWidth: 0 }}>
-
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: '#38bdf8' }}>✨ Your Itinerary</h3>
-                  {!bookingSearched && (
-                    <button
-                      onClick={() => triggerBookingSearch(plan, preferences)}
-                      style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a', background: '#38bdf8', border: 'none', padding: '5px 12px', borderRadius: 20, cursor: 'pointer' }}
-                    >
-                      ✈️ Find Flights &amp; Hotels
-                    </button>
-                  )}
-                  {bookingSearched && !Object.values(bookingResults).includes('loading') && (
-                    <span style={{ fontSize: '0.72rem', color: '#34d399', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', padding: '2px 10px', borderRadius: 20 }}>
-                      ✈️ Flights &amp; hotels loaded
-                    </span>
-                  )}
-                </div>
-
-                <p style={{ fontSize: '0.85rem', color: '#e2e8f0', margin: 0, lineHeight: 1.5 }}>{plan.summary}</p>
-
-                {loadingPkgs && (
-                  <div style={{ fontSize: '0.75rem', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span className="spinner" style={{ width: 12, height: 12 }} /> Searching agent packages...
-                  </div>
-                )}
-
-                {/* ── Trip cost summary ── */}
-                {plan && (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '8px 10px', borderRadius: 8, background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                    <div style={{ display: 'flex', align: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span style={{
-                        fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: 20, textTransform: 'capitalize',
-                        background: BUDGET_COLORS[plan.budgetLevel]?.bg || 'rgba(251,191,36,0.8)',
-                        color: BUDGET_COLORS[plan.budgetLevel]?.text || '#78350f',
-                      }}>
-                        {plan.budgetLevel}
-                      </span>
-                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                        {plan.days || preferences.days || '?'} days · {plan.travelers || preferences.travelers || 1} traveller{(plan.travelers || preferences.travelers || 1) > 1 ? 's' : ''}
-                      </span>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Est. total per person</div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#38bdf8' }}>
-                        NZD {(
-                          plan.destinations?.reduce((sum, d) => sum + (d.estimatedPrice?.total || 0), 0) || 0
-                        ).toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div style={{ maxHeight: '50vh', overflowY: 'auto', paddingRight: 4, minWidth: 0, width: '100%' }}>
-                  {allDestCards.map(({ dest, agentPkg }) => (
-                    <DestinationCard
-                      key={dest.id}
-                      dest={dest}
-                      agentPkg={agentPkg}
-                      onRemove={removeDestination}
-                      bookingData={bookingResults[dest.name]}
-                      selectedFlight={selectedFlights[dest.id]}
-                      selectedHotel={selectedHotels[dest.id]}
-                      onSelectFlight={handleSelectFlight}
-                      onSelectHotel={handleSelectHotel}
-                      budgetLevel={plan?.budgetLevel || preferences.budgetLevel}
-                    />
-                  ))}
-                </div>
-
-                {/* Booking summary */}
-                {hasBookingSelections && (
-                  <div style={{ background: 'rgba(56,189,248,0.07)', border: '1px solid rgba(56,189,248,0.25)', borderRadius: 10, padding: '10px 14px', fontSize: '0.8rem' }}>
-                    <div style={{ fontWeight: 600, color: '#38bdf8', marginBottom: 6 }}>Your selection summary:</div>
-                    {selectedComponents.map((c, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', color: '#e2e8f0', marginBottom: 3 }}>
-                        <span>{c.componentType === 'flight' ? '✈️' : '🏨'} {c.title}</span>
-                        <span style={{ color: '#34d399', fontWeight: 700 }}>NZD ${c.pricePerPerson?.toFixed(0)}</span>
-                      </div>
-                    ))}
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 8, paddingTop: 8, display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
-                      <span style={{ color: '#f8fafc' }}>Total for {preferences.travelers || 1} traveler{preferences.travelers > 1 ? 's' : ''} (flights &amp; hotels)</span>
-                      <span style={{ color: '#38bdf8', fontSize: '0.95rem' }}>NZD ${totalAll?.toFixed(0)}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Save bar */}
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1rem', display: 'flex', gap: 10 }}>
-                  <input
-                    type="text"
-                    placeholder="Itinerary Name (Optional)"
-                    value={tripTitle}
-                    onChange={e => setTripTitle(e.target.value)}
-                    style={{ flex: 1, background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '0.5rem 0.75rem', color: 'white', fontSize: '0.8rem' }}
-                  />
-                  <button
-                    onClick={handleSaveTrip}
-                    disabled={isSaving || saveSuccess || allDestCards.length === 0}
-                    style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: 'white', fontWeight: 600, fontSize: '0.8rem', padding: '0.5rem 1rem', borderRadius: 8, border: 'none', cursor: 'pointer' }}
-                  >
-                    {isSaving ? 'Saving...' : saveSuccess ? 'Saved! ✓' : 'Save Itinerary'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 180, background: '#1e293b', borderRadius: 16, border: '1px dashed rgba(255,255,255,0.2)', padding: '1.5rem', textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.24)' }}>
-              <span style={{ fontSize: '2rem', marginBottom: 8 }}>💬</span>
-              <span style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 500, lineHeight: 1.4 }}>Chat with the consultant to design your itinerary!</span>
-              <span style={{ fontSize: '0.75rem', color: '#cbd5e1', marginTop: 4 }}>Your live recommendations will appear here.</span>
+          {/* Itinerary moved into chat panel — shown below messages when readyToPlan */}
+          {!readyToPlan && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 160, background: '#1e293b', borderRadius: 16, border: '1px dashed rgba(255,255,255,0.2)', padding: '1.5rem', textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.24)' }}>
+              <span style={{ fontSize: '1.8rem', marginBottom: 8 }}>💬</span>
+              <span style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 500, lineHeight: 1.4 }}>Your itinerary will appear in the chat once the plan is ready.</span>
+              <span style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: 4 }}>Keep chatting with TravelAI →</span>
             </div>
           )}
         </div>
