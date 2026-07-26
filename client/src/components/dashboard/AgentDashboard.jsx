@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getProfile, updateProfile } from '../../services/authService';
-import { getAgentPackages, createSinglePackage, validateBulkPackages, confirmBulkPackages, updateSinglePackage } from '../../services/tripService';
+import { getAgentPackages, createSinglePackage, updateSinglePackage } from '../../services/tripService';
 import Navbar from '../common/Navbar';
+import BulkPackageUpload from '../common/BulkPackageUpload';
 
 const COMPONENT_META = {
   flight: { icon: '✈️', label: 'Flight', colour: '#0284c7' },
@@ -198,15 +199,6 @@ export default function AgentDashboard() {
   const [pkgSuccess, setPkgSuccess] = useState(null);
   const [pkgValidationErrors, setPkgValidationErrors] = useState([]);
 
-  // Bulk Upload states
-  const [bulkFile, setBulkFile] = useState(null);
-  const [bulkLoading, setBulkLoading] = useState(false);
-  const [bulkError, setBulkError] = useState(null);
-  const [bulkSuccess, setBulkSuccess] = useState(null);
-  const [bulkValidationErrors, setBulkValidationErrors] = useState([]);
-  const [bulkParsedPackages, setBulkParsedPackages] = useState([]);
-  const [bulkPreviewMode, setBulkPreviewMode] = useState(false);
-  const [bulkOverwrite, setBulkOverwrite] = useState(false);
   const [editingPkgId, setEditingPkgId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -357,87 +349,6 @@ export default function AgentDashboard() {
     setPkgError(null);
     setPkgSuccess(null);
     setActiveTab('packages');
-  }
-
-
-  function handleFileChange(e) {
-    setBulkFile(e.target.files[0]);
-    setBulkError(null);
-    setBulkSuccess(null);
-    setBulkValidationErrors([]);
-  }
-
-  async function handleBulkSubmit(e) {
-    e.preventDefault();
-    if (!bulkFile) {
-      setBulkError('Please select a file first.');
-      return;
-    }
-    setBulkLoading(true);
-    setBulkError(null);
-    setBulkSuccess(null);
-    setBulkValidationErrors([]);
-    setBulkParsedPackages([]);
-    try {
-      const res = await validateBulkPackages(accessToken, bulkFile, bulkOverwrite);
-      setBulkParsedPackages(res.packages || []);
-      setBulkPreviewMode(true);
-      if (res.invalidCount > 0) {
-        setBulkError(`Validation failed on ${res.invalidCount} packages. Please review the errors before confirming.`);
-      }
-    } catch (err) {
-      if (err.details && Array.isArray(err.details)) {
-        setBulkValidationErrors(err.details);
-      } else {
-        setBulkError(err.message || 'Bulk validation failed.');
-      }
-    } finally {
-      setBulkLoading(false);
-    }
-  }
-
-  async function handleConfirmImport() {
-    setBulkLoading(true);
-    setBulkError(null);
-    setBulkSuccess(null);
-    try {
-      const validPackages = bulkParsedPackages
-        .filter(p => p.isValid)
-        .map(p => p.data);
-
-      if (validPackages.length === 0) {
-        setBulkError('No valid packages found to import.');
-        return;
-      }
-
-      const res = await confirmBulkPackages(accessToken, validPackages, bulkOverwrite);
-      setBulkSuccess(res.message || 'Import confirmed successfully!');
-      setBulkFile(null);
-      setBulkParsedPackages([]);
-      setBulkPreviewMode(false);
-      setBulkOverwrite(false);
-      
-      const fileInput = document.getElementById('bulk-file-input');
-      if (fileInput) fileInput.value = '';
-      
-      const packagesData = await getAgentPackages(accessToken);
-      setPackages(packagesData.packages || []);
-    } catch (err) {
-      setBulkError(err.message || 'Failed to confirm import.');
-    } finally {
-      setBulkLoading(false);
-    }
-  }
-
-  function handleCancelImport() {
-    setBulkFile(null);
-    setBulkParsedPackages([]);
-    setBulkPreviewMode(false);
-    setBulkOverwrite(false);
-    setBulkError(null);
-    setBulkSuccess(null);
-    const fileInput = document.getElementById('bulk-file-input');
-    if (fileInput) fileInput.value = '';
   }
 
 
@@ -820,157 +731,12 @@ export default function AgentDashboard() {
             )}
 
             {activeTab === 'bulk' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  📥 Bulk Import Agent Packages
-                  {bulkPreviewMode && <span style={{ fontSize: '0.75rem', background: '#e0e7ff', color: '#4f46e5', padding: '2px 8px', borderRadius: 12 }}>Preview Mode</span>}
-                </h2>
-                <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>
-                  {!bulkPreviewMode 
-                    ? "Upload a file (.csv, .xlsx, or .txt) matching the system schema to preview, validate, and import multiple packages."
-                    : "Review the parsed packages below. Valid records can be successfully committed to the database."}
-                </p>
-
-                {bulkError && (
-                  <div style={{ padding: '12px 16px', borderRadius: 8, background: '#fee2e2', color: '#991b1b', fontSize: '0.85rem' }}>
-                    ⚠️ {bulkError}
-                  </div>
-                )}
-                {bulkSuccess && (
-                  <div style={{ padding: '12px 16px', borderRadius: 8, background: '#d1fae5', color: '#065f46', fontSize: '0.85rem' }}>
-                    ✅ {bulkSuccess}
-                  </div>
-                )}
-
-                {!bulkPreviewMode ? (
-                  <form onSubmit={handleBulkSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    <div style={{ border: '2px dashed rgba(15,23,42,0.15)', borderRadius: 12, padding: '24px', textAlign: 'center', background: '#f8fafc' }}>
-                      <span style={{ fontSize: '2rem', display: 'block', marginBottom: 8 }}>📁</span>
-                      <input
-                        type="file"
-                        id="bulk-file-input"
-                        accept=".csv,.xlsx,.txt"
-                        onChange={handleFileChange}
-                        style={{ display: 'block', margin: '0 auto' }}
-                      />
-                      <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginTop: 8 }}>
-                        Supported extensions: .csv, .xlsx, .txt (Tab/comma delimited)
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 4px' }}>
-                      <input
-                        type="checkbox"
-                        id="bulk-overwrite-input"
-                        checked={bulkOverwrite}
-                        onChange={(e) => setBulkOverwrite(e.target.checked)}
-                        style={{ cursor: 'pointer', width: 16, height: 16 }}
-                      />
-                      <label htmlFor="bulk-overwrite-input" style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 600, cursor: 'pointer' }}>
-                        🔄 Overwrite / Edit existing packages with matching names
-                      </label>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={bulkLoading || !bulkFile}
-                      style={{
-                        padding: '12px',
-                        background: bulkFile ? 'linear-gradient(135deg, #059669, #10b981)' : '#94a3b8',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: 8,
-                        fontWeight: 'bold',
-                        cursor: bulkFile ? 'pointer' : 'default',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      {bulkLoading ? 'Uploading and validating...' : 'Upload & Validate Preview'}
-                    </button>
-                  </form>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid rgba(15,23,42,0.05)', display: 'flex', justifyContent: 'space-around', fontSize: '0.85rem', color: '#1e293b' }}>
-                      <div>Total Rows: <strong style={{ color: '#0f172a' }}>{bulkParsedPackages.length}</strong></div>
-                      <div style={{ color: '#10b981' }}>Valid: <strong>{bulkParsedPackages.filter(p => p.isValid).length}</strong></div>
-                      <div style={{ color: '#ef4444' }}>Invalid: <strong>{bulkParsedPackages.filter(p => !p.isValid).length}</strong></div>
-                    </div>
-
-                    <div style={{ overflowX: 'auto', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 10 }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left', color: '#1e293b' }}>
-                        <thead>
-                          <tr style={{ background: '#f1f5f9', borderBottom: '1px solid rgba(15,23,42,0.08)' }}>
-                            <th style={{ padding: '10px 12px', fontWeight: 'bold', color: '#475569' }}>Row</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 'bold', color: '#475569' }}>Status</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 'bold', color: '#475569' }}>Package Name</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 'bold', color: '#475569' }}>Destination</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 'bold', color: '#475569' }}>Price</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 'bold', color: '#475569' }}>Duration</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 'bold', color: '#475569' }}>Errors</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {bulkParsedPackages.map((row, idx) => (
-                            <tr key={idx} style={{ borderBottom: '1px solid rgba(15,23,42,0.05)', background: row.isValid ? '#ffffff' : '#fef2f2' }}>
-                              <td style={{ padding: '10px 12px', fontWeight: 'bold', color: '#0f172a' }}>{row.rowNumber}</td>
-                              <td style={{ padding: '10px 12px' }}>
-                                <span style={{ padding: '2px 6px', borderRadius: 4, fontSize: '0.7rem', fontWeight: 'bold', background: row.isValid ? '#d1fae5' : '#fee2e2', color: row.isValid ? '#065f46' : '#991b1b' }}>
-                                  {row.isValid ? 'VALID' : 'INVALID'}
-                                </span>
-                                {row.isValid && row.data?.isUpdate && (
-                                  <span style={{ padding: '2px 6px', borderRadius: 4, fontSize: '0.7rem', fontWeight: 'bold', background: '#e0f2fe', color: '#0369a1', marginLeft: 6 }}>
-                                    UPDATE
-                                  </span>
-                                )}
-                              </td>
-                              <td style={{ padding: '10px 12px', fontWeight: 600, color: '#0f172a' }}>{row.data?.package_name || '(Untitled)'}</td>
-                              <td style={{ padding: '10px 12px', color: '#334155' }}>{row.data?.destination_name || 'N/A'}</td>
-                              <td style={{ padding: '10px 12px', color: '#10b981', fontWeight: 600 }}>{row.data?.currency_code} {row.data?.base_price}</td>
-                              <td style={{ padding: '10px 12px', color: '#334155' }}>{row.data?.duration_days}d / {row.data?.duration_nights}n</td>
-                              <td style={{ padding: '10px 12px', color: '#ef4444' }}>
-                                {row.errors.length > 0 ? (
-                                  <ul style={{ margin: 0, paddingLeft: 14 }}>
-                                    {row.errors.map((e, eidx) => <li key={eidx}>{e}</li>)}
-                                  </ul>
-                                ) : (
-                                  <span style={{ color: '#10b981' }}>None</span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-                      <button 
-                        type="button" 
-                        onClick={handleCancelImport} 
-                        style={{ flex: 1, padding: '12px', background: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: 'pointer' }}
-                      >
-                        Cancel / Upload New
-                      </button>
-                      <button 
-                        type="button" 
-                        onClick={handleConfirmImport} 
-                        disabled={bulkLoading || bulkParsedPackages.filter(p => p.isValid).length === 0} 
-                        style={{ 
-                          flex: 2, 
-                          padding: '12px', 
-                          background: bulkParsedPackages.filter(p => p.isValid).length > 0 ? 'linear-gradient(135deg, #059669, #10b981)' : '#94a3b8', 
-                          color: 'white', 
-                          border: 'none', 
-                          borderRadius: 8, 
-                          fontWeight: 'bold', 
-                          cursor: bulkParsedPackages.filter(p => p.isValid).length > 0 ? 'pointer' : 'default' 
-                        }}
-                      >
-                        {bulkLoading ? 'Confirming...' : `Confirm Import (${bulkParsedPackages.filter(p => p.isValid).length} Valid Packages)`}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <BulkPackageUpload
+                token={accessToken}
+                mode="agent"
+                providerId={profile?.profile_id}
+                onImportSuccess={fetchProfileAndPackages}
+              />
             )}
 
 

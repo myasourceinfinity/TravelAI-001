@@ -4,6 +4,7 @@ import { getAdminStats } from '../../services/adminService';
 import Navbar              from '../common/Navbar';
 import AdminAgentsList     from './AdminAgentsList';
 import AdminAuditLogTable  from './AdminAuditLogTable';
+import BulkPackageUpload   from '../common/BulkPackageUpload';
 
 function StatCard({ label, value, sub, color, bg, icon, onClick, isActive }) {
   return (
@@ -145,6 +146,7 @@ export default function AdminDashboard() {
             {navBtn('agents',    '🧑‍💼  Agents')}
             {navBtn('audit',     '📋  Audit Logs')}
             {navBtn('analytics', '📊  Analytics')}
+            {navBtn('bulk',      '📥  Bulk Import')}
           </div>
 
           {/* Content */}
@@ -165,6 +167,14 @@ export default function AdminDashboard() {
                 token={accessToken}
                 eventTypeFilter={auditFilter.eventType}
                 onFilterChange={() => setActiveCard(null)}
+              />
+            )}
+
+            {activeTab === 'bulk' && (
+              <BulkPackageUpload
+                token={accessToken}
+                mode="admin"
+                onImportSuccess={fetchStats}
               />
             )}
 

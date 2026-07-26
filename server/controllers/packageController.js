@@ -279,6 +279,12 @@ const parseAndValidateBulkPackages = async (req, res) => {
 
   const overwrite = req.body.overwrite === 'true' || req.query.overwrite === 'true' || req.body.overwrite === true;
 
+  // Admin can supply overrideProviderId to import packages on behalf of a specific agent
+  const ADMIN_ROLES = new Set(['admin', 'superadmin', 'useradmin']);
+  const overrideProviderId = ADMIN_ROLES.has(req.user.role_type) && req.body.overrideProviderId
+    ? Number(req.body.overrideProviderId)
+    : null;
+
   let rows = [];
   try {
     const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
@@ -304,6 +310,9 @@ const parseAndValidateBulkPackages = async (req, res) => {
       const rowIndex = i + 2; // Excel-style row number
       const rawRow = normalizeRow(rows[i]);
       const pkg = castRow(rawRow);
+
+      // Admin override: replace provider_id in every row with the selected agent
+      if (overrideProviderId) pkg.provider_id = overrideProviderId;
 
       const errors = validatePackage(pkg);
 

@@ -2,24 +2,39 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import '../home/HomePage.css';
 
-// ── Custom inline SVG Logo matching prototype ────────────────────────────────
+// ── Logo using the official TravelAI brand image ────────────────────────────────────────────
+// Place the logo file at: client/public/logo.png
 const Logo = () => (
-  <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-    <div style={{
-      width: '32px',
-      height: '32px',
-      borderRadius: '8px',
-      background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      boxShadow: '0 4px 10px rgba(79, 70, 229, 0.25)'
-    }}>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21 3L3 10.5L11.25 12.75L13.5 21L21 3Z" fill="white" stroke="white" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+  <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+    <img
+      src="/logo.png"
+      alt="Travel AI"
+      style={{
+        height: '40px',
+        width: 'auto',
+        objectFit: 'contain',
+        display: 'block',
+      }}
+      onError={e => {
+        // Fallback to text logo if image not found
+        e.target.style.display = 'none';
+        e.target.nextSibling.style.display = 'flex';
+      }}
+    />
+    {/* Fallback text logo (shown only if image fails to load) */}
+    <div style={{ display: 'none', alignItems: 'center', gap: '10px' }}>
+      <div style={{
+        width: '32px', height: '32px', borderRadius: '8px',
+        background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 4px 10px rgba(79, 70, 229, 0.25)'
+      }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M21 3L3 10.5L11.25 12.75L13.5 21L21 3Z" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+      <span style={{ fontWeight: '800', fontSize: '1.25rem', color: '#0f172a', fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.01em' }}>Travel AI</span>
     </div>
-    <span style={{ fontWeight: '800', fontSize: '1.25rem', color: '#0f172a', fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.01em' }}>Travel AI</span>
   </Link>
 );
 

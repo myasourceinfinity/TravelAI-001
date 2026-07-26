@@ -130,10 +130,11 @@ export function createSinglePackage(token, packageData) {
   });
 }
 
-export async function validateBulkPackages(token, file, overwrite = false) {
+export async function validateBulkPackages(token, file, overwrite = false, targetProviderId = null) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('overwrite', overwrite ? 'true' : 'false');
+  if (targetProviderId) formData.append('overrideProviderId', String(targetProviderId));
 
   const res = await fetch(`${BASE_URL}/packages/bulk/validate`, {
     method: 'POST',
