@@ -665,29 +665,23 @@ export default function PlanTripWithTravelAI() {
           {readyToPlan && plan && (
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(15,23,42,0.5)', maxHeight: '52vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem' }}>
 
-              {/* Header row */}
+              {/* Header row — title + neutral status only */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, flexShrink: 0 }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: '#38bdf8' }}>✨ Your Itinerary</h3>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   {loadingPkgs && (
                     <span style={{ fontSize: '0.68rem', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <span className="spinner" style={{ width: 10, height: 10 }} /> packages...
                     </span>
                   )}
-                  {!bookingSearched ? (
-                    <button
-                      onClick={() => triggerBookingSearch(plan, preferences)}
-                      style={{ fontSize: '0.7rem', fontWeight: 700, color: '#0f172a', background: '#38bdf8', border: 'none', padding: '4px 12px', borderRadius: 20, cursor: 'pointer' }}
-                    >
-                      ✈️ Find Flights &amp; Hotels
-                    </button>
-                  ) : Object.values(bookingResults).includes('loading') ? (
+                  {bookingSearched && Object.values(bookingResults).includes('loading') && (
                     <span style={{ fontSize: '0.68rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span className="spinner" style={{ width: 10, height: 10 }} /> Searching...
+                      <span className="spinner" style={{ width: 10, height: 10 }} /> Searching prices...
                     </span>
-                  ) : (
+                  )}
+                  {bookingSearched && !Object.values(bookingResults).includes('loading') && (
                     <span style={{ fontSize: '0.68rem', color: '#34d399', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', padding: '2px 10px', borderRadius: 20 }}>
-                      ✈️ Loaded
+                      ✅ Prices loaded
                     </span>
                   )}
                 </div>
@@ -731,6 +725,23 @@ export default function PlanTripWithTravelAI() {
                   />
                 ))}
               </div>
+
+              {/* Find Flights & Hotels CTA — after destinations so user reviews the plan first */}
+              {!bookingSearched && (
+                <button
+                  onClick={() => triggerBookingSearch(plan, preferences)}
+                  style={{
+                    width: '100%', padding: '12px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #0369a1, #38bdf8)',
+                    color: 'white', fontWeight: 700, fontSize: '0.85rem',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    boxShadow: '0 4px 16px rgba(56,189,248,0.25)',
+                    flexShrink: 0,
+                  }}
+                >
+                  ✈️ Find Live Flights &amp; Hotels for All Destinations
+                </button>
+              )}
 
               {/* Booking selection summary */}
               {hasBookingSelections && (
