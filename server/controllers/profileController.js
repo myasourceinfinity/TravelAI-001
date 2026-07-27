@@ -100,8 +100,8 @@ const updateProfile = async (req, res) => {
         (budget_amount !== '' && budget_amount != null) ? parseFloat(budget_amount) : null,
         currency || null,
         destination || null,
-        location_types ? JSON.stringify(location_types) : null,
-        travel_style ? JSON.stringify(travel_style) : null,
+        location_types ? JSON.stringify(location_types) : '[]',
+        travel_style ? JSON.stringify(travel_style) : '{}',
       ]
     );
 
