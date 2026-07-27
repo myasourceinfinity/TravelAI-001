@@ -373,14 +373,16 @@ const saveTrip = async (req, res) => {
 
     for (let i = 0; i < plan.destinations.length; i++) {
       const dest = plan.destinations[i];
+      const lat = dest.lat != null && dest.lat !== '' && !isNaN(Number(dest.lat)) ? Number(dest.lat) : null;
+      const lng = dest.lng != null && dest.lng !== '' && !isNaN(Number(dest.lng)) ? Number(dest.lng) : null;
       const destValues = [
         tripId,
-        dest.id,
+        dest.id || dest.name.toLowerCase().replace(/\s+/g, '-'),
         dest.name,
-        dest.country,
-        dest.lat,
-        dest.lng,
-        dest.emoji,
+        dest.country || null,
+        lat,
+        lng,
+        dest.emoji || null,
         JSON.stringify(dest.highlights || []),
         JSON.stringify(dest.bookmeDeals || []),
         i

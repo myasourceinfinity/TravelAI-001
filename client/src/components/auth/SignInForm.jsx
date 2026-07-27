@@ -130,7 +130,6 @@ export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
             shape="rectangular"
             text="continue_with"
             size="large"
-            width="100%"
           />
         </div>
 

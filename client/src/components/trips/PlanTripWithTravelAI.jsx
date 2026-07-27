@@ -761,22 +761,30 @@ export default function PlanTripWithTravelAI() {
               )}
 
               {/* Save bar */}
-              <div style={{ display: 'flex', gap: 8, flexShrink: 0, paddingTop: 4 }}>
-                <input
-                  type="text"
-                  placeholder="Itinerary name (optional)"
-                  value={tripTitle}
-                  onChange={e => setTripTitle(e.target.value)}
-                  style={{ flex: 1, background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '0.45rem 0.75rem', color: 'white', fontSize: '0.78rem', outline: 'none' }}
-                />
-                <button
-                  onClick={handleSaveTrip}
-                  disabled={isSaving || saveSuccess || allDestCards.length === 0}
-                  style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: 'white', fontWeight: 700, fontSize: '0.78rem', padding: '0.45rem 1rem', borderRadius: 8, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}
-                >
-                  {isSaving ? 'Saving...' : saveSuccess ? 'Saved! ✓' : '💾 Save'}
-                </button>
-              </div>
+              {bookingSearched && (
+                <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 6, paddingBottom: 4, flexShrink: 0 }}>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (!isSaving && !saveSuccess && allDestCards.length > 0) {
+                        handleSaveTrip();
+                      }
+                    }}
+                    style={{
+                      color: saveSuccess ? '#34d399' : '#38bdf8',
+                      textDecoration: 'underline',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      cursor: (isSaving || saveSuccess || allDestCards.length === 0) ? 'default' : 'pointer',
+                      opacity: (isSaving || allDestCards.length === 0) ? 0.6 : 1,
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {isSaving ? 'Saving your itinerary...' : saveSuccess ? 'Itinerary saved! ✓' : 'Save your itinerary'}
+                  </a>
+                </div>
+              )}
             </div>
           )}
 

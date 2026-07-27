@@ -10,10 +10,11 @@ const Logo = () => (
       src="/logo.png"
       alt="Travel AI"
       style={{
-        height: '40px',
+        height: '140px',
         width: 'auto',
         objectFit: 'contain',
         display: 'block',
+        margin: '-46px -10px',
       }}
       onError={e => {
         // Fallback to text logo if image not found

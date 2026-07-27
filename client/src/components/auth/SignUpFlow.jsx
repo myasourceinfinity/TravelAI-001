@@ -322,7 +322,6 @@ export default function SignUpFlow({ onGoToLogin }) {
           shape="rectangular"
           text="continue_with"
           size="large"
-          width="100%"
         />
       </div>
 
