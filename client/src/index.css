@@ -691,6 +691,7 @@ select.form-input option { background: var(--bg-800); color: var(--text-primary)
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  justify-content: flex-start;
 }
 
 .dashboard-container {

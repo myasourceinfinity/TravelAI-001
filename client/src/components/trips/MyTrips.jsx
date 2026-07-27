@@ -78,22 +78,24 @@ function EditTripPanel({ trip, token, onSave, onCancel }) {
 
   // ── styles ────────────────────────────────────────────────────────────────
   const inputStyle = {
-    background: 'var(--bg-900)',
-    border: '1px solid var(--glass-border)',
-    borderRadius: 6,
-    padding: '6px 10px',
-    color: 'var(--text-main)',
+    background: '#ffffff',
+    border: '1px solid #cbd5e1',
+    borderRadius: 8,
+    padding: '8px 12px',
+    color: '#0f172a',
     fontSize: 13,
     width: '100%',
     boxSizing: 'border-box',
+    outline: 'none',
   };
   const labelStyle = {
     fontSize: 11,
-    color: 'var(--text-secondary, #94a3b8)',
+    color: '#64748b',
     marginBottom: 4,
     display: 'block',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
+    fontWeight: 600,
   };
 
   return (
@@ -163,8 +165,8 @@ function EditTripPanel({ trip, token, onSave, onCancel }) {
 
         {destinations.map((dest, idx) => (
           <div key={dest.id || idx} style={{
-            background: 'var(--bg-900)',
-            border: '1px solid var(--glass-border)',
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
             borderRadius: 10,
             padding: '14px',
           }}>
