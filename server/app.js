@@ -3,32 +3,32 @@
  */
 
 require('dotenv').config();
-const express    = require('express');
-const cors       = require('cors');
+const express = require('express');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 // Import pool to trigger the startup connectivity test
 require('./config/db');
 
-const authRoutes    = require('./routes/authRoutes');
+const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
-const tripRoutes    = require('./routes/tripRoutes');
+const tripRoutes = require('./routes/tripRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
 const packageRoutes = require('./routes/packageRoutes');
-const chatRoutes    = require('./routes/chatRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
-const adminRoutes   = require('./routes/adminRoutes');
-const publicRoutes  = require('./routes/publicRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const publicRoutes = require('./routes/publicRoutes');
 const { requireRole, ADMIN_ROLES } = require('./middleware/requireRole');
 
 
 
-const app  = express();
+const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors({
-  origin:      process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+  origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
   credentials: true,   // required for HttpOnly cookie to be sent
 }));
 app.use(express.json());
@@ -42,7 +42,7 @@ app.use('/api/trips', authMiddleware, tripRoutes);
 app.use('/api/packages', authMiddleware, packageRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
 app.use('/api/booking', authMiddleware, bookingRoutes);
-app.use('/api/admin',  authMiddleware, requireRole(...ADMIN_ROLES), adminRoutes);
+app.use('/api/admin', authMiddleware, requireRole(...ADMIN_ROLES), adminRoutes);
 app.use('/api/public', publicRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
@@ -59,10 +59,20 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Internal server error.' });
 });
 
-// ── Start server ──────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n🚀 AITravelBuddy API running on http://localhost:${PORT}`);
-  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}\n`);
-});
+// // ── Start server ──────────────────────────────────────────────────────────────
+// app.listen(PORT, () => {
+//   console.log(`\n🚀 AITravelBuddy API running on http://localhost:${PORT}`);
+//   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}\n`);
+// });
+
+// module.exports = app;
+
+// ── Start server (Only in local development) ──────────────────────────────────
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 TravelAI API running on http://localhost:${PORT}`);
+    console.log(`   Environment: ${process.env.NODE_ENV || 'development'}\n`);
+  });
+}
 
 module.exports = app;
