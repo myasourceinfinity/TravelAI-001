@@ -10,6 +10,7 @@ import SignUpFlow from './SignUpFlow';
 import SignInForm from './SignInForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
 import ResetPasswordForm from './ResetPasswordForm';
+import travelAILogo from '../../assets/travelai-logo.png';
 
 // ─── Left decorative panel ───────────────────────────────────────────────────
 function LeftPanel({ mode }) {
@@ -44,17 +45,12 @@ function LeftPanel({ mode }) {
       padding: '28px 24px',
     }}>
       {/* ── Logo ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, zIndex: 2 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10, background: '#fff',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-        }}>
-          <span style={{ fontSize: '1.1rem' }}>✈️</span>
-        </div>
-        <span style={{ fontWeight: 700, fontSize: '1rem', color: '#1a1a2a', fontFamily: 'Outfit, sans-serif' }}>
-          Travel AI
-        </span>
+      <div style={{ zIndex: 2 }}>
+        <img
+          src={travelAILogo}
+          alt="Travel AI"
+          style={{ height: 38, width: 'auto', objectFit: 'contain', mixBlendMode: 'multiply' }}
+        />
       </div>
 
       {/* ── Small floating dots (top-right) ── */}

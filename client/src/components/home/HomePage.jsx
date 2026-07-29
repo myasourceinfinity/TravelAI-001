@@ -3,22 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../common/Navbar';
 import './HomePage.css';
+import travelAILogo from '../../assets/travelai-logo.png';
 
 // ── Inline Logo for footer (Navbar has its own) ──────────────────────────────
-const Logo = () => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-    <div style={{
-      width: '32px', height: '32px', borderRadius: '8px',
-      background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxShadow: '0 4px 10px rgba(79, 70, 229, 0.25)'
-    }}>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21 3L3 10.5L11.25 12.75L13.5 21L21 3Z" fill="white" stroke="white" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </div>
-    <span style={{ fontWeight: '800', fontSize: '1.25rem', color: '#0f172a', fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.01em' }}>Travel AI</span>
-  </div>
+
+// ── Logo using real brand image ───────────────────────────────────────────────
+const Logo = ({ height = 40 }) => (
+  <img
+    src={travelAILogo}
+    alt="Travel AI"
+    style={{ height, width: 'auto', objectFit: 'contain', display: 'block' }}
+  />
 );
 
 export default function HomePage() {
@@ -186,7 +181,7 @@ export default function HomePage() {
         <div className="home-footer-grid">
           {/* Brand/logo column */}
           <div className="home-footer-brand-col">
-            <Logo />
+            <Logo height={32} />
             <p className="home-footer-desc">
               Your AI travel companion for unforgettable journeys.
             </p>

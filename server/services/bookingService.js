@@ -146,8 +146,13 @@ function summarizeFlights(raw, maxResults = 5) {
     }
   }
 
-  const seen = new Set();
-  const deduped = [];
+  // Keyed by flight IDENTITY (not price) — airline, times, stops. Booking.com
+  // often returns the same physical flight multiple times as separate fare
+  // buckets (different booking class / refund policy) at different prices.
+  // Since we don't currently surface WHY those prices differ, showing both
+  // just looks like a bug ("same flight, different price?"). Instead we keep
+  // only the CHEAPEST instance of each distinct flight.
+  const seenFlights = new Map(); // dedupeKey -> summarized object
 
   for (const offer of offers) {
     try {
@@ -158,10 +163,15 @@ function summarizeFlights(raw, maxResults = 5) {
       const airline  = legs[0]?.carriersData?.[0]?.name || 'Unknown airline';
       const stops    = legs.length - 1;
 
+      // Return leg — segments[1] exists for round-trip offers
+      const returnSeg  = segments[1] || null;
+      const returnLegs = returnSeg?.legs || [];
+
       const summarized = {
         airline,
         price:            price.units != null ? parseFloat(price.units) : null,
         currency:         price.currencyCode || 'NZD',
+        // ── Outbound leg ──
         departure_time:   firstSeg.departureTime,
         arrival_time:     firstSeg.arrivalTime,
         origin_code:      firstSeg.departureAirport?.code || '',
@@ -169,20 +179,28 @@ function summarizeFlights(raw, maxResults = 5) {
         stops,
         is_direct:        stops === 0,
         duration_minutes: firstSeg.totalTime ? Math.floor(firstSeg.totalTime / 60) : null,
+        // ── Return leg (null for one-way) ──
+        return_departure_time:   returnSeg?.departureTime   || null,
+        return_arrival_time:     returnSeg?.arrivalTime     || null,
+        return_origin_code:      returnSeg?.departureAirport?.code || '',
+        return_destination_code: returnSeg?.arrivalAirport?.code  || '',
+        return_stops:            returnLegs.length > 1 ? returnLegs.length - 1 : 0,
+        return_is_direct:        returnLegs.length <= 1,
+        return_duration_minutes: returnSeg?.totalTime ? Math.floor(returnSeg.totalTime / 60) : null,
       };
 
-      // Booking.com's raw response can list the exact same offer more than
-      // once (e.g. across different fare buckets that resolve to identical
-      // times/price). Dedupe on the fields the user actually sees so we never
-      // show 3 cards that look identical.
-      const dedupeKey = `${summarized.airline}|${summarized.departure_time}|${summarized.arrival_time}|${summarized.price}|${summarized.stops}`;
-      if (seen.has(dedupeKey)) continue;
-      seen.add(dedupeKey);
+      const dedupeKey = `${summarized.airline}|${summarized.departure_time}|${summarized.arrival_time}|${summarized.stops}`;
+      const existing = seenFlights.get(dedupeKey);
 
-      deduped.push(summarized);
-      if (deduped.length >= maxResults) break;
+      if (!existing || (summarized.price != null && summarized.price < existing.price)) {
+        seenFlights.set(dedupeKey, summarized);
+      }
     } catch (_) {}
   }
+
+  const deduped = Array.from(seenFlights.values())
+    .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity))
+    .slice(0, maxResults);
 
   return deduped;
 }

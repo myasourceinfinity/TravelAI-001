@@ -42,8 +42,8 @@ export default function FlightCard({ flight: f, selected, onSelect, index, cheap
     <div
       onClick={onSelect}
       style={{
-        background:    selected ? 'rgba(56,189,248,0.08)' : 'rgba(15,23,42,0.6)',
-        border:        `1px solid ${accentColor}`,
+        background:    selected ? 'rgba(99,102,241,0.06)' : '#ffffff',
+        border:        `1px solid ${selected ? '#6366f1' : '#e2e0da'}`,
         borderRadius:  12,
         padding:       '14px 16px',
         cursor:        'pointer',
@@ -75,43 +75,58 @@ export default function FlightCard({ flight: f, selected, onSelect, index, cheap
 
       {/* Airline */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(56,189,248,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>{emoji}</div>
-        <span style={{ fontWeight: 600, fontSize: 13, color: '#f1f5f9' }}>{f.airline || 'Airline'}</span>
+        <div style={{ width: 30, height: 30, borderRadius: 8, background: '#f0f0ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>{emoji}</div>
+        <span style={{ fontWeight: 600, fontSize: 13, color: '#1f2937' }}>{f.airline || 'Airline'}</span>
       </div>
 
       {/* Route */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <div style={{ textAlign: 'center', minWidth: 56 }}>
-          <div style={{ fontSize: 17, fontWeight: 700, color: '#f8fafc', lineHeight: 1 }}>{fmtTime(f.departure_time)}</div>
+          <div style={{ fontSize: 17, fontWeight: 700, color: '#1f2937', lineHeight: 1 }}>{fmtTime(f.departure_time)}</div>
           <div style={{ fontSize: 10, color: '#64748b', marginTop: 2, letterSpacing: '0.03em' }}>{f.origin_code}</div>
         </div>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
           <div style={{ width: '100%', height: 1, background: 'linear-gradient(90deg, #38bdf8, #818cf8)', position: 'relative' }}>
             <span style={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', fontSize: 12, color: '#38bdf8' }}>✈</span>
           </div>
-          <div style={{ fontSize: 9, color: '#64748b' }}>
+          <div style={{ fontSize: 9, color: '#9ca3af' }}>
             {f.is_direct ? 'Nonstop' : `${f.stops} stop${f.stops === 1 ? '' : 's'}`}
             {f.duration_minutes ? ` · ${fmtDuration(f.duration_minutes)}` : ''}
           </div>
         </div>
         <div style={{ textAlign: 'center', minWidth: 56 }}>
-          <div style={{ fontSize: 17, fontWeight: 700, color: '#f8fafc', lineHeight: 1 }}>{fmtTime(f.arrival_time)}</div>
+          <div style={{ fontSize: 17, fontWeight: 700, color: '#1f2937', lineHeight: 1 }}>{fmtTime(f.arrival_time)}</div>
           <div style={{ fontSize: 10, color: '#64748b', marginTop: 2, letterSpacing: '0.03em' }}>{f.destination_code}</div>
         </div>
       </div>
 
+      {/* Return flight row — shown only for round-trip results */}
+      {f.return_departure_time && (
+        <div style={{ marginTop: 8, padding: '6px 8px', background: '#f8f7f4', borderRadius: 8, border: '1px solid #e5e3dc' }}>
+          <div style={{ fontSize: 9, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Return</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#1f2937' }}>{fmtTime(f.return_departure_time)}</span>
+            <span style={{ fontSize: 10, color: '#9ca3af' }}>→</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#1f2937' }}>{fmtTime(f.return_arrival_time)}</span>
+            {f.return_duration_minutes && (
+              <span style={{ fontSize: 9, color: '#9ca3af', marginLeft: 'auto' }}>{fmtDuration(f.return_duration_minutes)}</span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 12, paddingTop: 10, borderTop: '1px solid #f0ede6' }}>
         <div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: selected ? '#38bdf8' : overBudget ? '#fbbf24' : '#34d399', fontFamily: 'serif' }}>{fmtPrice(f.price, f.currency)}</div>
-          <div style={{ fontSize: 10, color: '#64748b' }}>total price{overBudget ? ' · above budget' : ''}</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: selected ? '#4f46e5' : overBudget ? '#f59e0b' : '#059669', fontFamily: 'serif' }}>{fmtPrice(f.price, f.currency)}</div>
+          <div style={{ fontSize: 10, color: '#9ca3af' }}>total price{overBudget ? ' · above budget' : ''}</div>
         </div>
         <button
           onClick={e => { e.stopPropagation(); onSelect(); }}
           style={{
-            background: selected ? 'rgba(56,189,248,0.15)' : 'rgba(56,189,248,0.08)',
-            border:     `1px solid ${selected ? '#38bdf8' : '#334155'}`,
-            color:      selected ? '#38bdf8' : '#94a3b8',
+            background: selected ? 'rgba(99,102,241,0.12)' : '#f8f7f4',
+            border:     `1px solid ${selected ? '#6366f1' : '#d1d5db'}`,
+            color:      selected ? '#4f46e5' : '#6b7280',
             borderRadius: 8,
             padding:    '4px 12px',
             fontSize:   11,

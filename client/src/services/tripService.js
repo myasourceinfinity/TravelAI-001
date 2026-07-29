@@ -122,6 +122,51 @@ export function getAgentPackages(token) {
   });
 }
 
+/**
+ * confirmBooking — POST /api/trips/booking/confirm
+ *
+ * Creates a confirmed internal reservation (status: 'pending_payment') for the
+ * traveller's selected flights/hotels/activities. This is the step BEFORE
+ * payment — Stripe checkout is the next feature, which will transition the
+ * booking from 'pending_payment' to 'confirmed'.
+ *
+ * @param {string} token — JWT access token
+ * @param {{
+ *   tripId?:             string,
+ *   destination:         string,
+ *   originCity:           string,
+ *   departDate:           string,  // YYYY-MM-DD
+ *   returnDate?:          string,  // YYYY-MM-DD
+ *   travelers:            number,
+ *   selectedComponents:   object[],
+ *   totalPricePerPerson:  number,
+ *   totalPriceAll:        number,
+ *   travelerName:         string,
+ *   travelerEmail:        string,
+ *   travelerPhone?:       string,
+ * }} payload
+ * @returns {Promise<{ success: boolean, booking: object, message: string }>}
+ */
+export function confirmBooking(token, payload) {
+  return request('/trips/booking/confirm', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: payload,
+  });
+}
+
+/**
+ * getBooking — GET /api/trips/booking/:id
+ * @param {string} token — JWT access token
+ * @param {string} bookingId
+ */
+export function getBooking(token, bookingId) {
+  return request(`/trips/booking/${bookingId}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function createSinglePackage(token, packageData) {
   return request('/packages/single', {
     method: 'POST',
@@ -169,4 +214,14 @@ export function updateSinglePackage(token, packageId, packageData) {
   });
 }
 
+/**
+ * getUserBookings — GET /api/trips/bookings
+ * @param {string} token — JWT access token
+ */
+export function getUserBookings(token) {
+  return request('/trips/bookings', {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
 

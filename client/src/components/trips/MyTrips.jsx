@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import travelAILogo from '../../assets/travelai-logo.png';
 import { getSavedTrips, modifyTrip, deleteTrip } from '../../services/tripService';
 import Navbar from '../common/Navbar';
 
@@ -76,34 +77,44 @@ function EditTripPanel({ trip, token, onSave, onCancel }) {
     }
   };
 
-  // ── styles ────────────────────────────────────────────────────────────────
+  // ── styles — explicit colors, not CSS variables that may not be defined
+  // on this page. MyTrips is a light-themed page; this edit panel previously
+  // used var(--bg-900)/var(--text-main), which are dark-theme variables from
+  // a different part of the app and weren't scoped here, producing invisible
+  // black-on-black text.
   const inputStyle = {
     background: '#ffffff',
-    border: '1px solid #cbd5e1',
-    borderRadius: 8,
-    padding: '8px 12px',
-    color: '#0f172a',
+    border: '1px solid #d1d5db',
+    borderRadius: 6,
+    padding: '8px 10px',
+    color: '#111827',
     fontSize: 13,
     width: '100%',
     boxSizing: 'border-box',
-    outline: 'none',
   };
   const labelStyle = {
     fontSize: 11,
-    color: '#64748b',
+    color: '#6b7280',
     marginBottom: 4,
     display: 'block',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
     fontWeight: 600,
   };
+  const cardStyle = {
+    background: '#f9fafb',
+    border: '1px solid #e5e7eb',
+    borderRadius: 10,
+    padding: '14px',
+  };
+  const panelBg = { background: '#ffffff' };
 
   return (
-    <div style={{ padding: '20px 0 8px' }}>
+    <div style={{ padding: '20px 0 8px', ...panelBg }}>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--text-main)' }}>
+        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#111827' }}>
           ✏️ Edit Trip
         </h3>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -147,7 +158,7 @@ function EditTripPanel({ trip, token, onSave, onCancel }) {
 
       {/* Destinations header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-main)' }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>
           📍 Destinations ({destinations.length})
         </span>
         <button className="btn btn-ghost btn-sm" onClick={addDest} style={{ fontSize: 12 }}>
@@ -158,21 +169,16 @@ function EditTripPanel({ trip, token, onSave, onCancel }) {
       {/* Destination cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {destinations.length === 0 && (
-          <p style={{ fontSize: 13, color: 'var(--text-secondary, #94a3b8)', textAlign: 'center', padding: '20px 0' }}>
+          <p style={{ fontSize: 13, color: '#6b7280', textAlign: 'center', padding: '20px 0' }}>
             No destinations. Click "+ Add Destination" to add one.
           </p>
         )}
 
         {destinations.map((dest, idx) => (
-          <div key={dest.id || idx} style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: 10,
-            padding: '14px',
-          }}>
+          <div key={dest.id || idx} style={cardStyle}>
             {/* Card header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-main)' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>
                 {dest.emoji} {dest.name || `Destination ${idx + 1}`}
               </span>
               <button onClick={() => removeDest(idx)} style={{
@@ -223,7 +229,7 @@ function EditTripPanel({ trip, token, onSave, onCancel }) {
       </div>
 
       {/* Bottom save bar */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--glass-border)' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20, paddingTop: 16, borderTop: '1px solid #e5e7eb' }}>
         <button className="btn btn-ghost btn-sm" onClick={onCancel} disabled={saving}>Cancel</button>
         <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={saving}>
           {saving ? 'Saving…' : '💾 Save Changes'}
@@ -319,17 +325,41 @@ export default function MyTrips() {
   }
 
   return (
-    <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)' }}>
-      <Navbar />
-      <div className="dashboard-container" style={{ maxWidth: '100%', width: '100%', padding: '0 5%' }}>
+    <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start', padding: '0 5%' }}>
+      <div className="dashboard-container" style={{ maxWidth: '100%', width: '100%' }}>
 
         <header className="dashboard-header glass-card" style={{ marginBottom: '2rem' }}>
           <div className="dashboard-header-left">
-            <div className="avatar-circle">🗺️</div>
+            <img
+              src={travelAILogo}
+              alt="Travel AI"
+              style={{ height: 44, width: 'auto', objectFit: 'contain', mixBlendMode: 'multiply', flexShrink: 0 }}
+            />
             <div>
               <h1 className="heading-lg">My Saved Trips</h1>
               <p className="text-sm text-secondary">View and manage your AI-generated travel itineraries.</p>
             </div>
+          </div>
+          <div className="dashboard-header-right">
+            <button
+              onClick={() => navigate('/')}
+              style={{
+                background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
+                color: 'white',
+                fontWeight: 600,
+                fontSize: '0.9375rem',
+                padding: '0.625rem 1.75rem',
+                borderRadius: '9999px',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(79, 70, 229, 0.35)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.25)'; }}
+            >
+              ← Back to Home
+            </button>
           </div>
         </header>
 
@@ -425,12 +455,13 @@ export default function MyTrips() {
                                     <strong>Summary:</strong> {trip.summary || 'No summary available.'}
                                   </p>
                                   {trip.destinations && trip.destinations.length > 0 ? (
-                                    <table className="trip-table" style={{ background: 'var(--bg-900)', borderRadius: '8px', overflow: 'hidden' }}>
+                                    <table className="trip-table" style={{ background: '#f9fafb', borderRadius: '8px', overflow: 'hidden' }}>
                                       <thead>
                                         <tr>
                                           <th>Destination</th>
                                           <th>Country</th>
-                                          <th>AI Highlights</th>
+                                          <th>Highlights</th>
+                                          <th>Activities (Bookme Deals)</th>
                                         </tr>
                                       </thead>
                                       <tbody>
@@ -444,13 +475,28 @@ export default function MyTrips() {
                                             </td>
                                             <td className="text-muted text-sm" style={{ whiteSpace: 'nowrap' }}>{dest.country}</td>
                                             <td className="text-sm text-secondary">
-                                              {dest.highlights && dest.highlights.length > 0
-                                                ? dest.highlights.map((h, i) => (
-                                                    <span key={i} style={{ display: 'inline-block', marginRight: 6 }}>
-                                                      <span style={{ color: '#818cf8', fontSize: 10, marginRight: 3 }}>✦</span>{h}
-                                                    </span>
-                                                  ))
-                                                : <span style={{ color: '#64748b' }}>—</span>}
+                                              {dest.highlights && dest.highlights.length > 0 ? dest.highlights.join(' • ') : '—'}
+                                            </td>
+                                            <td>
+                                              {dest.bookmeDeals && dest.bookmeDeals.length > 0 ? (
+                                                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', maxWidth: '300px' }}>
+                                                  {dest.bookmeDeals.map((deal, i) => (
+                                                    <a key={i} href={deal.link} target="_blank" rel="noreferrer" title={deal.title}
+                                                      style={{ minWidth: '120px', background: '#ffffff', borderRadius: '4px', padding: '6px', textDecoration: 'none', border: '1px solid #e5e7eb' }}
+                                                    >
+                                                      <div className="text-xs font-medium" style={{ color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '2px' }}>
+                                                        {deal.title}
+                                                      </div>
+                                                      <div className="text-xs" style={{ color: '#2563eb', display: 'flex', justifyContent: 'space-between' }}>
+                                                        <span>{deal.price}</span>
+                                                        {deal.discount && <span style={{ color: '#059669', fontSize: '0.65rem' }}>{deal.discount}</span>}
+                                                      </div>
+                                                    </a>
+                                                  ))}
+                                                </div>
+                                              ) : (
+                                                <span className="text-xs text-muted">No activities found</span>
+                                              )}
                                             </td>
                                           </tr>
                                         ))}
@@ -491,7 +537,7 @@ export default function MyTrips() {
             textAlign: 'center',
           }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>🗑️</div>
-            <h3 style={{ margin: '0 0 8px', fontSize: 18, color: 'var(--text-main)' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 18, color: 'var(--text-main, #f8fafc)' }}>
               Delete this trip?
             </h3>
             <p style={{ fontSize: 14, color: 'var(--text-secondary, #94a3b8)', marginBottom: 24 }}>
