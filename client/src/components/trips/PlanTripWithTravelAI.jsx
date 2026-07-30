@@ -7,6 +7,7 @@ import FlightCard from './FlightCard';
 import HotelCard  from './HotelCard';
 import Navbar from '../common/Navbar';
 import '../home/HomePage.css';
+import { saveRecentSearchToDB } from '../../services/recentSearchService';
 
 const API = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -476,6 +477,12 @@ export default function PlanTripWithTravelAI() {
   async function handleSend() {
     if (!userInput.trim() || isSending) return;
     const userMsg = userInput.trim();
+    
+    if (accessToken) {
+      saveRecentSearchToDB(accessToken, userMsg).catch((err) => {
+        console.warn('[PlanTrip] Failed to save recent search:', err);
+      });
+    }
     setUserInput('');
     setIsSending(true);
     setError(null);
