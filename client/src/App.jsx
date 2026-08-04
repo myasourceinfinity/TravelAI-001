@@ -6,7 +6,8 @@ import AuthPage from './components/auth/AuthPage';
 import LoadingSpinner from './components/common/LoadingSpinner';
 //import TravellerDashboard from './components/dashboard/TravellerDashboard';
 //import PlanTripWithTravelAI from './components/trips/PlanTripWithTravelAI';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState, } from 'react';
+import SplashScreen from './components/common/SplashScreen';
 
 const TravellerDashboard = lazy(() => import('./components/dashboard/TravellerDashboard'));
 const AgentDashboard     = lazy(() => import('./components/dashboard/AgentDashboard'));
@@ -58,7 +59,22 @@ function ProfileRoute() {
 }
 
 export default function App() {
+    const [showSplash, setShowSplash] = useState(true);
+
+    useEffect(() => {
+      const splashTimer = window.setTimeout(() => {
+        setShowSplash(false);
+      }, 2200);
+
+      return () => {
+        window.clearTimeout(splashTimer);
+      };
+    }, []);
+
   return (
+    <>
+     {showSplash && <SplashScreen />}
+
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <BrowserRouter>
         <AuthProvider>
@@ -107,5 +123,6 @@ export default function App() {
         </AuthProvider>
       </BrowserRouter>
     </GoogleOAuthProvider>
+    </>
   );
 }
