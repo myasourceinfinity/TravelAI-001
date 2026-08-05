@@ -546,6 +546,205 @@
   gap: 1.4rem;
 }
 
+.traveller-chat-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.9fr);
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.traveller-chat-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 480px;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 1.75rem;
+  padding: 1.5rem;
+}
+
+.traveller-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.traveller-chat-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #fff;
+  background: linear-gradient(135deg, #818cf8, #3b82f6);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.25);
+}
+
+.traveller-chat-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.traveller-chat-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #2563eb;
+  font-size: 0.85rem;
+}
+
+.traveller-chat-status-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #34d399;
+  display: inline-block;
+}
+
+.traveller-chat-messages {
+  flex: 1;
+  min-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding-right: 0.25rem;
+}
+
+.traveller-chat-message {
+  max-width: 100%;
+  padding: 1rem 1.2rem;
+  border-radius: 18px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.traveller-chat-message.assistant {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px 18px 18px 6px;
+}
+
+.traveller-chat-message.user {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #ffffff;
+  align-self: flex-end;
+  border-radius: 18px 18px 6px 18px;
+}
+
+.traveller-chat-error {
+  padding: 0.85rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 1rem;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.traveller-chat-input-row {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  margin-top: auto;
+}
+
+.traveller-chat-input-row input {
+  flex: 1;
+  min-height: 48px;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.traveller-chat-input-row input:disabled {
+  opacity: 0.65;
+}
+
+.traveller-chat-send-btn {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border: none;
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 1rem;
+  padding: 0.95rem 1.2rem;
+  min-width: 96px;
+  cursor: pointer;
+}
+
+.traveller-chat-send-btn:disabled {
+  background: #c7d2fe;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.traveller-tracker-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 420px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 1.75rem;
+  padding: 1.5rem;
+}
+
+.traveller-tracker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.traveller-tracker-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.traveller-tracker-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.92rem;
+  color: #334155;
+}
+
+.traveller-tracker-row:last-child {
+  border-bottom: none;
+}
+
+.traveller-tracker-row strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.traveller-tracker-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.traveller-tracker-tag {
+  font-size: 0.78rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #4338ca;
+}
+
 .traveller-home-badge {
   width: fit-content;
   padding: 0.55rem 0.9rem;
@@ -742,6 +941,23 @@
 
   .traveller-home-hero-card {
     padding: 2.2rem;
+  }
+
+  .traveller-chat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .traveller-tracker-panel {
+    min-height: auto;
+  }
+
+  .traveller-chat-input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .traveller-chat-send-btn {
+    width: 100%;
   }
 
   .traveller-recent-card {

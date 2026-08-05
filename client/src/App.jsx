@@ -58,6 +58,13 @@ function ProfileRoute() {
   return user?.role_type === 'agent' ? <AgentProfilePage /> : <TravellerDashboard />;
 }
 
+function HomeRoute() {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (user?.role_type === 'agent') return <Navigate to="/dashboard" replace />;
+  return <HomePage />;
+}
+
 export default function App() {
     const [showSplash, setShowSplash] = useState(true);
 
@@ -80,7 +87,7 @@ export default function App() {
         <AuthProvider>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<HomeRoute />} />
             <Route path="/login" element={
               <GuestRoute><AuthPage /></GuestRoute>
             } />
