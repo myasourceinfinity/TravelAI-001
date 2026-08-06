@@ -74,13 +74,22 @@ const listPublicAgents = async (req, res) => {
          pr.nationality,
          pr.avatar_url,
          pr.specialties,
-         COUNT(ap.id)                                          AS total_packages,
-         COUNT(ap.id) FILTER (WHERE ap.status = 'active')     AS active_packages
+         COUNT(DISTINCT ap.id)                                      AS total_packages,
+         COUNT(DISTINCT ap.id) FILTER (WHERE ap.status = 'active') AS active_packages,
+         COALESCE(rv.average_rating, 0)                            AS average_rating,
+         COALESCE(rv.review_count, 0)                              AS review_count
        FROM users u
        LEFT JOIN user_profiles  pr ON pr.user_id   = u.id
        LEFT JOIN agent_packages ap ON ap.provider_id = pr.id AND ap.provider_type = 'Agent'
+       LEFT JOIN LATERAL (
+          SELECT
+            ROUND(AVG(ar.rating)::numeric, 1) AS average_rating,
+            COUNT(*)::int AS review_count
+          FROM agent_reviews ar
+          WHERE ar.agent_id = u.id
+        ) rv ON true
        WHERE ${where}
-       GROUP BY u.id, pr.id
+       GROUP BY u.id, pr.id, rv.average_rating, rv.review_count
        ORDER BY ${orderBy}
        LIMIT $${params.length - 1} OFFSET $${params.length}`,
       params
@@ -109,17 +118,34 @@ const getPublicAgentDetail = async (req, res) => {
     // Agent profile (public fields only)
     const { rows } = await pool.query(
       `SELECT
-         u.id, u.first_name, u.last_name,
-         pr.bio, pr.nationality, pr.avatar_url, pr.specialties,
-         COUNT(ap.id)                                       AS total_packages,
-         COUNT(ap.id) FILTER (WHERE ap.status = 'active')  AS active_packages
+         u.id,
+         u.first_name,
+         u.last_name,
+         pr.bio,
+         pr.nationality,
+         pr.avatar_url,
+         pr.specialties,
+         COUNT(DISTINCT ap.id)                                      AS total_packages,
+         COUNT(DISTINCT ap.id) FILTER (WHERE ap.status = 'active') AS active_packages,
+         COALESCE(rv.average_rating, 0)                            AS average_rating,
+         COALESCE(rv.review_count, 0)                              AS review_count
        FROM users u
-       LEFT JOIN user_profiles  pr ON pr.user_id   = u.id
-       LEFT JOIN agent_packages ap ON ap.provider_id = pr.id AND ap.provider_type = 'Agent'
+       LEFT JOIN user_profiles pr
+         ON pr.user_id = u.id
+       LEFT JOIN agent_packages ap
+         ON ap.provider_id = pr.id
+        AND ap.provider_type = 'Agent'
+       LEFT JOIN LATERAL (
+         SELECT
+           ROUND(AVG(ar.rating)::numeric, 1) AS average_rating,
+           COUNT(*)::int AS review_count
+         FROM agent_reviews ar
+         WHERE ar.agent_id = u.id
+       ) rv ON true
        WHERE u.id = $1
          AND u.role_type = 'agent'
-         AND u.status    = 'active'
-       GROUP BY u.id, pr.id`,
+         AND u.status = 'active'
+       GROUP BY u.id, pr.id, rv.average_rating, rv.review_count`,
       [id]
     );
 
@@ -130,12 +156,22 @@ const getPublicAgentDetail = async (req, res) => {
     // Active packages only
     const { rows: packages } = await pool.query(
       `SELECT
-         ap.id, ap.package_name, ap.destination_name, ap.package_type,
-         ap.travel_mode, ap.summary, ap.duration_days, ap.duration_nights,
-         ap.base_price AS price_per_person, ap.currency_code AS currency,
-         ap.min_travelers, ap.max_travelers, ap.is_customizable
+         ap.id,
+         ap.package_name,
+         ap.destination_name,
+         ap.package_type,
+         ap.travel_mode,
+         ap.summary,
+         ap.duration_days,
+         ap.duration_nights,
+         ap.base_price AS price_per_person,
+         ap.currency_code AS currency,
+         ap.min_travelers,
+         ap.max_travelers,
+         ap.is_customizable
        FROM agent_packages ap
-       JOIN user_profiles up ON ap.provider_id = up.id
+       JOIN user_profiles up
+         ON ap.provider_id = up.id
        WHERE up.user_id = $1
          AND ap.provider_type = 'Agent'
          AND ap.status = 'active'
@@ -144,12 +180,149 @@ const getPublicAgentDetail = async (req, res) => {
       [id]
     );
 
-    return res.json({ agent: rows[0], packages });
+    const { rows: reviews } = await pool.query(
+      `SELECT
+         ar.id,
+         ar.rating,
+         ar.comment,
+         ar.created_at,
+         ar.updated_at,
+         u.first_name,
+         u.last_name
+       FROM agent_reviews ar
+       JOIN users u
+         ON u.id = ar.reviewer_id
+       WHERE ar.agent_id = $1
+       ORDER BY ar.updated_at DESC
+       LIMIT 20`,
+      [id]
+    );
+
+    return res.json({
+      agent: rows[0],
+      packages,
+      reviews,
+    });
   } catch (err) {
     console.error('[getPublicAgentDetail] Error:', err.message);
     return res.status(500).json({ error: 'Failed to fetch agent profile.' });
   }
 };
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// CREATE / UPDATE AGENT REVIEW — POST /api/public/agents/:id/reviews
+// ═══════════════════════════════════════════════════════════════════════════════
+const createAgentReview = async (req, res) => {
+  const { id } = req.params;
+  const reviewerId = req.user?.userId || req.user?.id;
+  const rating = Number(req.body.rating);
+  const comment = String(req.body.comment || '').trim();
 
-module.exports = { listPublicAgents, getPublicAgentDetail, VALID_SPECIALTIES };
+  if (!reviewerId) {
+    return res.status(401).json({ error: 'Authentication required.' });
+  }
+
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: 'Rating must be an integer between 1 and 5.' });
+  }
+
+  if (comment.length > 1000) {
+    return res.status(400).json({ error: 'Review comment must be 1000 characters or less.' });
+  }
+
+  if (id === reviewerId) {
+    return res.status(400).json({ error: 'You cannot review yourself.' });
+  }
+
+  try {
+    const agentCheck = await pool.query(
+      `SELECT id
+       FROM users
+       WHERE id = $1
+         AND role_type = 'agent'
+         AND status = 'active'`,
+      [id]
+    );
+
+    if (agentCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Agent not found.' });
+    }
+
+    const reviewerCheck = await pool.query(
+      `SELECT id, role_type, status
+       FROM users
+       WHERE id = $1
+         AND status = 'active'`,
+      [reviewerId]
+    );
+
+    if (reviewerCheck.rows.length === 0) {
+      return res.status(403).json({ error: 'Reviewer account is not active.' });
+    }
+
+    const reviewerRole = reviewerCheck.rows[0].role_type;
+
+    if (['agent', 'admin', 'useradmin', 'superadmin'].includes(reviewerRole)) {
+      return res.status(403).json({ error: 'Only travellers can review agents.' });
+    }
+
+    const { rows: reviewRows } = await pool.query(
+      `INSERT INTO agent_reviews (
+         agent_id,
+         reviewer_id,
+         rating,
+         comment
+       )
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (agent_id, reviewer_id)
+       DO UPDATE SET
+         rating = EXCLUDED.rating,
+         comment = EXCLUDED.comment,
+         updated_at = NOW()
+       RETURNING id, agent_id, reviewer_id, rating, comment, created_at, updated_at`,
+      [id, reviewerId, rating, comment || null]
+    );
+
+    const { rows: summaryRows } = await pool.query(
+      `SELECT
+         COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS average_rating,
+         COUNT(*)::int AS review_count
+       FROM agent_reviews
+       WHERE agent_id = $1`,
+      [id]
+    );
+
+    const { rows: reviews } = await pool.query(
+      `SELECT
+         ar.id,
+         ar.rating,
+         ar.comment,
+         ar.created_at,
+         ar.updated_at,
+         u.first_name,
+         u.last_name
+       FROM agent_reviews ar
+       JOIN users u ON u.id = ar.reviewer_id
+       WHERE ar.agent_id = $1
+       ORDER BY ar.updated_at DESC
+       LIMIT 20`,
+      [id]
+    );
+
+    return res.status(201).json({
+      review: reviewRows[0],
+      reviewSummary: summaryRows[0],
+      reviews,
+    });
+  } catch (err) {
+    console.error('[createAgentReview] Error:', err.message);
+    return res.status(500).json({ error: 'Failed to submit review.' });
+  }
+};
+
+module.exports = {
+  listPublicAgents,
+  getPublicAgentDetail,
+  createAgentReview,
+  VALID_SPECIALTIES,
+};

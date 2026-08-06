@@ -1,16 +1,21 @@
 /**
  * agentService.js
  * API wrapper for public /api/public/agents/* endpoints.
- * No authentication required.
  */
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 async function request(endpoint, options = {}) {
+  const { body, headers, ...restOptions } = options;
+
   const res = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...restOptions,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(headers || {}),
+    },
     credentials: 'include',
+    body: body ? JSON.stringify(body) : undefined,
   });
 
   const data = await res.json().catch(() => ({}));
@@ -24,24 +29,32 @@ async function request(endpoint, options = {}) {
   return data;
 }
 
-/**
- * listPublicAgents
- * @param {{ q?, specialty?, page?, limit?, sort? }} filters
- */
 export function listPublicAgents({ q = '', specialty = '', page = 1, limit = 12, sort = 'name_asc' } = {}) {
   const params = new URLSearchParams();
-  if (q)         params.set('q', q);
+
+  if (q) params.set('q', q);
   if (specialty) params.set('specialty', specialty);
+
   params.set('page', page);
   params.set('limit', limit);
   params.set('sort', sort);
+
   return request(`/public/agents?${params}`, { method: 'GET' });
 }
 
-/**
- * getPublicAgentDetail
- * @param {string} id — agent user UUID
- */
 export function getPublicAgentDetail(id) {
   return request(`/public/agents/${id}`, { method: 'GET' });
+}
+
+export function submitAgentReview(id, token, { rating, comment }) {
+  return request(`/public/agents/${id}/reviews`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: {
+      rating,
+      comment,
+    },
+  });
 }

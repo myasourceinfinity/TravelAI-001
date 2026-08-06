@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getPublicAgentDetail } from '../../services/agentService';
+import { getPublicAgentDetail, submitAgentReview } from '../../services/agentService';
+import { useAuth } from '../../context/AuthContext';
 import Navbar from '../common/Navbar';
 
 const SPECIALTY_COLORS = {
@@ -22,11 +23,17 @@ const PKG_TYPE_ICONS = {
 export default function AgentDetailPublic() {
   const { id }     = useParams();
   const navigate   = useNavigate();
+  const { user, accessToken } = useAuth();
 
   const [agent,     setAgent]     = useState(null);
   const [packages,  setPackages]  = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error,     setError]     = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewMsg, setReviewMsg] = useState(null);
 
   useEffect(() => {
     if (!id) return;
@@ -35,10 +42,57 @@ export default function AgentDetailPublic() {
       .then(data => {
         setAgent(data.agent);
         setPackages(data.packages || []);
+        setReviews(data.reviews || []);
       })
       .catch(err => setError(err.message))
       .finally(() => setIsLoading(false));
   }, [id]);
+
+    async function handleSubmitReview() {
+    if (!user || !accessToken) {
+      navigate('/login');
+      return;
+    }
+
+    if (!rating) {
+      setReviewMsg({ type: 'error', text: 'Please select a rating first.' });
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    setReviewMsg(null);
+
+    try {
+      const data = await submitAgentReview(id, accessToken, {
+        rating,
+        comment,
+      });
+
+      setReviews(data.reviews || []);
+
+      if (data.reviewSummary) {
+        setAgent(prev => ({
+          ...prev,
+          average_rating: data.reviewSummary.average_rating,
+          review_count: data.reviewSummary.review_count,
+        }));
+      }
+
+      setReviewMsg({
+        type: 'success',
+        text: 'Thank you! Your review has been submitted.',
+      });
+
+      setComment('');
+    } catch (err) {
+      setReviewMsg({
+        type: 'error',
+        text: err.message || 'Failed to submit review.',
+      });
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -106,6 +160,16 @@ export default function AgentDetailPublic() {
               <p style={{ margin: '0 0 14px', opacity: 0.8, fontSize: 14 }}>
                 Travel Consultant{agent.nationality ? ` · ${agent.nationality}` : ''}
               </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: '#facc15' }}>
+                    ⭐ {Number(agent.average_rating) > 0 ? Number(agent.average_rating).toFixed(1) : 'New'}
+                  </span>
+                  <span style={{ fontSize: 13, opacity: 0.82 }}>
+                    {Number(agent.review_count) > 0
+                      ? `${agent.review_count} review${Number(agent.review_count) !== 1 ? 's' : ''}`
+                      : 'No reviews yet'}
+                  </span>
+                </div>
 
               {/* Specialty badges */}
               {specialties.length > 0 && (
@@ -166,6 +230,149 @@ export default function AgentDetailPublic() {
               </div>
             </div>
           )}
+
+          <div style={{ background: 'white', borderRadius: 16, padding: 20, border: '1px solid rgba(15,23,42,0.08)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+            <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Traveller Reviews
+            </h3>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <div style={{ fontSize: 28, fontWeight: 900, color: '#0f172a' }}>
+                {Number(agent.average_rating) > 0 ? Number(agent.average_rating).toFixed(1) : 'New'}
+              </div>
+              <div>
+                <div style={{ color: '#f59e0b', fontSize: 16 }}>
+                  {'★'.repeat(Math.round(Number(agent.average_rating) || 0))}
+                  {'☆'.repeat(5 - Math.round(Number(agent.average_rating) || 0))}
+                </div>
+                <div style={{ fontSize: 12, color: '#64748b' }}>
+                  {Number(agent.review_count) || 0} review{Number(agent.review_count) !== 1 ? 's' : ''}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ borderTop: '1px solid rgba(15,23,42,0.08)', paddingTop: 16, marginBottom: 18 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+                Leave a Review
+              </div>
+
+              <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+                {[1, 2, 3, 4, 5].map(star => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      fontSize: 26,
+                      color: star <= rating ? '#f59e0b' : '#cbd5e1',
+                      padding: 0,
+                      lineHeight: 1,
+                    }}
+                    aria-label={`${star} star`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Share your experience with this travel agent..."
+                rows={3}
+                maxLength={1000}
+                style={{
+                  width: '100%',
+                  resize: 'vertical',
+                  border: '1px solid rgba(15,23,42,0.14)',
+                  borderRadius: 10,
+                  padding: '10px 12px',
+                  fontSize: 13,
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  marginBottom: 10,
+                }}
+              />
+
+              {reviewMsg && (
+                <div
+                  style={{
+                    fontSize: 12,
+                    marginBottom: 10,
+                    color: reviewMsg.type === 'success' ? '#047857' : '#b91c1c',
+                    background: reviewMsg.type === 'success' ? '#d1fae5' : '#fee2e2',
+                    padding: '8px 10px',
+                    borderRadius: 8,
+                  }}
+                >
+                  {reviewMsg.type === 'success' ? '✅' : '⚠️'} {reviewMsg.text}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={handleSubmitReview}
+                disabled={isSubmittingReview}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  background: 'linear-gradient(135deg,#4f46e5,#3b82f6)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontWeight: 800,
+                  fontSize: 13,
+                  cursor: isSubmittingReview ? 'default' : 'pointer',
+                  opacity: isSubmittingReview ? 0.7 : 1,
+                }}
+              >
+                {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </div>
+
+            {reviews.length === 0 ? (
+              <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
+                No reviews yet. Be the first to review this agent.
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {reviews.map(review => {
+                  const reviewerName = `${review.first_name || ''} ${review.last_name || ''}`.trim() || 'Traveller';
+
+                  return (
+                    <div key={review.id} style={{ borderTop: '1px solid rgba(15,23,42,0.08)', paddingTop: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 4 }}>
+                        <strong style={{ fontSize: 13, color: '#0f172a' }}>{reviewerName}</strong>
+                        <span style={{ color: '#f59e0b', fontSize: 13 }}>
+                          {'★'.repeat(Number(review.rating))}
+                          {'☆'.repeat(5 - Number(review.rating))}
+                        </span>
+                      </div>
+
+                      {review.comment && (
+                        <p style={{ margin: '4px 0 6px', fontSize: 13, color: '#475569', lineHeight: 1.55 }}>
+                          {review.comment}
+                        </p>
+                      )}
+
+                      <small style={{ color: '#94a3b8', fontSize: 11 }}>
+                        {review.updated_at
+                          ? new Date(review.updated_at).toLocaleDateString('en-US', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                            })
+                          : ''}
+                      </small>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Contact CTA */}
           <div style={{ background: 'linear-gradient(135deg,#4f46e5,#3b82f6)', borderRadius: 16, padding: 20, textAlign: 'center', color: 'white' }}>

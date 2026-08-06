@@ -52,6 +52,14 @@ export default function AgentCard({ agent }) {
             <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
               📦 {agent.active_packages || 0} active package{agent.active_packages !== 1 ? 's' : ''}
             </div>
+            <div style={{ fontSize: 12, color: '#f59e0b', marginTop: 4, fontWeight: 700 }}>
+              ⭐ {Number(agent.average_rating) > 0 ? Number(agent.average_rating).toFixed(1) : 'New'}
+              <span style={{ color: '#64748b', fontWeight: 500, marginLeft: 6 }}>
+                {Number(agent.review_count) > 0
+                  ? `(${agent.review_count} review${Number(agent.review_count) !== 1 ? 's' : ''})`
+                  : '(No reviews yet)'}
+              </span>
+            </div>
           </div>
         </div>
 

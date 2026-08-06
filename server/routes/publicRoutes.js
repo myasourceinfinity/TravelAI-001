@@ -11,12 +11,16 @@
 const express = require('express');
 const router  = express.Router();
 
+const authMiddleware = require('../middleware/authMiddleware');
+
 const {
   listPublicAgents,
   getPublicAgentDetail,
+  createAgentReview,
 } = require('../controllers/publicAgentController');
 
 router.get('/agents',     listPublicAgents);
 router.get('/agents/:id', getPublicAgentDetail);
+router.post('/agents/:id/reviews', authMiddleware, createAgentReview);
 
 module.exports = router;
