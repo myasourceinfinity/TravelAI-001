@@ -1,391 +1,498 @@
-/**
- * TravellerDashboard.jsx
- *
- * Post-login dashboard for traveller users. Displays all user information
- * in interactive, editable form sections. Fetches fresh data on mount and
- * allows saving changes back to the server.
- */
-
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getProfile, updateProfile } from '../../services/authService';
 import Navbar from '../common/Navbar';
+import '../home/HomePage.css';
+import { getRecentSearches, saveRecentSearchToDB } from '../../services/recentSearchService';
+import { chatWithAI } from '../../services/tripService';
 
-// ── Location type options (matches signup Phase 1) ──────────────────────────
-const LOCATION_TYPE_OPTIONS = [
-  '🏖️ Beach', '⛰️ Mountain', '🏙️ City', '🌄 Countryside',
-  '🏝️ Island', '🏜️ Desert', '🌲 Forest', '❄️ Arctic',
-];
+function formatSearchDate(value) {
+  if (!value) return '';
 
-const CURRENCY_OPTIONS = ['USD', 'EUR', 'GBP', 'INR', 'AUD', 'CAD', 'JPY', 'SGD', 'AED'];
+  return new Date(value).toLocaleDateString('en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 export default function TravellerDashboard() {
-  const navigate   = useNavigate();
-  const { user, accessToken, logout } = useAuth();
+  const navigate = useNavigate();
+  const { user, accessToken } = useAuth();
 
-  const [profile, setProfile]     = useState(null);
-  const [form, setForm]           = useState({});
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving]   = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [saveMsg, setSaveMsg]     = useState(null);
-  const [error, setError]         = useState(null);
+  const chatMessagesRef = useRef(null);
+  const hasMountedMessagesRef = useRef(false);
 
-  // ── Fetch full profile from server on mount ─────────────────────────────────
-  const fetchProfile = useCallback(async () => {
-    if (!accessToken) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getProfile(accessToken);
-      setProfile(data.user);
-      setForm(buildFormState(data.user));
-    } catch (err) {
-      if (err.status === 401) {
-        await logout();
-        navigate('/');
-      } else {
-        setError(err.message);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      content:
+        'Hello! I am TravelAI, your interactive travel consultant buddy. 🌍 Where are we dreaming of going for your next adventure? Tell me your destination, travel dates, number of travellers, and budget -- or we can figure it out together!',
+    },
+  ]);
+
+  const [userInput, setUserInput] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [chatError, setChatError] = useState(null);
+
+  const [preferences, setPreferences] = useState({
+    destination: '',
+    originCity: '',
+    days: 0,
+    travelers: 0,
+    budgetLevel: '',
+    budgetAmount: 0,
+    flightBudget: 0,
+    hotelBudgetPerNight: 0,
+    departDate: '',
+    returnDate: '',
+    location_types: [],
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadRecentSearches() {
+      if (!accessToken) {
+        setRecentSearches([]);
+        return;
       }
-    } finally {
-      setIsLoading(false);
+
+      try {
+        const data = await getRecentSearches(accessToken);
+
+        if (!cancelled) {
+          setRecentSearches(data.recentSearches || []);
+        }
+      } catch (err) {
+        console.error('[TravellerDashboard] Failed to load recent searches:', err);
+      }
     }
-  }, [accessToken, logout, navigate]);
 
-  useEffect(() => { fetchProfile(); }, [fetchProfile]);
+    loadRecentSearches();
 
-  // ── Build editable form state from profile data ─────────────────────────────
-  function buildFormState(p) {
-    return {
-      first_name:     p.first_name  || '',
-      last_name:      p.last_name   || '',
-      phone:          p.phone       || '',
-      dob:            p.dob ? p.dob.slice(0, 10) : '',
-      nationality:    p.nationality || '',
-      bio:            p.bio         || '',
-      budget_amount:  p.budget_amount ?? '',
-      currency:       p.currency    || 'USD',
-      destination:    p.destination || '',
-      location_types: Array.isArray(p.location_types) ? p.location_types : [],
+    return () => {
+      cancelled = true;
     };
-  }
+  }, [accessToken]);
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    setSaveMsg(null);
-  }
+  useEffect(() => {
+    if (!hasMountedMessagesRef.current) {
+      hasMountedMessagesRef.current = true;
+      return;
+    }
 
-  function toggleLocationType(type) {
-    setForm(prev => {
-      const types = prev.location_types.includes(type)
-        ? prev.location_types.filter(t => t !== type)
-        : [...prev.location_types, type];
-      return { ...prev, location_types: types };
-    });
-    setSaveMsg(null);
-  }
+    const chatBox = chatMessagesRef.current;
+    if (!chatBox) return;
 
-  function handleCancel() {
-    setForm(buildFormState(profile));
-    setIsEditing(false);
-    setSaveMsg(null);
-  }
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }, [messages]);
 
-  async function handleSave() {
-    setIsSaving(true);
-    setSaveMsg(null);
+  async function saveRecentSearch(query) {
+    const cleanQuery = String(query || '').trim();
+
+    if (!cleanQuery || !accessToken) return;
+
     try {
-      const data = await updateProfile(accessToken, form);
-      setProfile(data.user);
-      setForm(buildFormState(data.user));
-      setIsEditing(false);
-      setSaveMsg({ type: 'success', text: 'Profile updated successfully!' });
+      const data = await saveRecentSearchToDB(accessToken, cleanQuery);
+      setRecentSearches(data.recentSearches || []);
     } catch (err) {
-      setSaveMsg({ type: 'error', text: err.message || 'Failed to save changes.' });
-    } finally {
-      setIsSaving(false);
+      console.error('[TravellerDashboard] Failed to save recent search:', err);
     }
   }
 
-  async function handleLogout() {
-    await logout();
-    navigate('/');
+  function parseBoldText(text) {
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
+    return parts.map((part, idx) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong key={idx} style={{ color: '#111827', fontWeight: 700 }}>
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+
+      return part;
+    });
   }
 
-  // ── Loading / Error states ──────────────────────────────────────────────────
-  if (isLoading) {
-    return (
-      <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start' }}>
-        <div className="dashboard-loader">
-          <span className="spinner" style={{ width: 32, height: 32 }} />
-          <p className="text-secondary mt-4">Loading your dashboard…</p>
-        </div>
-      </div>
-    );
+  function renderFormattedMessage(content) {
+    if (!content) return null;
+
+    const cleaned = content
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, '')
+      .replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
+
+    return cleaned.split('\n').map((line, lineIdx) => {
+      const t = line.trim();
+
+      if (!t) return <div key={lineIdx} style={{ height: '0.4rem' }} />;
+
+      if (t === '---') {
+        return (
+          <hr
+            key={lineIdx}
+            style={{
+              border: 'none',
+              borderTop: '1px solid rgba(15,23,42,0.1)',
+              margin: '0.75rem 0',
+            }}
+          />
+        );
+      }
+
+      if (t.startsWith('###')) {
+        return (
+          <h3
+            key={lineIdx}
+            style={{
+              fontSize: '1rem',
+              fontWeight: 700,
+              color: '#4f46e5',
+              margin: '0.75rem 0 0.4rem',
+            }}
+          >
+            {parseBoldText(t.replace(/^###\s*/, ''))}
+          </h3>
+        );
+      }
+
+      if (t.startsWith('##')) {
+        return (
+          <h4
+            key={lineIdx}
+            style={{
+              fontSize: '1.1rem',
+              fontWeight: 700,
+              color: '#6366f1',
+              margin: '0.9rem 0 0.5rem',
+            }}
+          >
+            {parseBoldText(t.replace(/^##\s*/, ''))}
+          </h4>
+        );
+      }
+
+      if (t.startsWith('#')) {
+        return (
+          <h2
+            key={lineIdx}
+            style={{
+              fontSize: '1.2rem',
+              fontWeight: 800,
+              color: '#1f2937',
+              margin: '1.1rem 0 0.6rem',
+            }}
+          >
+            {parseBoldText(t.replace(/^#\s*/, ''))}
+          </h2>
+        );
+      }
+
+      if (t.startsWith('- ') || t.startsWith('* ')) {
+        return (
+          <div
+            key={lineIdx}
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 8,
+              marginLeft: '0.5rem',
+              marginBottom: '0.3rem',
+            }}
+          >
+            <span style={{ color: '#6366f1', fontSize: '0.8rem', marginTop: 4 }}>
+              •
+            </span>
+            <span style={{ flex: 1, color: '#374151' }}>
+              {parseBoldText(t.substring(2))}
+            </span>
+          </div>
+        );
+      }
+
+      return (
+        <p
+          key={lineIdx}
+          style={{ margin: '0 0 0.5rem', lineHeight: 1.6, color: '#374151' }}
+        >
+          {parseBoldText(line)}
+        </p>
+      );
+    });
   }
 
-  if (error) {
-    return (
-      <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start' }}>
-        <div className="glass-card dashboard-error-card">
-          <p className="text-secondary">⚠️ {error}</p>
-          <button className="btn btn-primary mt-4" onClick={fetchProfile}>Retry</button>
-        </div>
-      </div>
-    );
+  async function handleSend() {
+    if (!userInput.trim() || isSending) return;
+
+    const userMsg = userInput.trim();
+
+    saveRecentSearch(userMsg).catch((err) => {
+      console.warn('[TravellerDashboard] Failed to save recent search:', err);
+    });
+
+    setUserInput('');
+    setIsSending(true);
+    setChatError(null);
+
+    const newMessages = [...messages, { role: 'user', content: userMsg }];
+    setMessages(newMessages);
+
+    try {
+      const data = await chatWithAI(accessToken, { messages: newMessages });
+      const assistantText =
+        data?.message || 'Sorry, I did not get a reply. Please try again.';
+
+      setMessages((prev) => [...prev, { role: 'assistant', content: assistantText }]);
+
+      if (data?.extractedPreferences) {
+        setPreferences((prev) => ({ ...prev, ...data.extractedPreferences }));
+      }
+    } catch (err) {
+      setChatError(err.message || 'Something went wrong while chatting with TravelAI.');
+    } finally {
+      setIsSending(false);
+    }
   }
 
-  const initials = `${(profile?.first_name?.[0] || '').toUpperCase()}${(profile?.last_name?.[0] || '').toUpperCase()}`;
+  function handleRecentSearchClick(query) {
+    const cleanQuery = String(query || '').trim();
+
+    if (!cleanQuery) return;
+
+    sessionStorage.setItem('pending_trip_description', cleanQuery);
+    navigate('/plan-trip');
+  }
 
   return (
-    <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)' }}>
+    <div className="home-page-container">
       <Navbar />
-      <div className="dashboard-container" style={{ maxWidth: '100%', width: '100%', padding: '0 5%' }}>
 
-        {/* ═══ Header ═══════════════════════════════════════════════════════════ */}
-        <header className="dashboard-header glass-card" style={{ background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', boxShadow: '0 4px 20px rgba(15,23,42,0.05)' }}>
-          <div className="dashboard-header-left">
-            <div className="avatar-circle">{initials || '✈️'}</div>
-            <div>
-              <h1 className="heading-lg">
-                Welcome back, <span style={{
-                  background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>{profile?.first_name}</span>!
-              </h1>
-              <p className="text-sm text-secondary">
-                {profile?.email} · <span className="badge badge-role">{profile?.role_type}</span>
-              </p>
-            </div>
-          </div>
-          <div className="dashboard-header-right">
-            {!isEditing ? (
-              <button className="btn btn-primary btn-sm" onClick={() => setIsEditing(true)}>
-                ✏️ Edit Profile
-              </button>
-            ) : (
-              <div className="flex gap-2">
-                <button className="btn btn-ghost btn-sm" onClick={handleCancel} disabled={isSaving}>
-                  Cancel
-                </button>
-                <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={isSaving}>
-                  {isSaving ? <><span className="spinner" /> Saving…</> : '💾 Save Changes'}
-                </button>
-              </div>
-            )}
-          </div>
-        </header>
+      <header className="traveller-home-section">
+        <div className="traveller-home-grid">
+          <div className="traveller-home-card traveller-home-hero-card">
+            <span className="traveller-home-badge">AI Travel Assistant</span>
 
-        {/* ═══ Save feedback ══════════════════════════════════════════════════ */}
-        {saveMsg && (
-          <div className={`alert alert-${saveMsg.type}`}>
-            {saveMsg.type === 'success' ? '✅' : '⚠️'} {saveMsg.text}
-          </div>
-        )}
+            <div className="traveller-chat-grid">
+              <div className="traveller-chat-panel">
+                <div className="traveller-chat-header">
+                  <div className="traveller-chat-avatar">🤖</div>
 
-        {/* ═══ Dashboard Grid ════════════════════════════════════════════════ */}
-        <div className="dashboard-grid">
+                  <div>
+                    <div className="traveller-chat-title">TravelAI Consultant</div>
+                    <div className="traveller-chat-status">
+                      <span className="traveller-chat-status-dot" />
+                      Online &amp; Listening
+                    </div>
+                  </div>
+                </div>
 
-          {/* ── Personal Information ─────────────────────────────────────────── */}
-          <section className="glass-card dashboard-section">
-            <h2 className="section-title">👤 Personal Information</h2>
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">First Name</label>
-                <input
-                  name="first_name"
-                  className="form-input"
-                  value={form.first_name}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Last Name</label>
-                <input
-                  name="last_name"
-                  className="form-input"
-                  value={form.last_name}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Email</label>
-                <input
-                  className="form-input"
-                  value={profile?.email || ''}
-                  disabled
-                  title="Email cannot be changed"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Phone</label>
-                <input
-                  name="phone"
-                  type="tel"
-                  className="form-input"
-                  value={form.phone}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  placeholder="e.g. +1 555-123-4567"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Date of Birth</label>
-                <input
-                  name="dob"
-                  type="date"
-                  className="form-input"
-                  value={form.dob}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Nationality</label>
-                <input
-                  name="nationality"
-                  className="form-input"
-                  value={form.nationality}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  placeholder="e.g. American"
-                />
-              </div>
-            </div>
-            <div className="form-group mt-4">
-              <label className="form-label">Bio</label>
-              <textarea
-                name="bio"
-                className="form-input"
-                rows={3}
-                value={form.bio}
-                onChange={handleChange}
-                disabled={!isEditing}
-                placeholder="Tell us about yourself…"
-                style={{ resize: 'vertical' }}
-              />
-            </div>
-          </section>
+                <div className="traveller-chat-messages" ref={chatMessagesRef}>
+                  {messages.map((msg, index) => {
+                    const isUser = msg.role === 'user';
 
-          {/* ── Travel Preferences ───────────────────────────────────────────── */}
-          <section className="glass-card dashboard-section">
-            <h2 className="section-title">🌍 Travel Preferences</h2>
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">Budget</label>
-                <input
-                  name="budget_amount"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="form-input"
-                  value={form.budget_amount}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  placeholder="0.00"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Currency</label>
-                <select
-                  name="currency"
-                  className="form-input"
-                  value={form.currency}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                >
-                  {CURRENCY_OPTIONS.map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                <label className="form-label">Preferred Destination</label>
-                <input
-                  name="destination"
-                  className="form-input"
-                  value={form.destination}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  placeholder="e.g. Bali, Tokyo, Paris"
-                />
-              </div>
-            </div>
+                    return (
+                      <div
+                        key={index}
+                        className={`traveller-chat-message ${isUser ? 'user' : 'assistant'}`}
+                      >
+                        {isUser ? msg.content : renderFormattedMessage(msg.content)}
+                      </div>
+                    );
+                  })}
+                </div>
 
-            <div className="form-group mt-4">
-              <label className="form-label">Location Types</label>
-              <div className="chip-group">
-                {LOCATION_TYPE_OPTIONS.map(type => (
+                {chatError && (
+                  <div className="traveller-chat-error">⚠️ {chatError}</div>
+                )}
+
+                <div className="traveller-chat-input-row">
+                  <input
+                    type="text"
+                    placeholder="Tell TravelAI your destination, interests, dates, or plans..."
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSend();
+                      }
+                    }}
+                    disabled={isSending}
+                  />
+
                   <button
-                    key={type}
                     type="button"
-                    className={`chip${form.location_types.includes(type) ? ' selected' : ''}`}
-                    onClick={() => isEditing && toggleLocationType(type)}
-                    disabled={!isEditing}
+                    className="traveller-chat-send-btn"
+                    onClick={handleSend}
+                    disabled={isSending || !userInput.trim()}
                   >
-                    {type}
+                    {isSending ? 'Thinking...' : 'Send'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="traveller-tracker-panel">
+                <div className="traveller-tracker-header">
+                  <span className="traveller-tracker-title">
+                    🎯 Live Consultant Tracker
+                  </span>
+                </div>
+
+                <div className="traveller-tracker-row">
+                  <span>📍 Destination</span>
+                  <strong>{preferences.destination || 'Finding...'}</strong>
+                </div>
+
+                <div className="traveller-tracker-row">
+                  <span>🛫 Flying From</span>
+                  <strong>{preferences.originCity || 'Finding...'}</strong>
+                </div>
+
+                <div className="traveller-tracker-row">
+                  <span>📅 Duration</span>
+                  <strong>{preferences.days > 0 ? `${preferences.days} Days` : 'Finding...'}</strong>
+                </div>
+
+                <div className="traveller-tracker-row">
+                  <span>🗓 Depart Date</span>
+                  <strong>{preferences.departDate || 'Finding...'}</strong>
+                </div>
+
+                <div className="traveller-tracker-row">
+                  <span>🗓 Return Date</span>
+                  <strong>{preferences.returnDate || 'Finding...'}</strong>
+                </div>
+
+                <div className="traveller-tracker-row">
+                  <span>👥 Travelers</span>
+                  <strong>
+                    {preferences.travelers > 0
+                      ? `${preferences.travelers} Traveler(s)`
+                      : 'Finding...'}
+                  </strong>
+                </div>
+
+                <div className="traveller-tracker-row">
+                  <span>💰 Budget</span>
+                  <strong>
+                    {preferences.budgetAmount > 0
+                      ? `$${preferences.budgetAmount.toLocaleString()}`
+                      : preferences.flightBudget > 0 || preferences.hotelBudgetPerNight > 0
+                        ? `✈️ $${preferences.flightBudget.toLocaleString()} · 🏨 $${preferences.hotelBudgetPerNight.toLocaleString()}/night`
+                        : preferences.budgetLevel || 'Finding...'}
+                  </strong>
+                </div>
+
+                {preferences.location_types?.length > 0 && (
+                  <div className="traveller-tracker-tags">
+                    {preferences.location_types.map((type, idx) => (
+                      <span key={idx} className="traveller-tracker-tag">
+                        {type}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <aside className="traveller-home-card traveller-recent-card">
+            <div className="traveller-recent-header">
+              <div>
+                <span className="traveller-recent-kicker">AI History</span>
+                <h2>Recent Search</h2>
+              </div>
+
+              <span className="traveller-recent-count">{recentSearches.length}/5</span>
+            </div>
+
+            {recentSearches.length === 0 ? (
+              <div className="traveller-recent-empty">
+                <p>No recent searches yet.</p>
+                <span>Your AI trip searches will appear here.</span>
+              </div>
+            ) : (
+              <div className="traveller-recent-list">
+                {recentSearches.map((item, index) => (
+                  <button
+                    key={item.id || index}
+                    type="button"
+                    className="traveller-recent-item"
+                    onClick={() => handleRecentSearchClick(item.query)}
+                  >
+                    <span className="traveller-recent-number">{index + 1}</span>
+
+                    <span className="traveller-recent-text">
+                      <strong>{item.query}</strong>
+                      <small>{formatSearchDate(item.createdAt)}</small>
+                    </span>
+
+                    <span className="traveller-recent-arrow">→</span>
                   </button>
                 ))}
               </div>
-            </div>
-          </section>
-
-          {/* ── Account Information ──────────────────────────────────────────── */}
-          <section className="glass-card dashboard-section">
-            <h2 className="section-title">🔒 Account Information</h2>
-            <div className="account-badges">
-              <div className="info-badge">
-                <span className="info-badge-label">Role</span>
-                <span className="badge badge-role">{profile?.role_type}</span>
-              </div>
-              <div className="info-badge">
-                <span className="info-badge-label">Status</span>
-                <span className={`badge badge-status badge-${profile?.status}`}>
-                  {profile?.status}
-                </span>
-              </div>
-              <div className="info-badge">
-                <span className="info-badge-label">Auth Provider</span>
-                <span className="badge badge-provider">
-                  {profile?.auth_provider === 'google' ? '🔵 Google' : '📧 Local'}
-                </span>
-              </div>
-              <div className="info-badge">
-                <span className="info-badge-label">Email Verified</span>
-                <span className={`badge ${profile?.email_verified ? 'badge-active' : 'badge-pending'}`}>
-                  {profile?.email_verified ? '✅ Verified' : '⏳ Pending'}
-                </span>
-              </div>
-              <div className="info-badge">
-                <span className="info-badge-label">Last Login</span>
-                <span className="text-sm text-secondary">
-                  {profile?.last_login_at
-                    ? new Date(profile.last_login_at).toLocaleString()
-                    : '—'}
-                </span>
-              </div>
-              <div className="info-badge">
-                <span className="info-badge-label">Member Since</span>
-                <span className="text-sm text-secondary">
-                  {profile?.created_at
-                    ? new Date(profile.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric', month: 'long', day: 'numeric',
-                      })
-                    : '—'}
-                </span>
-              </div>
-            </div>
-          </section>
-
+            )}
+          </aside>
         </div>
-      </div>
+      </header>
+
+      <section className="home-dest-section" id="explore">
+        <div className="home-dest-header">
+          <h2 className="home-section-title">Popular Destinations</h2>
+          <a href="#explore" className="home-view-all">
+            View all <span>→</span>
+          </a>
+        </div>
+
+        <div className="home-dest-grid">
+          <div className="home-dest-card">
+            <div className="home-dest-banner paris" />
+            <div className="home-dest-footer">
+              <div className="home-dest-details">
+                <span className="home-dest-name">Paris</span>
+                <span className="home-dest-country">France</span>
+              </div>
+              <span className="home-dest-rating">★ 4.8</span>
+            </div>
+          </div>
+
+          <div className="home-dest-card">
+            <div className="home-dest-banner bali" />
+            <div className="home-dest-footer">
+              <div className="home-dest-details">
+                <span className="home-dest-name">Bali</span>
+                <span className="home-dest-country">Indonesia</span>
+              </div>
+              <span className="home-dest-rating">★ 4.8</span>
+            </div>
+          </div>
+
+          <div className="home-dest-card">
+            <div className="home-dest-banner dubai" />
+            <div className="home-dest-footer">
+              <div className="home-dest-details">
+                <span className="home-dest-name">Dubai</span>
+                <span className="home-dest-country">UAE</span>
+              </div>
+              <span className="home-dest-rating">★ 4.8</span>
+            </div>
+          </div>
+
+          <div className="home-dest-card">
+            <div className="home-dest-banner newyork" />
+            <div className="home-dest-footer">
+              <div className="home-dest-details">
+                <span className="home-dest-name">New York</span>
+                <span className="home-dest-country">USA</span>
+              </div>
+              <span className="home-dest-rating">★ 4.8</span>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -47,6 +47,8 @@ export default function HomePage() {
   const { user, logout, accessToken } = useAuth();
   const [description, setDescription] = useState('');
   const messagesEndRef = useRef(null);
+  const chatMessagesRef = useRef(null);
+  const hasMountedMessagesRef = useRef(false);
   const [messages, setMessages] = useState([{
     role: 'assistant',
     content: "Hello! I am TravelAI, your interactive travel consultant buddy. 🌍 Where are we dreaming of going for your next adventure? Tell me your destination, travel dates, number of travellers, and budget -- or we can figure it out together!"
@@ -108,7 +110,15 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  if (!hasMountedMessagesRef.current) {
+    hasMountedMessagesRef.current = true;
+    return;
+  }
+
+    const chatBox = chatMessagesRef.current;
+    if (!chatBox) return;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
   }, [messages]);
 
   const parseBoldText = (text) => {
@@ -232,7 +242,7 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <div className="traveller-chat-messages">
+                  <div className="traveller-chat-messages" ref={chatMessagesRef}>
                     {messages.map((msg, index) => {
                       const isUser = msg.role === 'user';
                       return (
@@ -480,67 +490,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="home-footer">
-        <div className="home-footer-grid">
-          {/* Brand/logo column */}
-          <div className="home-footer-brand-col">
-            <Logo height={32} />
-            <p className="home-footer-desc">
-              Your AI travel companion for unforgettable journeys.
-            </p>
-          </div>
-
-          {/* Company column */}
-          <div className="home-footer-col">
-            <span className="home-footer-title">Company</span>
-            <div className="home-footer-links">
-              <a href="#about" className="home-footer-link">About Us</a>
-              <a href="#careers" className="home-footer-link">Careers</a>
-              <a href="#blog" className="home-footer-link">Blog</a>
-              <a href="#press" className="home-footer-link">Press</a>
-            </div>
-          </div>
-
-          {/* Support column */}
-          <div className="home-footer-col">
-            <span className="home-footer-title">Support</span>
-            <div className="home-footer-links">
-              <a href="#help" className="home-footer-link">Help Center</a>
-              <a href="#contact" className="home-footer-link">Contact Us</a>
-              <a href="#faqs" className="home-footer-link">FAQs</a>
-              <a href="#privacy" className="home-footer-link">Privacy Policy</a>
-            </div>
-          </div>
-
-          {/* Resources column */}
-          <div className="home-footer-col">
-            <span className="home-footer-title">Resources</span>
-            <div className="home-footer-links">
-              <a href="#guide" className="home-footer-link">Travel Guide</a>
-              <a href="#explore" className="home-footer-link">Top Destinations</a>
-              <a href="#tips" className="home-footer-link">Travel Tips</a>
-              <a href="#features" className="home-footer-link">AI Features</a>
-            </div>
-          </div>
-
-          {/* Follow Us column with social buttons */}
-          <div className="home-footer-col" id="pricing">
-            <span className="home-footer-title">Follow Us</span>
-            <div className="home-social-links">
-              <a href="#facebook" className="home-social-btn">f</a>
-              <a href="#google" className="home-social-btn">g</a>
-              <a href="#twitter" className="home-social-btn">tw</a>
-              <a href="#youtube" className="home-social-btn">yt</a>
-            </div>
-          </div>
-        </div>
-
-        <div className="home-footer-bottom">
-          <p>© 2026 Travel AI. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }

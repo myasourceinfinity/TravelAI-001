@@ -58,21 +58,42 @@ export default function Navbar() {
         {user ? (
           <>
             {user.role_type === 'agent' ? (
-              <Link to="/dashboard" className={`home-nav-link ${isActive('/dashboard')}`}>Dashboard</Link>
+              <Link to="/dashboard" className={`home-nav-link ${isActive('/dashboard')}`}>
+                Dashboard
+              </Link>
             ) : user.role_type && ['admin','useradmin','superadmin'].includes(user.role_type) ? (
-              <Link to="/admin" className={`home-nav-link ${isActive('/admin')}`}>Admin</Link>
-            ) : null}
-            {user?.role_type !== 'agent' && !['admin','useradmin','superadmin'].includes(user?.role_type) && (
-              <Link to="/" className={`home-nav-link ${isActive('/')}`}>Home</Link>
+              <Link to="/admin" className={`home-nav-link ${isActive('/admin')}`}>
+                Admin
+              </Link>
+            ) : (
+              <Link to="/dashboard" className={`home-nav-link ${isActive('/dashboard')}`}>
+                Dashboard
+              </Link>
             )}
-            <Link to="/agents" className={`home-nav-link ${isActive('/agents')}`}>Agents</Link>
-            <Link to="/plan-trip" className={`home-nav-link ${isActive('/plan-trip')}`}>AI Planner</Link>
-            <Link to="/my-trips" className={`home-nav-link ${isActive('/my-trips')}`}>My Trips</Link>
-            {user.role_type !== 'agent' && user.role_type !== 'admin' && user.role_type !== 'useradmin' && user.role_type !== 'superadmin' && (
-              <Link to="/dashboard" className={`home-nav-link ${isActive('/dashboard')}`}>Dashboard</Link>
-            )}
-            <Link to="/profile" className={`home-nav-link ${isActive('/profile')}`}>Profile</Link>
-            <button onClick={handleLogout} className="home-nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}>Logout</button>
+
+            <Link to="/agents" className={`home-nav-link ${isActive('/agents')}`}>
+              Agents
+            </Link>
+
+            <Link to="/plan-trip" className={`home-nav-link ${isActive('/plan-trip')}`}>
+              AI Planner
+            </Link>
+
+            <Link to="/my-trips" className={`home-nav-link ${isActive('/my-trips')}`}>
+              My Trips
+            </Link>
+
+            <Link to="/profile" className={`home-nav-link ${isActive('/profile')}`}>
+              Profile
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className="home-nav-link"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}
+            >
+              Logout
+            </button>
           </>
         ) : (
           <>
