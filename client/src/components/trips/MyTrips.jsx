@@ -315,16 +315,23 @@ export default function MyTrips() {
 
   if (isLoading) {
     return (
-      <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start' }}>
-        <div className="dashboard-loader text-center mt-12">
-          <span className="spinner" style={{ width: 32, height: 32 }} />
-          <p className="text-secondary mt-4">Loading your trips…</p>
+      <>
+        <Navbar />
+
+        <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start' }}>
+          <div className="dashboard-loader text-center mt-12">
+            <span className="spinner" style={{ width: 32, height: 32 }} />
+            <p className="text-secondary mt-4">Loading your trips…</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
+  <>
+    <Navbar />
+
     <div className="dashboard-page page-bg" style={{ background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)', minHeight: '100vh', alignItems: 'flex-start', padding: '0 5%' }}>
       <div className="dashboard-container" style={{ maxWidth: '100%', width: '100%' }}>
 
@@ -566,5 +573,6 @@ export default function MyTrips() {
       )}
 
     </div>
-  );
+  </>
+);
 }

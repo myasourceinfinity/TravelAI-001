@@ -6,14 +6,16 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { Navigate, Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import SignUpFlow from './SignUpFlow';
 import SignInForm from './SignInForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
 import ResetPasswordForm from './ResetPasswordForm';
-import travelAILogo from '../../assets/travelai-logo.png';
+import travelAILogo from '../../assets/TravelAI_Transparent.png';
 
 // ─── Left decorative panel ───────────────────────────────────────────────────
-function LeftPanel({ mode }) {
+function LeftPanel({ mode, isMobile = false }) {
   const isSignup = mode === 'signup';
 
   const bg = isSignup
@@ -38,18 +40,44 @@ function LeftPanel({ mode }) {
 
   return (
     <div style={{
-      width: '300px', minWidth: '300px',
-      background: bg,
-      position: 'relative', overflow: 'hidden',
-      display: 'flex', flexDirection: 'column',
-      padding: '28px 24px',
+        width: isMobile ? '100%' : '300px',
+        minWidth: isMobile ? 0 : '300px',
+        minHeight: isMobile ? 240 : 'auto',
+        background: bg,
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: isMobile ? '24px 22px 34px' : '28px 24px',
+        boxSizing: 'border-box',
     }}>
       {/* ── Logo ── */}
-      <div style={{ zIndex: 2 }}>
+      <div
+        style={{
+          zIndex: 2,
+          width: isMobile ? 230 : 250,
+          height: isMobile ? 80 : 92,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          overflow: 'visible',
+          background: 'transparent',
+          marginBottom: isMobile ? 22 : 0,
+        }}
+      >
         <img
           src={travelAILogo}
           alt="Travel AI"
-          style={{ height: 38, width: 'auto', objectFit: 'contain', mixBlendMode: 'multiply' }}
+          style={{
+            width: isMobile ? 210 : 235,
+            height: 'auto',
+            objectFit: 'contain',
+            display: 'block',
+            mixBlendMode: 'multiply',
+            background: 'transparent',
+            border: 'none',
+            boxShadow: 'none',
+          }}
         />
       </div>
 
@@ -59,7 +87,13 @@ function LeftPanel({ mode }) {
       <div style={{ position: 'absolute', top: 38, right: 8,  width: 12, height: 12, borderRadius: '50%', background: '#e8c060', opacity: 0.85 }} />
 
       {/* ── Large orb cluster ── */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+      <div style={{
+          flex: isMobile ? 'none' : 1,
+          display: isMobile ? 'none' : 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        }}>
         <div style={{
           position: 'absolute', width: 210, height: 210, borderRadius: '50%',
           background: `radial-gradient(circle at 40% 40%, ${orbColor}, rgba(80,80,150,0.2))`,
@@ -87,14 +121,26 @@ function LeftPanel({ mode }) {
       }} />
 
       {/* ── Tagline ── */}
-      <div style={{ zIndex: 2, marginBottom: isSignup ? 12 : 24 }}>
+      <div
+        style={{
+          zIndex: 2,
+          marginTop: isMobile ? 4 : 0,
+          marginBottom: isSignup ? 12 : 24,
+        }}
+      >
         <h2 style={{
-          fontSize: '1.65rem', fontWeight: 800, color: headingColor,
+          fontSize: isMobile ? '1.35rem' : '1.65rem', fontWeight: 800, color: headingColor,
           fontFamily: 'Outfit, sans-serif', lineHeight: 1.2, margin: '0 0 10px',
         }}>
           {isSignup ? <>Create your<br />account</> : <>Your journey<br />starts here.</>}
         </h2>
-        <p style={{ fontSize: '0.82rem', color: textColor, lineHeight: 1.55, margin: 0 }}>
+        <p style={{
+            fontSize: isMobile ? '0.78rem' : '0.82rem',
+            color: textColor,
+            lineHeight: 1.55,
+            margin: 0,
+            maxWidth: isMobile ? 280 : 'none',
+          }}>
           {isSignup
             ? 'Your AI travel companion starts here.\nA few steps and you\'re ready to explore.'
             : 'AI-powered travel planning —\nitineraries, bookings & inspiration\nall in one beautiful place.'}
@@ -132,6 +178,7 @@ function LeftPanel({ mode }) {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function AuthPage() {
+  const { user, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     const view = params.get('view');
@@ -153,6 +200,18 @@ export default function AuthPage() {
   });
 
   const [selectedCurrency, setSelectedCurrency] = useState('NZD');
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+
+    useEffect(() => {
+      function handleResize() {
+        setIsMobile(window.innerWidth <= 768);
+      }
+
+      handleResize();
+      window.addEventListener('resize', handleResize);
+
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
   const verifyEmailToken = useCallback(async (token) => {
     try {
@@ -214,28 +273,99 @@ export default function AuthPage() {
     }
   }
 
-  return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      fontFamily: 'Inter, system-ui, sans-serif',
-      background: '#fff',
-    }}>
-      {/* ── Left decorative panel ── */}
-      <LeftPanel mode={activeTab} />
+    if (isLoading) {
+      return null;
+    }
 
-      {/* ── Right form panel ── */}
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '48px 56px',
-        background: '#ffffff',
-        overflowY: 'auto',
-      }}>
+    if (user && (activeTab === 'signin' || activeTab === 'signup')) {
+      const adminRoles = ['admin', 'useradmin', 'superadmin'];
+
+      if (adminRoles.includes(user.role_type)) {
+        return <Navigate to="/admin" replace />;
+      }
+
+      return <Navigate to="/dashboard" replace />;
+    }
+
+ return (
+  <div style={{
+    display: 'flex',
+    flexDirection: isMobile ? 'column' : 'row',
+    minHeight: '100svh',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    background: isMobile ? '#f8fafc' : '#fff',
+    overflowX: 'hidden',
+  }}>
+    {/* ── Left decorative panel ── */}
+    <LeftPanel mode={activeTab} isMobile={isMobile} />
+
+    {/* ── Right form panel ── */}
+    <div style={{
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: isMobile ? 'flex-start' : 'center',
+      padding: isMobile ? '26px 18px 32px' : '48px 56px',
+      background: '#ffffff',
+      overflowY: 'auto',
+      borderTopLeftRadius: isMobile ? 24 : 0,
+      borderTopRightRadius: isMobile ? 24 : 0,
+      marginTop: isMobile ? -18 : 0,
+      position: 'relative',
+      zIndex: 3,
+      boxShadow: isMobile ? '0 -14px 34px rgba(15,23,42,0.08)' : 'none',
+      boxSizing: 'border-box',
+    }}>
+        {!isMobile && (
+          <Link
+            to="/"
+            style={{
+              position: 'absolute',
+              top: 24,
+              right: 32,
+              color: '#4f46e5',
+              fontSize: '0.9rem',
+              fontWeight: 700,
+              textDecoration: 'none',
+              fontFamily: 'Outfit, sans-serif',
+              zIndex: 5,
+            }}
+          >
+            ← Home
+          </Link>
+        )}
         <div style={{ maxWidth: 480, width: '100%', margin: '0 auto' }}>
-          {renderPanel()}
+          {isMobile && (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-start',
+                marginBottom: 18,
+              }}
+            >
+              <Link
+                to="/"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '8px 14px',
+                  borderRadius: 999,
+                  background: 'rgba(79, 70, 229, 0.1)',
+                  border: '1px solid rgba(79, 70, 229, 0.18)',
+                  color: '#4f46e5',
+                  fontSize: '0.88rem',
+                  fontWeight: 800,
+                  textDecoration: 'none',
+                  fontFamily: 'Outfit, sans-serif',
+                }}
+      >
+        ← Home
+      </Link>
+    </div>
+  )}
+
+  {renderPanel()}
 
           {/* Footer */}
           <p style={{ marginTop: 24, fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center' }}>

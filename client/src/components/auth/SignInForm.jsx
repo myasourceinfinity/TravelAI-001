@@ -98,7 +98,17 @@ export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 0,
+        width: '100%',
+        maxWidth: '100%',
+      }}
+    >
 
       {/* ── Heading ── */}
       <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#111827', margin: '0 0 6px', fontFamily: 'Outfit, sans-serif' }}>
@@ -121,7 +131,7 @@ export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
       {/* ── Social buttons ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
         {/* Google — using the real SDK button, wrapped in a styled container */}
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => console.error('Google Login Failed')}

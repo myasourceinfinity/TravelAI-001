@@ -8,6 +8,7 @@ import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import SplashScreen from './components/common/SplashScreen';
 import Footer from './components/common/Footer';
 
+const HomePage = lazy(() => import('./components/home/HomePage'));
 const TravellerDashboard   = lazy(() => import('./components/dashboard/TravellerDashboard'));
 const TravellerProfilePage = lazy(() => import('./components/dashboard/TravellerProfilePage'));
 const AgentDashboard       = lazy(() => import('./components/dashboard/AgentDashboard'));
@@ -125,7 +126,7 @@ function HomeRoute() {
   if (isLoading) return null;
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <HomePage />;
   }
 
   if (ADMIN_ROLES.includes(user?.role_type)) {

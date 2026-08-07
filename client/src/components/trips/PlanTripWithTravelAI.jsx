@@ -751,7 +751,10 @@ export default function PlanTripWithTravelAI() {
 
   // -- Landing screen (shown before the first message is sent) --------------
   if (showLanding) {
-    return (
+  return (
+    <>
+      <Navbar />
+
       <div style={{ minHeight: '100vh', background: '#f5f4f1', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3rem 1.5rem', fontFamily: 'Georgia, "Times New Roman", serif' }}>
 
         <div style={{ width: '100%', maxWidth: 900, background: '#faf9f6', border: '1px solid #e2e0da', borderRadius: 20, padding: '2.5rem 2.5rem 2rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
@@ -826,12 +829,14 @@ export default function PlanTripWithTravelAI() {
           </p>
         </div>
       </div>
-    );
-  }
+    </>
+  );
+}
 
-      {/* Header */}
-      <Navbar />
   return (
+  <>
+    <Navbar />
+
     <div style={{ minHeight: '100vh', background: '#f5f4f1', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1.5rem', fontFamily: 'Georgia, "Times New Roman", serif' }}>
 
       <div style={{ width: '100%', maxWidth: 1400, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -1167,5 +1172,6 @@ export default function PlanTripWithTravelAI() {
       </div>
       </div>
     </div>
-  );
+  </>
+);
 }

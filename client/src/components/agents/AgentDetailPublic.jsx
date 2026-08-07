@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getPublicAgentDetail, submitAgentReview } from '../../services/agentService';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../common/Navbar';
+import { saveRecentPackageActivity } from '../../services/recentPackageService';
 
 const SPECIALTY_COLORS = {
   Luxury:     { bg: 'rgba(168,85,247,0.12)',  color: '#7c3aed', border: 'rgba(168,85,247,0.25)' },
@@ -92,6 +93,26 @@ export default function AgentDetailPublic() {
     } finally {
       setIsSubmittingReview(false);
     }
+  }
+
+  async function handleEnquirePackage(pkg) {
+    if (accessToken && user) {
+      try {
+        await saveRecentPackageActivity(accessToken, {
+          packageId: pkg.id,
+          activityType: 'enquire',
+        });
+      } catch (err) {
+        console.warn('[AgentDetailPublic] Failed to save recent package:', err);
+      }
+    }
+
+    sessionStorage.setItem(
+      'pending_trip_description',
+      `${pkg.package_name} in ${pkg.destination_name}`
+    );
+
+    navigate('/plan-trip');
   }
 
   if (isLoading) {
@@ -380,7 +401,14 @@ export default function AgentDetailPublic() {
             <h3 style={{ margin: '0 0 6px', fontWeight: 800, fontSize: 16 }}>Ready to plan your trip?</h3>
             <p style={{ margin: '0 0 16px', fontSize: 13, opacity: 0.85 }}>Chat with {agent.first_name} to get a personalised itinerary.</p>
             <button
-              onClick={() => navigate('/plan-trip')}
+              onClick={() => {
+                sessionStorage.setItem(
+                  'pending_trip_description',
+                  `Plan a personalised trip with ${agent.first_name} ${agent.last_name}`
+                );
+
+                navigate('/plan-trip');
+              }}
               style={{ background: 'white', color: '#4f46e5', border: 'none', borderRadius: 8, padding: '10px 20px', fontWeight: 700, fontSize: 13, cursor: 'pointer', width: '100%' }}
             >
               Start Planning →
@@ -453,7 +481,7 @@ export default function AgentDetailPublic() {
                     )}
                     <div style={{ marginLeft: 'auto' }}>
                       <button
-                        onClick={() => navigate('/plan-trip')}
+                        onClick={() => handleEnquirePackage(pkg)}
                         style={{ fontSize: 12, padding: '6px 14px', background: 'linear-gradient(135deg,#4f46e5,#3b82f6)', color: 'white', border: 'none', borderRadius: 7, fontWeight: 700, cursor: 'pointer' }}
                       >
                         Enquire →

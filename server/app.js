@@ -20,7 +20,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const publicRoutes = require('./routes/publicRoutes');
 const { requireRole, ADMIN_ROLES } = require('./middleware/requireRole');
 const recentSearchRoutes = require('./routes/recentSearchRoutes');
-
+const recentPackageRoutes = require('./routes/recentPackageRoutes');
 
 
 const app = express();
@@ -44,6 +44,7 @@ app.use('/api/booking', authMiddleware, bookingRoutes);
 app.use('/api/admin', authMiddleware, requireRole(...ADMIN_ROLES), adminRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/recent-searches', authMiddleware, recentSearchRoutes);
+app.use('/api/recent-packages', authMiddleware, recentPackageRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) =>

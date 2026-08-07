@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getProfile, updateProfile } from '../../services/authService';
 import Navbar from '../common/Navbar';
+import { getRecentPackages } from '../../services/recentPackageService';
 
 const LOCATION_TYPE_OPTIONS = [
   '🏖️ Beach',
@@ -17,41 +18,6 @@ const LOCATION_TYPE_OPTIONS = [
 
 const CURRENCY_OPTIONS = ['USD', 'EUR', 'GBP', 'INR', 'AUD', 'CAD', 'JPY', 'SGD', 'AED'];
 
-const RECENT_PACKAGES = [
-  {
-    id: 1,
-    title: 'Bali Family Escape',
-    destination: 'Bali, Indonesia',
-    duration: '5 days',
-    price: 'USD 850',
-    status: 'Viewed',
-  },
-  {
-    id: 2,
-    title: 'Tokyo Spring Trip',
-    destination: 'Tokyo, Japan',
-    duration: '7 days',
-    price: 'USD 1,450',
-    status: 'Saved',
-  },
-  {
-    id: 3,
-    title: 'Paris City Break',
-    destination: 'Paris, France',
-    duration: '4 days',
-    price: 'USD 1,200',
-    status: 'Draft',
-  },
-  {
-    id: 4,
-    title: 'Dubai Luxury Stay',
-    destination: 'Dubai, UAE',
-    duration: '3 days',
-    price: 'USD 980',
-    status: 'Recommended',
-  },
-];
-
 export default function TravellerProfilePage() {
   const navigate = useNavigate();
   const { accessToken, logout } = useAuth();
@@ -63,6 +29,9 @@ export default function TravellerProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [saveMsg, setSaveMsg] = useState(null);
   const [error, setError] = useState(null);
+  const [recentPackages, setRecentPackages] = useState([]);
+  const [isRecentPackagesLoading, setIsRecentPackagesLoading] = useState(false);
+  const [recentPackageError, setRecentPackageError] = useState(null);
 
   function buildFormState(p) {
     return {
@@ -86,24 +55,41 @@ export default function TravellerProfilePage() {
     setError(null);
 
     try {
-      const data = await getProfile(accessToken);
-      setProfile(data.user);
-      setForm(buildFormState(data.user));
+        const data = await getProfile(accessToken);
+        setProfile(data.user);
+        setForm(buildFormState(data.user));
     } catch (err) {
-      if (err.status === 401) {
+        if (err.status === 401) {
         await logout();
         navigate('/');
-      } else {
+        } else {
         setError(err.message || 'Failed to load profile.');
-      }
+        }
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  }, [accessToken, logout, navigate]);
+    }, [accessToken, logout, navigate]);
 
-  useEffect(() => {
+    const fetchRecentPackages = useCallback(async () => {
+    if (!accessToken) return;
+
+    setIsRecentPackagesLoading(true);
+    setRecentPackageError(null);
+
+    try {
+        const data = await getRecentPackages(accessToken);
+        setRecentPackages(data.recentPackages || []);
+    } catch (err) {
+        setRecentPackageError(err.message || 'Failed to load recent packages.');
+    } finally {
+        setIsRecentPackagesLoading(false);
+    }
+    }, [accessToken]);
+
+    useEffect(() => {
     fetchProfile();
-  }, [fetchProfile]);
+    fetchRecentPackages();
+    }, [fetchProfile, fetchRecentPackages]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -442,32 +428,101 @@ export default function TravellerProfilePage() {
         </section>
 
         <section className="glass-card traveller-profile-card traveller-recent-package-section">
-          <div className="traveller-recent-package-header">
-            <div>
-              <span className="traveller-profile-kicker">Recent Package</span>
-              <h2>Recent travel packages</h2>
-            </div>
-          </div>
-
-          <div className="traveller-recent-package-grid">
-            {RECENT_PACKAGES.map(pkg => (
-              <article key={pkg.id} className="traveller-package-card">
-                <div className="traveller-package-top">
-                  <span className="traveller-package-status">{pkg.status}</span>
-                  <span>✈️</span>
+            <div className="traveller-recent-package-header">
+                <div>
+                    <span className="traveller-profile-kicker">Travel Activity</span>
+                    <h2>Recent Package</h2>
+                    <p className="text-secondary" style={{ margin: '6px 0 0' }}>
+                    Packages you have asked agents about will appear here.
+                    </p>
+                </div>
                 </div>
 
-                <h3>{pkg.title}</h3>
-                <p>{pkg.destination}</p>
-
-                <div className="traveller-package-meta">
-                  <span>{pkg.duration}</span>
-                  <strong>{pkg.price}</strong>
+            {isRecentPackagesLoading ? (
+                <div className="dashboard-loader" style={{ minHeight: 180 }}>
+                <span className="spinner" style={{ width: 28, height: 28 }} />
+                <p className="text-secondary mt-4">Loading recent packages…</p>
                 </div>
-              </article>
-            ))}
-          </div>
-        </section>
+            ) : recentPackageError ? (
+                <div className="dashboard-error-card" style={{ padding: 20 }}>
+                <p className="text-secondary">⚠️ {recentPackageError}</p>
+                <button className="btn btn-primary btn-sm mt-4" onClick={fetchRecentPackages}>
+                    Retry
+                </button>
+                </div>
+            ) : recentPackages.length === 0 ? (
+                <div style={{ padding: '28px 0', textAlign: 'center' }}>
+                <div style={{ fontSize: 36, marginBottom: 10 }}>📭</div>
+                <h3 style={{ margin: '0 0 6px', color: '#0f172a' }}>No package activity yet</h3>
+                    <p className="text-secondary" style={{ margin: 0 }}>
+                    Enquired packages will appear here after you contact an agent.
+                    </p>
+                <button
+                    className="btn btn-primary btn-sm mt-4"
+                    onClick={() => navigate('/agents')}
+                >
+                    Browse Agents
+                </button>
+                </div>
+            ) : (
+                <div className="traveller-recent-package-grid">
+                {recentPackages.map(pkg => {
+                    const duration =
+                    pkg.duration_days && pkg.duration_nights
+                        ? `${pkg.duration_days}d / ${pkg.duration_nights}n`
+                        : pkg.duration_days
+                        ? `${pkg.duration_days} days`
+                        : 'Flexible';
+
+                    const price =
+                    pkg.base_price !== null && pkg.base_price !== undefined
+                        ? `${pkg.currency_code || 'USD'} ${Number(pkg.base_price).toLocaleString()}`
+                        : 'Price on request';
+
+                    const status =
+                    pkg.activity_type === 'enquire'
+                        ? 'Enquired'
+                        : 'Viewed';
+
+                    return (
+                    <article
+                        key={pkg.id}
+                        className="traveller-package-card"
+                        onClick={() => {
+                        if (pkg.agent_user_id) {
+                            navigate(`/agents/${pkg.agent_user_id}`);
+                        }
+                        }}
+                        style={{ cursor: pkg.agent_user_id ? 'pointer' : 'default' }}
+                    >
+                        <div className="traveller-package-top">
+                        <span className="traveller-package-status">{status}</span>
+                        <span>✈️</span>
+                        </div>
+
+                        <h3>{pkg.package_name}</h3>
+                        <p>{pkg.destination_name}</p>
+
+                        <div className="traveller-package-meta">
+                        <span>{duration}</span>
+                        <strong>{price}</strong>
+                        </div>
+
+                        <small style={{ display: 'block', marginTop: 10, color: '#94a3b8' }}>
+                        {pkg.last_interacted_at
+                            ? `Last activity: ${new Date(pkg.last_interacted_at).toLocaleDateString('en-US', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                            })}`
+                            : ''}
+                        </small>
+                    </article>
+                    );
+                })}
+                </div>
+            )}
+            </section>
       </main>
     </div>
   );
