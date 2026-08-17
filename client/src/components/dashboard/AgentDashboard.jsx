@@ -451,10 +451,10 @@ export default function AgentDashboard() {
         </section>
 
         {/* ═══ Workspace Sidebar Grid ══════════════════════════════════════════ */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24, alignItems: 'start', gridTemplateColumns: '240px 1fr' }}>
+        <div className="agent-dashboard-workspace">
           
           {/* Left Column: Sidebar Navigation */}
-          <div className="glass-card" style={{ padding: '16px', background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 16, boxShadow: '0 4px 20px rgba(15,23,42,0.02)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="glass-card agent-dashboard-sidebar" style={{ padding: '16px', background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 16, boxShadow: '0 4px 20px rgba(15,23,42,0.02)', display: 'flex', flexDirection: 'column', gap: 8 }}>
             <button 
               onClick={() => {
                 setActiveTab('packages');
@@ -515,7 +515,7 @@ export default function AgentDashboard() {
           </div>
 
           {/* Right Column: Main Content Canvas */}
-          <div className="glass-card" style={{ padding: '24px', background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 16, boxShadow: '0 4px 20px rgba(15,23,42,0.04)' }}>
+          <div className="glass-card agent-dashboard-main" style={{ padding: '24px', background: '#ffffff', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 16, boxShadow: '0 4px 20px rgba(15,23,42,0.04)' }}>
 
             {activeTab === 'packages' && (
               <>

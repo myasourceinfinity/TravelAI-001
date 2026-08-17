@@ -5,6 +5,26 @@ import Navbar from '../common/Navbar';
 import '../home/HomePage.css';
 import { getRecentSearches, saveRecentSearchToDB } from '../../services/recentSearchService';
 import { chatWithAI } from '../../services/tripService';
+import travelAILogo from '../../assets/travelai-logo.png';
+
+const Logo = ({ height = 40 }) => (
+  <img
+    src={travelAILogo}
+    alt="Travel AI"
+    style={{ height, width: 'auto', objectFit: 'contain', display: 'block' }}
+  />
+);
+
+const EXPLORE_SUGGESTIONS = [
+  'Dubai Marina',
+  'Burj Khalifa',
+  'Palm Jumeirah',
+  'Dubai Mall',
+  'Desert Safari',
+  'Global Village',
+  'Miracle Garden',
+  'Dubai Creek',
+];
 
 function formatSearchDate(value) {
   if (!value) return '';
@@ -266,6 +286,10 @@ export default function TravellerDashboard() {
     navigate('/plan-trip');
   }
 
+  function handlePillClick(place) {
+    setUserInput(`Tell me about visiting ${place}`);
+  }
+
   return (
     <div className="home-page-container">
       <Navbar />
@@ -276,42 +300,26 @@ export default function TravellerDashboard() {
             <span className="traveller-home-badge">AI Travel Assistant</span>
 
             <div className="traveller-chat-grid">
-              <div className="traveller-chat-panel">
-                <div className="traveller-chat-header">
-                  <div className="traveller-chat-avatar">🤖</div>
-
-                  <div>
-                    <div className="traveller-chat-title">TravelAI Consultant</div>
-                    <div className="traveller-chat-status">
-                      <span className="traveller-chat-status-dot" />
-                      Online &amp; Listening
-                    </div>
-                  </div>
+              <div className="traveller-planner-entry-card">
+                <div className="traveller-planner-entry-logo">
+                  <Logo height={90} />
                 </div>
 
-                <div className="traveller-chat-messages" ref={chatMessagesRef}>
-                  {messages.map((msg, index) => {
-                    const isUser = msg.role === 'user';
-
-                    return (
-                      <div
-                        key={index}
-                        className={`traveller-chat-message ${isUser ? 'user' : 'assistant'}`}
-                      >
-                        {isUser ? msg.content : renderFormattedMessage(msg.content)}
-                      </div>
-                    );
-                  })}
+                <div className="traveller-planner-suggestions">
+                  {EXPLORE_SUGGESTIONS.map(place => (
+                    <button
+                      key={place}
+                      type="button"
+                      className="traveller-planner-suggestion-pill"
+                      onClick={() => handlePillClick(place)}
+                    >
+                      Explore {place}
+                    </button>
+                  ))}
                 </div>
 
-                {chatError && (
-                  <div className="traveller-chat-error">⚠️ {chatError}</div>
-                )}
-
-                <div className="traveller-chat-input-row">
-                  <input
-                    type="text"
-                    placeholder="Tell TravelAI your destination, interests, dates, or plans..."
+                <div className="traveller-planner-input-card">
+                  <textarea
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -320,18 +328,32 @@ export default function TravellerDashboard() {
                         handleSend();
                       }
                     }}
+                    placeholder="Ask here where do you want to go?"
                     disabled={isSending}
                   />
 
-                  <button
-                    type="button"
-                    className="traveller-chat-send-btn"
-                    onClick={handleSend}
-                    disabled={isSending || !userInput.trim()}
-                  >
-                    {isSending ? 'Thinking...' : 'Send'}
-                  </button>
+                  <div className="traveller-planner-submit-row">
+                    <button
+                      type="button"
+                      className="traveller-planner-submit-btn"
+                      onClick={handleSend}
+                      disabled={isSending || !userInput.trim()}
+                    >
+                      {isSending ? 'Thinking...' : 'Submit'}
+                    </button>
+                  </div>
                 </div>
+
+                {chatError && (
+                  <div className="traveller-chat-error">
+                    ⚠️ {chatError}
+                  </div>
+                )}
+
+                <p className="traveller-planner-entry-terms">
+                  AI-powered . By using AI Mode you agree to our{' '}
+                  <span>Terms</span> &amp; <span>Privacy Policy</span>
+                </p>
               </div>
 
               <div className="traveller-tracker-panel">
@@ -343,27 +365,27 @@ export default function TravellerDashboard() {
 
                 <div className="traveller-tracker-row">
                   <span>📍 Destination</span>
-                  <strong>{preferences.destination || 'Finding...'}</strong>
+                  <strong>{preferences.destination || '...'}</strong>
                 </div>
 
                 <div className="traveller-tracker-row">
                   <span>🛫 Flying From</span>
-                  <strong>{preferences.originCity || 'Finding...'}</strong>
+                  <strong>{preferences.originCity || '...'}</strong>
                 </div>
 
                 <div className="traveller-tracker-row">
                   <span>📅 Duration</span>
-                  <strong>{preferences.days > 0 ? `${preferences.days} Days` : 'Finding...'}</strong>
+                  <strong>{preferences.days > 0 ? `${preferences.days} Days` : '...'}</strong>
                 </div>
 
                 <div className="traveller-tracker-row">
                   <span>🗓 Depart Date</span>
-                  <strong>{preferences.departDate || 'Finding...'}</strong>
+                  <strong>{preferences.departDate || '...'}</strong>
                 </div>
 
                 <div className="traveller-tracker-row">
                   <span>🗓 Return Date</span>
-                  <strong>{preferences.returnDate || 'Finding...'}</strong>
+                  <strong>{preferences.returnDate || '...'}</strong>
                 </div>
 
                 <div className="traveller-tracker-row">
@@ -371,7 +393,7 @@ export default function TravellerDashboard() {
                   <strong>
                     {preferences.travelers > 0
                       ? `${preferences.travelers} Traveler(s)`
-                      : 'Finding...'}
+                      : '...'}
                   </strong>
                 </div>
 
@@ -382,7 +404,7 @@ export default function TravellerDashboard() {
                       ? `$${preferences.budgetAmount.toLocaleString()}`
                       : preferences.flightBudget > 0 || preferences.hotelBudgetPerNight > 0
                         ? `✈️ $${preferences.flightBudget.toLocaleString()} · 🏨 $${preferences.hotelBudgetPerNight.toLocaleString()}/night`
-                        : preferences.budgetLevel || 'Finding...'}
+                        : preferences.budgetLevel || '...'}
                   </strong>
                 </div>
 

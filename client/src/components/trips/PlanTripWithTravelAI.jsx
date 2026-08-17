@@ -767,9 +767,6 @@ export default function PlanTripWithTravelAI() {
           {/* Hero */}
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <img src={travelAILogo} alt="Travel AI" style={{ height: 110, width: 'auto', objectFit: 'contain', marginBottom: '0.75rem', mixBlendMode: 'multiply', display: 'inline-block' }} />
-            <p style={{ fontFamily: 'Arial, sans-serif', fontSize: 13, color: '#9ca3af', margin: 0 }}>
-              You're in <strong style={{ color: '#4b5563' }}>Auckland International</strong>
-            </p>
           </div>
 
           {/* Suggestion pills */}

@@ -69,6 +69,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const isAgent = user?.role_type === 'agent';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   function closeMobileMenu() {
@@ -131,29 +132,25 @@ export default function Navbar() {
                 </Link>
               )}
 
-              <Link
-                to="/agents"
-                onClick={closeMobileMenu}
-                className={`home-nav-link ${isActive('/agents')}`}
-              >
-                Agents
-              </Link>
+              {!isAgent && (
+                <Link
+                  to="/agents"
+                  onClick={closeMobileMenu}
+                  className={`home-nav-link ${isActive('/agents')}`}
+                >
+                  Packages
+                </Link>
+              )}
 
-              <Link
-                to="/plan-trip"
-                onClick={closeMobileMenu}
-                className={`home-nav-link ${isActive('/plan-trip')}`}
-              >
-                AI Planner
-              </Link>
-
-              <Link
-                to="/my-trips"
-                onClick={closeMobileMenu}
-                className={`home-nav-link ${isActive('/my-trips')}`}
-              >
-                My Trips
-              </Link>
+              {!isAgent && (
+                <Link
+                  to="/my-trips"
+                  onClick={closeMobileMenu}
+                  className={`home-nav-link ${isActive('/my-trips')}`}
+                >
+                  My Trips
+                </Link>
+              )}
 
               <Link
                 to="/profile"
@@ -173,11 +170,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <a href="/#pricing" onClick={closeMobileMenu} className="home-nav-link">
-                Pricing
-              </a>
-
-              <a href="/#about" onClick={closeMobileMenu} className="home-nav-link">
+              <a href="/#footer-about" onClick={closeMobileMenu} className="home-nav-link">
                 About Us
               </a>
 

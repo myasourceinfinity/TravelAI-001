@@ -11,12 +11,11 @@
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
 
 export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
-  const navigate = useNavigate();
+  
   const { login, loginWithGoogle, isLoading, authError, clearError } = useAuth();
 
   const [form, setForm]               = useState({ email: '', password: '' });
@@ -26,11 +25,11 @@ export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
   // ── Google OAuth ────────────────────────────────────────────────────────────
   async function handleGoogleSuccess(credentialResponse) {
     try {
-      const data = await loginWithGoogle(credentialResponse.credential);
-      if (data?.accessToken || data?.user) {
-        navigate(sessionStorage.getItem('pending_trip_description') ? '/plan-trip' : '/');
-      }
-    } catch (_) { /* handled by context */ }
+      await loginWithGoogle(credentialResponse.credential);
+      sessionStorage.removeItem('pending_trip_description');
+    } catch (_) {
+      /* handled by context */
+    }
   }
 
   // ── Field helpers ────────────────────────────────────────────────────────────
@@ -58,9 +57,15 @@ export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
     try {
-      await login({ email: form.email.trim().toLowerCase(), password: form.password });
-      navigate(sessionStorage.getItem('pending_trip_description') ? '/plan-trip' : '/');
-    } catch (_) { /* authError set by context */ }
+      await login({
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+      });
+
+      sessionStorage.removeItem('pending_trip_description');
+    } catch (_) {
+      /* authError set by context */
+    }
   }
 
   // ── Shared input style (light outlined) ─────────────────────────────────────

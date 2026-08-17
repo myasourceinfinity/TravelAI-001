@@ -20,6 +20,16 @@ const Logo = ({ height = 40 }) => (
 
 //Traveller homepage
 const TRAVELLER_ROLES = ['traveller', 'traveler', 'user'];
+const EXPLORE_SUGGESTIONS = [
+  'Dubai Marina',
+  'Burj Khalifa',
+  'Palm Jumeirah',
+  'Dubai Mall',
+  'Desert Safari',
+  'Global Village',
+  'Miracle Garden',
+  'Dubai Creek',
+];
 
 function getUserRole(user) {
     return String(
@@ -212,6 +222,10 @@ export default function HomePage() {
   }
   //
 
+  function handlePillClick(place) {
+    setUserInput(`Tell me about visiting ${place}`);
+  }
+
   // ── Handle Logout click ───────────────────────────────────────────────────
   async function handleLogout() {
     await logout();
@@ -231,49 +245,64 @@ export default function HomePage() {
               <span className="traveller-home-badge">AI Travel Assistant</span>
 
               <div className="traveller-chat-grid">
-                <div className="traveller-chat-panel">
-                  <div className="traveller-chat-header">
-                    <div className="traveller-chat-avatar">🤖</div>
-                    <div>
-                      <div className="traveller-chat-title">TravelAI Consultant</div>
-                      <div className="traveller-chat-status">
-                        <span className="traveller-chat-status-dot" /> Online &amp; Listening
-                      </div>
+                <div className="traveller-planner-entry-card">
+                  <div className="traveller-planner-entry-logo">
+                    <Logo height={90} />
+                  </div>
+
+                  <p className="traveller-planner-entry-location">
+                    You're in <strong>Auckland International</strong>
+                  </p>
+
+                  <div className="traveller-planner-suggestions">
+                    {EXPLORE_SUGGESTIONS.map(place => (
+                      <button
+                        key={place}
+                        type="button"
+                        className="traveller-planner-suggestion-pill"
+                        onClick={() => handlePillClick(place)}
+                      >
+                        Explore {place}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="traveller-planner-input-card">
+                    <textarea
+                      value={userInput}
+                      onChange={(e) => setUserInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSend();
+                        }
+                      }}
+                      placeholder="Ask here where do you want to go?"
+                      disabled={isSending}
+                    />
+
+                    <div className="traveller-planner-submit-row">
+                      <button
+                        type="button"
+                        className="traveller-planner-submit-btn"
+                        onClick={handleSend}
+                        disabled={isSending || !userInput.trim()}
+                      >
+                        {isSending ? 'Thinking...' : 'Submit'}
+                      </button>
                     </div>
                   </div>
 
-                  <div className="traveller-chat-messages" ref={chatMessagesRef}>
-                    {messages.map((msg, index) => {
-                      const isUser = msg.role === 'user';
-                      return (
-                        <div key={index} className={`traveller-chat-message ${isUser ? 'user' : 'assistant'}`}>
-                          {isUser ? msg.content : renderFormattedMessage(msg.content)}
-                        </div>
-                      );
-                    })}
-                    <div ref={messagesEndRef} />
-                  </div>
+                  {chatError && (
+                    <div className="traveller-chat-error">
+                      ⚠️ {chatError}
+                    </div>
+                  )}
 
-                  {chatError && <div className="traveller-chat-error">⚠️ {chatError}</div>}
-
-                  <div className="traveller-chat-input-row">
-                    <input
-                      type="text"
-                      placeholder="Tell TravelAI your destination, interests, dates, or plans..."
-                      value={userInput}
-                      onChange={(e) => setUserInput(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                      disabled={isSending}
-                    />
-                    <button
-                      type="button"
-                      className="traveller-chat-send-btn"
-                      onClick={handleSend}
-                      disabled={isSending || !userInput.trim()}
-                    >
-                      {isSending ? 'Thinking...' : 'Send'}
-                    </button>
-                  </div>
+                  <p className="traveller-planner-entry-terms">
+                    AI-powered . By using AI Mode you agree to our{' '}
+                    <span>Terms</span> &amp; <span>Privacy Policy</span>
+                  </p>
                 </div>
 
                 <div className="traveller-tracker-panel">
