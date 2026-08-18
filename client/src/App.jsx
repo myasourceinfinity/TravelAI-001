@@ -55,6 +55,7 @@ function AppFooter() {
   const { isLoading } = useAuth();
 
   const hiddenRoutes = [
+    '/',
     '/login',
     '/signup',
     '/verify-email',
@@ -76,36 +77,12 @@ function PrivateRoute({ children }) {
   return user ? children : <Navigate to="/login?reason=session-expired" replace />;
 }
 
-function RedirectSplash({ to }) {
-  const [canRedirect, setCanRedirect] = useState(false);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setCanRedirect(true);
-    }, 1200);
-
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  if (canRedirect) {
-    return <Navigate to={to} replace />;
-  }
-
-  return <SplashScreen />;
-}
-
 function GuestRoute({ children }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) return null;
 
-  if (!user) {
-    return children;
-  }
-
-  const targetPath = ADMIN_ROLES.includes(user.role_type) ? '/admin' : '/dashboard';
-
-  return <RedirectSplash to={targetPath} />;
+  return user ? <Navigate to="/" replace /> : children;
 }
 
 function AdminRoute({ children }) {

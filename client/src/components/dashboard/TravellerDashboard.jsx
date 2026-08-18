@@ -6,26 +6,9 @@ import PopularDestinationsCarousel from '../common/PopularDestinationsCarousel';
 import '../home/HomePage.css';
 import { getMyAttractions, getPopularDestinations, getRecentSearches } from '../../services/recentSearchService';
 import { chatWithAI } from '../../services/tripService';
+import AnimatedTripPlannerInput from '../trips/AnimatedTripPlannerInput';
 import travelAILogo from '../../assets/travelai-logo.png';
-
-const Logo = ({ height = 40 }) => (
-  <img
-    src={travelAILogo}
-    alt="Travel AI"
-    style={{ height, width: 'auto', objectFit: 'contain', display: 'block' }}
-  />
-);
-
-const EXPLORE_SUGGESTIONS = [
-  'Dubai Marina',
-  'Burj Khalifa',
-  'Palm Jumeirah',
-  'Dubai Mall',
-  'Desert Safari',
-  'Global Village',
-  'Miracle Garden',
-  'Dubai Creek',
-];
+import PlanTripWithTravelAI from '../trips/PlanTripWithTravelAI';
 
 function formatSearchDate(value) {
   if (!value) return '';
@@ -415,139 +398,14 @@ export default function TravellerDashboard() {
     navigate('/plan-trip');
   }
 
-  function handlePillClick(place) {
-    setUserInput(`Tell me about visiting ${place}`);
-  }
-
   return (
     <div className="home-page-container">
       <Navbar />
 
       <header className="traveller-home-section">
         <div className="traveller-home-grid">
-          <div className="traveller-home-card traveller-home-hero-card">
-            <span className="traveller-home-badge">AI Travel Assistant</span>
-
-            <div className="traveller-chat-grid">
-              <div className="traveller-planner-entry-card">
-                <div className="traveller-planner-entry-logo">
-                  <Logo height={90} />
-                </div>
-
-                <div className="traveller-planner-suggestions">
-                  {EXPLORE_SUGGESTIONS.map(place => (
-                    <button
-                      key={place}
-                      type="button"
-                      className="traveller-planner-suggestion-pill"
-                      onClick={() => handlePillClick(place)}
-                    >
-                      Explore {place}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="traveller-planner-input-card">
-                  <textarea
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSend();
-                      }
-                    }}
-                    placeholder="Ask here where do you want to go?"
-                    disabled={isSending}
-                  />
-
-                  <div className="traveller-planner-submit-row">
-                    <button
-                      type="button"
-                      className="traveller-planner-submit-btn"
-                      onClick={handleSend}
-                      disabled={isSending || !userInput.trim()}
-                    >
-                      {isSending ? 'Thinking...' : 'Submit'}
-                    </button>
-                  </div>
-                </div>
-
-                {chatError && (
-                  <div className="traveller-chat-error">
-                    ⚠️ {chatError}
-                  </div>
-                )}
-
-                <p className="traveller-planner-entry-terms">
-                  AI-powered . By using AI Mode you agree to our{' '}
-                  <span>Terms</span> &amp; <span>Privacy Policy</span>
-                </p>
-              </div>
-
-              <div className="traveller-tracker-panel">
-                <div className="traveller-tracker-header">
-                  <span className="traveller-tracker-title">
-                    🎯 Live Consultant Tracker
-                  </span>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>📍 Destination</span>
-                  <strong>{preferences.destination || '...'}</strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>🛫 Flying From</span>
-                  <strong>{preferences.originCity || '...'}</strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>📅 Duration</span>
-                  <strong>{preferences.days > 0 ? `${preferences.days} Days` : '...'}</strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>🗓 Depart Date</span>
-                  <strong>{preferences.departDate || '...'}</strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>🗓 Return Date</span>
-                  <strong>{preferences.returnDate || '...'}</strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>👥 Travelers</span>
-                  <strong>
-                    {preferences.travelers > 0
-                      ? `${preferences.travelers} Traveler(s)`
-                      : '...'}
-                  </strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>💰 Budget</span>
-                  <strong>
-                    {preferences.budgetAmount > 0
-                      ? `$${preferences.budgetAmount.toLocaleString()}`
-                      : preferences.flightBudget > 0 || preferences.hotelBudgetPerNight > 0
-                        ? `✈️ $${preferences.flightBudget.toLocaleString()} · 🏨 $${preferences.hotelBudgetPerNight.toLocaleString()}/night`
-                        : preferences.budgetLevel || '...'}
-                  </strong>
-                </div>
-
-                {preferences.location_types?.length > 0 && (
-                  <div className="traveller-tracker-tags">
-                    {preferences.location_types.map((type, idx) => (
-                      <span key={idx} className="traveller-tracker-tag">
-                        {type}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+          <div ref={plannerRef} className="traveller-home-card traveller-home-hero-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column' }}>
+            <PlanTripWithTravelAI isDashboardMode={true} onNewSearchSaved={refreshRecentSearches} prefillQuery={plannerQuery} />
           </div>
 
           <aside className="traveller-home-card traveller-recent-card">

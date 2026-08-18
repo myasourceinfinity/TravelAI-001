@@ -11,11 +11,12 @@
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
 
 export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
-  
+  const navigate = useNavigate();
   const { login, loginWithGoogle, isLoading, authError, clearError } = useAuth();
 
   const [form, setForm]               = useState({ email: '', password: '' });

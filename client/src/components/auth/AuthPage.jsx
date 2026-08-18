@@ -175,61 +175,6 @@ function LeftPanel({ mode, isMobile = false }) {
   );
 }
 
-function LoginSplash({ to }) {
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDone(true);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (done) {
-    return <Navigate to={to} replace />;
-  }
-
-  return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(180deg, #eff4ff 0%, #fbfbf9 100%)',
-        fontFamily: 'Outfit, sans-serif',
-      }}
-    >
-      <div style={{ textAlign: 'center' }}>
-        <img
-          src="/logo.png"
-          alt="Travel AI"
-          style={{
-            width: 180,
-            height: 'auto',
-            objectFit: 'contain',
-            marginBottom: 18,
-          }}
-        />
-        <div
-          style={{
-            width: 34,
-            height: 34,
-            border: '4px solid #e0e7ff',
-            borderTopColor: '#4f46e5',
-            borderRadius: '50%',
-            margin: '0 auto 14px',
-            animation: 'spin 0.8s linear infinite',
-          }}
-        />
-        <p style={{ margin: 0, color: '#475569', fontWeight: 700 }}>
-          Preparing your dashboard...
-        </p>
-      </div>
-    </div>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function AuthPage() {
@@ -334,9 +279,12 @@ export default function AuthPage() {
 
     if (user && (activeTab === 'signin' || activeTab === 'signup')) {
       const adminRoles = ['admin', 'useradmin', 'superadmin'];
-      const targetPath = adminRoles.includes(user.role_type) ? '/admin' : '/dashboard';
 
-      return <LoginSplash to={targetPath} />;
+      if (adminRoles.includes(user.role_type)) {
+        return <Navigate to="/admin" replace />;
+      }
+
+      return <Navigate to="/dashboard" replace />;
     }
 
  return (

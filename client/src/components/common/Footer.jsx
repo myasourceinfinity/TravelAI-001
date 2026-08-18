@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import './Footer.css';
-const footerIcon = '/fav.png';
+import footerLogo from '../../assets/TravelAI_Transparent.png';
 
 function FooterIcon({ type }) {
   const icons = {
@@ -88,7 +88,7 @@ function FooterIcon({ type }) {
 
 const footerColumns = [
   [
-    { label: 'About Us', href: '#footer-about', icon: 'user' },
+    { label: 'About Us', href: '#about', icon: 'user' },
     { label: 'Terms of Use', href: '#terms', icon: 'shield' },
     { label: 'Privacy Policy', href: '#privacy', icon: 'lock' },
     { label: 'Contact', href: '#contact', icon: 'mail' },
@@ -108,7 +108,7 @@ const footerColumns = [
 
 export default function Footer() {
   return (
-    <footer id="footer-about" className="site-footer">
+    <footer className="site-footer">
       <div className="site-footer-glow site-footer-glow-left" />
       <div className="site-footer-glow site-footer-glow-right" />
       <div className="site-footer-arc site-footer-arc-top" />
@@ -116,16 +116,12 @@ export default function Footer() {
 
       <div className="site-footer-inner">
         <div className="site-footer-brand">
-        <div className="site-footer-brand-head">
-            <img src={footerIcon} alt="Travel AI" className="site-footer-brand-icon" />
-            <span className="site-footer-brand-text">Travel AI</span>
-        </div>
-
-        <div className="site-footer-tagline-row">
+          <img src={footerLogo} alt="Travel AI" className="site-footer-logo-img" />
+          <div className="site-footer-tagline-row">
             <span className="site-footer-spark">✦</span>
             <p>Plan smarter. Travel better.</p>
             <span className="site-footer-spark">✦</span>
-        </div>
+          </div>
         </div>
 
         <div className="site-footer-panel">
