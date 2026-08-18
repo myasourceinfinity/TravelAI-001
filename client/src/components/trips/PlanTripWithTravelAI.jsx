@@ -760,15 +760,23 @@ export default function PlanTripWithTravelAI({ isDashboardMode = false, onNewSea
 
   // -- Landing screen (shown before the first message is sent) --------------
   if (showLanding) {
-    const landingContent = (
-      <div style={{ width: '100%', background: '#ffffff', border: isDashboardMode ? 'none' : '1px solid #e2e0da', borderRadius: 20, padding: isDashboardMode ? '1rem 0' : '2.5rem 2.5rem 2rem', boxShadow: isDashboardMode ? 'none' : '0 1px 3px rgba(0,0,0,0.04)' }}>
-        {/* Hero */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src={travelAILogo} alt="Travel AI" style={{ height: isDashboardMode ? 80 : 110, width: 'auto', objectFit: 'contain', marginBottom: '0.75rem', mixBlendMode: 'multiply', display: 'inline-block' }} />
-          <p style={{ fontFamily: 'Arial, sans-serif', fontSize: 13, color: '#9ca3af', margin: 0 }}>
-            You're in <strong style={{ color: '#4b5563' }}>Auckland International</strong>
-          </p>
-        </div>
+  return (
+    <>
+      <Navbar />
+
+      <div style={{ minHeight: '100vh', background: '#f5f4f1', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3rem 1.5rem', fontFamily: 'Georgia, "Times New Roman", serif' }}>
+
+        <div style={{ width: '100%', maxWidth: 900, background: '#faf9f6', border: '1px solid #e2e0da', borderRadius: 20, padding: '2.5rem 2.5rem 2rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+
+          {/* Top-left brand */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '2.5rem' }}>
+            <img src={travelAILogo} alt="Travel AI" style={{ height: 28, width: 'auto', objectFit: 'contain', mixBlendMode: 'multiply' }} />
+          </div>
+
+          {/* Hero */}
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <img src={travelAILogo} alt="Travel AI" style={{ height: 110, width: 'auto', objectFit: 'contain', marginBottom: '0.75rem', mixBlendMode: 'multiply', display: 'inline-block' }} />
+          </div>
 
         {/* Suggestion pills */}
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10, marginBottom: '2rem' }}>
