@@ -6,10 +6,19 @@
  * Persists token to sessionStorage (access token, short-lived — no localStorage).
  */
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { localLogin, googleAuth, logout as apiLogout } from '../services/authService';
 
 const AuthContext = createContext(null);
+
+function getTokenExpiry(token) {
+  try {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(payload)).exp * 1000;
+  } catch {
+    return null;
+  }
+}
 
 export function AuthProvider({ children }) {
   const[user, setUser] = useState(() => {
@@ -22,6 +31,38 @@ export function AuthProvider({ children }) {
 
   const [isLoading,   setIsLoading]   = useState(false);
   const [authError,   setAuthError]   = useState(null);
+
+  const clearSession = useCallback((message = null) => {
+    setUser(null);
+    setAccessToken(null);
+    setAuthError(message);
+    sessionStorage.removeItem('travelai_user');
+    sessionStorage.removeItem('travelai_token');
+  }, []);
+
+  // Access tokens expire independently of the refresh cookie. Clear stale UI
+  // state exactly when the JWT expires so protected routes return to sign-in.
+  useEffect(() => {
+    if (!accessToken) return undefined;
+
+    const expiry = getTokenExpiry(accessToken);
+    if (!expiry) {
+      clearSession('Your session is invalid. Please sign in again.');
+      return undefined;
+    }
+
+    const remaining = expiry - Date.now();
+    if (remaining <= 0) {
+      clearSession('Your session has expired. Please sign in again.');
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      clearSession('Your session has expired. Please sign in again.');
+    }, remaining);
+
+    return () => window.clearTimeout(timer);
+  }, [accessToken, clearSession]);
 
   // ── Local login ─────────────────────────────────────────────────────────────
   const login = useCallback(async ({ email, password }) => {
@@ -69,12 +110,8 @@ export function AuthProvider({ children }) {
   // ── Logout ───────────────────────────────────────────────────────────────────
   const logout = useCallback(async () => {
     try { await apiLogout(); } catch (_) { /* silent */ }
-    setUser(null);
-    setAccessToken(null);
-    setAuthError(null);
-    sessionStorage.removeItem('travelai_user');
-    sessionStorage.removeItem('travelai_token');
-  }, []);
+    clearSession();
+  }, [clearSession]);
 
   return (
     <AuthContext.Provider value={{

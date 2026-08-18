@@ -94,7 +94,7 @@ const footerColumns = [
     { label: 'Contact', href: '#contact', icon: 'mail' },
   ],
   [
-    { label: 'Agents', to: '/agents', icon: 'user' },
+    { label: 'Packages', to: '/packages', icon: 'map' },
     { label: 'Blogs', href: '#blogs', icon: 'blog' },
     { label: 'Support', href: '#support', icon: 'support' },
     { label: 'Travel AI', to: '/plan-trip', icon: 'ai' },

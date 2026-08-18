@@ -8,15 +8,15 @@ WITH demo_users AS (
   FROM (
     VALUES
       (
-        'Brenda',
-        'Traveler',
-        'brendasinyal@gmail.com',
+        'Emerald',
+        'Lwyn',
+        'myathuzarlwyn@gmail.com',
         'traveler'
       ),
       (
-        'Brenda',
-        'Agent',
-        'mbrendasinyal@gmail.com',
+        'Mya',
+        'Source Infinity',
+        'mya.sourceinfinity@gmail.com',
         'agent'
       )
   ) AS t(first_name, last_name, email, role_type)
@@ -86,8 +86,8 @@ SELECT
   '[]'::jsonb
 FROM users u
 WHERE u.email IN (
-  'brendasinyal@gmail.com',
-  'mbrendasinyal@gmail.com'
+  'myathuzarlwyn@gmail.com',
+  'mya.sourceinfinity@gmail.com'
 )
 AND NOT EXISTS (
   SELECT 1

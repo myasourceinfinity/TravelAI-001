@@ -42,3 +42,21 @@ export function saveRecentSearchToDB(token, query) {
     body: { query },
   });
 }
+
+export function getPopularDestinations(token) {
+  return request('/recent-searches/popular', {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export function getMyAttractions(token) {
+  return request('/recent-searches/my-attractions', {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}

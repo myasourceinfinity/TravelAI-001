@@ -4,9 +4,10 @@ import { useAuth } from '../../context/AuthContext';
 import { chatWithAI, saveTripToDB, confirmBooking } from '../../services/tripService';
 import travelAILogo from '../../assets/travelai-logo.png';
 import FlightCard from './FlightCard';
-import HotelCard  from './HotelCard';
+import HotelCard from './HotelCard';
 import Navbar from '../common/Navbar';
 import '../home/HomePage.css';
+import AnimatedTripPlannerInput from './AnimatedTripPlannerInput';
 import { saveRecentSearchToDB } from '../../services/recentSearchService';
 
 const API = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -36,30 +37,30 @@ function parseNumericBudget(budgetLevel = '') {
 
 // -- Component type icons ------------------------------------------------------
 const COMPONENT_META = {
-  flight:   { icon: '✈️', colour: '#38bdf8' },
-  hotel:    { icon: '🏨', colour: '#a78bfa' },
+  flight: { icon: '✈️', colour: '#38bdf8' },
+  hotel: { icon: '🏨', colour: '#a78bfa' },
   activity: { icon: '🎯', colour: '#34d399' },
   transfer: { icon: '🚌', colour: '#fb923c' },
 };
 
 // -- Curated destination hero images (Unsplash direct CDN, no key needed) -----
 const DEST_IMAGES = {
-  'auckland':           'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=600&q=75',
-  'wellington':         'https://images.unsplash.com/photo-1577048982768-5cb3e7ddfa23?w=600&q=75',
-  'rotorua':            'https://images.unsplash.com/photo-1583236070780-6ece19db7fa7?w=600&q=75',
-  'queenstown':         'https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?w=600&q=75',
-  'christchurch':       'https://images.unsplash.com/photo-1547300352-2c6fee46e3a2?w=600&q=75',
-  'dunedin':            'https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?w=600&q=75',
-  'tauranga':           'https://images.unsplash.com/photo-1570737209810-87a8e7245f88?w=600&q=75',
-  'napier':             'https://images.unsplash.com/photo-1608490531175-57e6c6c26ae6?w=600&q=75',
-  'milford sound':      'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&q=75',
-  'fiordland':          'https://images.unsplash.com/photo-1589196728941-5f04fc59d7f3?w=600&q=75',
-  'tongariro':          'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=75',
-  'waiheke':            'https://images.unsplash.com/photo-1493219686142-5a8641badc78?w=600&q=75',
-  'coromandel':         'https://images.unsplash.com/photo-1467377791767-c929b5dc9a23?w=600&q=75',
-  'dubai':              'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=75',
-  'abu dhabi':          'https://images.unsplash.com/photo-1578895101408-1a36b834405b?w=600&q=75',
-  'new zealand':        'https://images.unsplash.com/photo-1467377791767-c929b5dc9a23?w=600&q=75',
+  'auckland': 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=600&q=75',
+  'wellington': 'https://images.unsplash.com/photo-1577048982768-5cb3e7ddfa23?w=600&q=75',
+  'rotorua': 'https://images.unsplash.com/photo-1583236070780-6ece19db7fa7?w=600&q=75',
+  'queenstown': 'https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?w=600&q=75',
+  'christchurch': 'https://images.unsplash.com/photo-1547300352-2c6fee46e3a2?w=600&q=75',
+  'dunedin': 'https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?w=600&q=75',
+  'tauranga': 'https://images.unsplash.com/photo-1570737209810-87a8e7245f88?w=600&q=75',
+  'napier': 'https://images.unsplash.com/photo-1608490531175-57e6c6c26ae6?w=600&q=75',
+  'milford sound': 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&q=75',
+  'fiordland': 'https://images.unsplash.com/photo-1589196728941-5f04fc59d7f3?w=600&q=75',
+  'tongariro': 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=75',
+  'waiheke': 'https://images.unsplash.com/photo-1493219686142-5a8641badc78?w=600&q=75',
+  'coromandel': 'https://images.unsplash.com/photo-1467377791767-c929b5dc9a23?w=600&q=75',
+  'dubai': 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=75',
+  'abu dhabi': 'https://images.unsplash.com/photo-1578895101408-1a36b834405b?w=600&q=75',
+  'new zealand': 'https://images.unsplash.com/photo-1467377791767-c929b5dc9a23?w=600&q=75',
 };
 
 function getDestImage(dest) {
@@ -79,19 +80,19 @@ function getDestImage(dest) {
 }
 
 const BUDGET_COLORS = {
-  budget:   { bg: 'rgba(52,211,153,0.85)',  text: '#065f46' },
-  moderate: { bg: 'rgba(251,191,36,0.85)',  text: '#78350f' },
-  luxury:   { bg: 'rgba(167,139,250,0.85)', text: '#2e1065' },
+  budget: { bg: 'rgba(52,211,153,0.85)', text: '#065f46' },
+  moderate: { bg: 'rgba(251,191,36,0.85)', text: '#78350f' },
+  luxury: { bg: 'rgba(167,139,250,0.85)', text: '#2e1065' },
 };
 
 function packageEmoji(pkg) {
   const name = (pkg.destination_name || '').toLowerCase();
-  if (name.includes('auckland'))     return '🌆';
-  if (name.includes('wellington'))   return '🌧️';
-  if (name.includes('rotorua'))      return '🌋';
-  if (name.includes('queenstown'))   return '🏔️';
+  if (name.includes('auckland')) return '🌆';
+  if (name.includes('wellington')) return '🌧️';
+  if (name.includes('rotorua')) return '🌋';
+  if (name.includes('queenstown')) return '🏔️';
   if (name.includes('christchurch')) return '🌿';
-  if (name.includes('tauranga'))     return '🏖️';
+  if (name.includes('tauranga')) return '🏖️';
   return '📍';
 }
 
@@ -102,21 +103,21 @@ function DestinationCard({ dest, onRemove, agentPkg, bookingData, selectedFlight
     : null;
 
   // Determine displayed price: live booking > agent package > AI estimate
-  const liveFlightPrice  = cheapestFlight && isFinite(cheapestFlight) ? cheapestFlight : null;
-  const liveHotelPrice   = bookingData?.hotels?.[0]?.price ?? null;
-  const liveTotalPrice   = (liveFlightPrice || 0) + (liveHotelPrice || 0);
-  const agentPkgPrice    = agentPkg ? parseFloat(agentPkg.price_per_person ?? agentPkg.base_price ?? 0) : null;
-  const estimatedTotal   = dest.estimatedPrice?.total ?? null;
+  const liveFlightPrice = cheapestFlight && isFinite(cheapestFlight) ? cheapestFlight : null;
+  const liveHotelPrice = bookingData?.hotels?.[0]?.price ?? null;
+  const liveTotalPrice = (liveFlightPrice || 0) + (liveHotelPrice || 0);
+  const agentPkgPrice = agentPkg ? parseFloat(agentPkg.price_per_person ?? agentPkg.base_price ?? 0) : null;
+  const estimatedTotal = dest.estimatedPrice?.total ?? null;
 
   const displayPrice = liveTotalPrice > 0
     ? { amount: liveTotalPrice, label: 'Live estimate', live: true }
     : agentPkgPrice > 0
-    ? { amount: agentPkgPrice, label: 'Agent package', live: false }
-    : estimatedTotal > 0
-    ? { amount: estimatedTotal, label: dest.estimatedPrice?.note || 'Estimate', live: false }
-    : null;
+      ? { amount: agentPkgPrice, label: 'Agent package', live: false }
+      : estimatedTotal > 0
+        ? { amount: estimatedTotal, label: dest.estimatedPrice?.note || 'Estimate', live: false }
+        : null;
 
-  const heroImg  = getDestImage(dest);
+  const heroImg = getDestImage(dest);
   const budgetSt = BUDGET_COLORS[budgetLevel] || BUDGET_COLORS.moderate;
 
   return (
@@ -153,16 +154,16 @@ function DestinationCard({ dest, onRemove, agentPkg, bookingData, selectedFlight
           confusing duplicate choices for the same category. */}
       {agentPkg?.components?.length > 0 && (() => {
         const hasLiveFlights = bookingData?.flights?.length > 0;
-        const hasLiveHotels  = bookingData?.hotels?.length > 0;
+        const hasLiveHotels = bookingData?.hotels?.length > 0;
         // Also suppress agent hotel/flight items while search is in progress (loading)
         // or once booking has been searched at all -- avoids the race condition where
         // agent package hotels show briefly before live Booking.com results arrive.
         const searchInProgress = bookingData === 'loading';
-        const searchHasRun     = bookingData && bookingData !== 'loading';
+        const searchHasRun = bookingData && bookingData !== 'loading';
         const visibleComponents = agentPkg.components.filter(comp => {
           const type = comp.component_type || comp.componentType || '';
           if (type === 'flight' && (hasLiveFlights || searchInProgress || searchHasRun)) return false;
-          if (type === 'hotel'  && (hasLiveHotels  || searchInProgress || searchHasRun)) return false;
+          if (type === 'hotel' && (hasLiveHotels || searchInProgress || searchHasRun)) return false;
           return true;
         });
         if (visibleComponents.length === 0) return null;
@@ -187,72 +188,53 @@ function DestinationCard({ dest, onRemove, agentPkg, bookingData, selectedFlight
         );
       })()}
 
-      {/* Bookme deals */}
-      {!agentPkg && dest.bookmeDeals?.length > 0 && (
-        <div>
-          <h4 style={{ fontSize: '0.75rem', color: '#4f46e5', margin: '0 0 6px 0', fontWeight: 600 }}>✨ Recommended on Bookme</h4>
-          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, minWidth: 0, maxWidth: '100%' }}>
-            {dest.bookmeDeals.map((deal, i) => (
-              <a key={i} href={deal.link} target="_blank" rel="noreferrer"
-                style={{ minWidth: 160, flexShrink: 0, background: '#f1f0ec', border: '1px solid #e2e0da', borderRadius: 8, padding: 7, display: 'block', textDecoration: 'none' }}>
-                <div style={{ height: 70, borderRadius: 5, backgroundImage: `url(${deal.image})`, backgroundSize: 'cover', backgroundPosition: 'center', marginBottom: 5 }} />
-                <h5 style={{ fontSize: '0.7rem', fontWeight: 600, margin: '0 0 3px 0', color: '#1f2937', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{deal.title}</h5>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.65rem', color: '#34d399', fontWeight: 700 }}>{deal.price}</span>
-                  {deal.discount && <span style={{ fontSize: '0.6rem', background: '#f97316', color: '#fff', padding: '1px 4px', borderRadius: 4 }}>{deal.discount}</span>}
-                </div>
-              </a>
-            ))}
-            </div>
-          </div>
-        )}
 
-        {/* Price breakdown */}
-        {displayPrice && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
-            {dest.estimatedPrice?.flight > 0 && !liveFlightPrice && (
-              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.2)', color: '#38bdf8' }}>
-                ✈️ est. NZD {dest.estimatedPrice.flight.toLocaleString()}
-              </span>
-            )}
-            {liveFlightPrice && (
-              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(56,189,248,0.12)', border: '1px solid rgba(56,189,248,0.25)', color: '#38bdf8' }}>
-                ✈️ NZD {Math.round(liveFlightPrice).toLocaleString()}
-              </span>
-            )}
-            {dest.estimatedPrice?.hotel > 0 && !liveHotelPrice && (
-              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.2)', color: '#a78bfa' }}>
-                🏨 est. NZD {dest.estimatedPrice.hotel.toLocaleString()}
-              </span>
-            )}
-            {liveHotelPrice && (
-              <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa' }}>
-                🏨 NZD {Math.round(liveHotelPrice).toLocaleString()}
-              </span>
-            )}
-          </div>
-        )}
+      {/* Price breakdown */}
+      {displayPrice && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+          {dest.estimatedPrice?.flight > 0 && !liveFlightPrice && (
+            <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.2)', color: '#38bdf8' }}>
+              ✈️ est. NZD {dest.estimatedPrice.flight.toLocaleString()}
+            </span>
+          )}
+          {liveFlightPrice && (
+            <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(56,189,248,0.12)', border: '1px solid rgba(56,189,248,0.25)', color: '#38bdf8' }}>
+              ✈️ NZD {Math.round(liveFlightPrice).toLocaleString()}
+            </span>
+          )}
+          {dest.estimatedPrice?.hotel > 0 && !liveHotelPrice && (
+            <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.2)', color: '#a78bfa' }}>
+              🏨 est. NZD {dest.estimatedPrice.hotel.toLocaleString()}
+            </span>
+          )}
+          {liveHotelPrice && (
+            <span style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 10, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa' }}>
+              🏨 NZD {Math.round(liveHotelPrice).toLocaleString()}
+            </span>
+          )}
+        </div>
+      )}
 
-        {/* Agent package inclusions */}
-        {agentPkg?.components?.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <h4 style={{ fontSize: '0.7rem', color: '#34d399', margin: '0 0 4px 0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>📦 Agent Package</h4>
-            {agentPkg.components.map((comp, i) => {
-              const meta = COMPONENT_META[comp.component_type] || { icon: '📌', colour: '#94a3b8' };
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 8px', borderRadius: 6, background: `${meta.colour}0f`, border: `1px solid ${meta.colour}22` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <span style={{ fontSize: 13 }}>{meta.icon}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#f1f5f9' }}>{comp.title}</span>
-                  </div>
-                  <span style={{ fontSize: 11, color: meta.colour, fontWeight: 700 }}>
-                    NZD ${parseFloat(comp.price_per_person ?? comp.pricePerPerson ?? 0).toFixed(0)}
-                  </span>
+      {/* Agent package inclusions */}
+      {agentPkg?.components?.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <h4 style={{ fontSize: '0.7rem', color: '#34d399', margin: '0 0 4px 0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>📦 Agent Package</h4>
+          {agentPkg.components.map((comp, i) => {
+            const meta = COMPONENT_META[comp.component_type] || { icon: '📌', colour: '#94a3b8' };
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 8px', borderRadius: 6, background: `${meta.colour}0f`, border: `1px solid ${meta.colour}22` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <span style={{ fontSize: 13 }}>{meta.icon}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#f1f5f9' }}>{comp.title}</span>
                 </div>
-              );
-            })}
-          </div>
-        )}
+                <span style={{ fontSize: 11, color: meta.colour, fontWeight: 700 }}>
+                  NZD ${parseFloat(comp.price_per_person ?? comp.pricePerPerson ?? 0).toFixed(0)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* -- FLIGHTS (shown after itinerary confirmed) -- */}
       {bookingData?.flights?.length > 0 && (
@@ -332,10 +314,11 @@ function DestinationCard({ dest, onRemove, agentPkg, bookingData, selectedFlight
 }
 
 // ===============================================================================
-export default function PlanTripWithTravelAI() {
+export default function PlanTripWithTravelAI({ isDashboardMode = false, onNewSearchSaved, prefillQuery = '' }) {
   const navigate = useNavigate();
   const { accessToken, logout } = useAuth();
   const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   // -- Landing / search-style entry screen (shown before chat starts) --------
   const [showLanding, setShowLanding] = useState(true);
@@ -349,9 +332,9 @@ export default function PlanTripWithTravelAI() {
     role: 'assistant',
     content: "Hello! I am TravelAI, your interactive travel consultant buddy. 🌍 Where are we dreaming of going for your next adventure? Tell me your destination, travel dates, number of travellers, and budget -- or we can figure it out together!"
   }]);
-  const [userInput,  setUserInput]  = useState('');
-  const [isSending,  setIsSending]  = useState(false);
-  const [error,      setError]      = useState(null);
+  const [userInput, setUserInput] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState(null);
 
   // -- Preferences -----------------------------------------------------------
   const [preferences, setPreferences] = useState({
@@ -359,37 +342,59 @@ export default function PlanTripWithTravelAI() {
   });
 
   // -- Plan state ------------------------------------------------------------
-  const [readyToPlan,   setReadyToPlan]   = useState(false);
-  const [plan,          setPlan]          = useState(null);
+  const [readyToPlan, setReadyToPlan] = useState(false);
+  const [plan, setPlan] = useState(null);
   const [agentPackages, setAgentPackages] = useState([]);
-  const [loadingPkgs,   setLoadingPkgs]   = useState(false);
+  const [loadingPkgs, setLoadingPkgs] = useState(false);
 
   // -- Booking state ---------------------------------------------------------
   // bookingResults: { [destName]: 'loading' | { flights: [], hotels: [] } }
-  const [bookingResults,   setBookingResults]   = useState({});
+  const [bookingResults, setBookingResults] = useState({});
   // selectedFlights: { [destId]: flightIndex }
-  const [selectedFlights,  setSelectedFlights]  = useState({});
+  const [selectedFlights, setSelectedFlights] = useState({});
   // selectedHotels:  { [destId]: hotelIndex }
-  const [selectedHotels,   setSelectedHotels]   = useState({});
-  const [bookingSearched,  setBookingSearched]   = useState(false);
+  const [selectedHotels, setSelectedHotels] = useState({});
+  const [bookingSearched, setBookingSearched] = useState(false);
 
   // -- Save state ------------------------------------------------------------
-  const [tripTitle,   setTripTitle]   = useState('');
-  const [isSaving,    setIsSaving]    = useState(false);
+  const [tripTitle, setTripTitle] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [savedTripId, setSavedTripId] = useState(null);
 
   // -- Booking confirmation state --------------------------------------------
-  const [travelerName,        setTravelerName]        = useState('');
-  const [travelerEmail,       setTravelerEmail]        = useState('');
-  const [travelerPhone,       setTravelerPhone]        = useState('');
-  const [isConfirmingBooking, setIsConfirmingBooking]  = useState(false);
-  const [bookingConfirmation, setBookingConfirmation]  = useState(null); // { confirmationCode, status, ... }
+  const [travelerName, setTravelerName] = useState('');
+  const [travelerEmail, setTravelerEmail] = useState('');
+  const [travelerPhone, setTravelerPhone] = useState('');
+  const [isConfirmingBooking, setIsConfirmingBooking] = useState(false);
+  const [bookingConfirmation, setBookingConfirmation] = useState(null); // { confirmationCode, status, ... }
 
-  // Auto-scroll
+  // Auto-scroll messages — scroll the chat container directly so the page
+  // itself never jumps (important when embedded in the dashboard).
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages, isSending]);
+
+  // Pre-fill input when parent passes a prefillQuery (e.g. attraction card click in dashboard)
+  useEffect(() => {
+    if (!prefillQuery) return;
+    setUserInput(prefillQuery);
+    setShowLanding(true);
+  }, [prefillQuery]);
+
+  // On mount for the standalone /plan-trip page: read pending_trip_description from
+  // sessionStorage (written by HomePage, TravellerDashboard, PackageDetail, etc.)
+  // Pre-fill the input and clear the key so it doesn't persist on refresh.
+  useEffect(() => {
+    if (isDashboardMode) return;
+    const pending = sessionStorage.getItem('pending_trip_description');
+    if (!pending) return;
+    sessionStorage.removeItem('pending_trip_description');
+    setUserInput(pending);
+    setShowLanding(true);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load agent packages when plan arrives
   useEffect(() => {
@@ -403,7 +408,7 @@ export default function PlanTripWithTravelAI() {
     })
       .then(r => r.json())
       .then(data => setAgentPackages(data.packages || []))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingPkgs(false));
   }, [plan, accessToken]);
 
@@ -423,26 +428,26 @@ export default function PlanTripWithTravelAI() {
 
     try {
       const res = await fetch(`${API}/booking/search`, {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         credentials: 'include',
         signal: controller.signal,
         body: JSON.stringify({
-          origin:       currentPrefs.originCity || currentPrefs.origin || '',
+          origin: currentPrefs.originCity || currentPrefs.origin || '',
           // NOTE: plan.startCity represents the traveller's origin/home city
           // (e.g. "Auckland"), NOT the destination -- using it as a hotel/flight
           // fallback would search the wrong city entirely. Prefer the actual
           // destination the user described.
           fallbackCity: currentPrefs.destination || currentPlan.destinations?.[0]?.country || '',
           destinations: currentPlan.destinations,
-          depart_date:  currentPrefs.departDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-          return_date:  currentPrefs.returnDate  || null,
-          adults:       currentPrefs.travelers   || 1,
+          depart_date: currentPrefs.departDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+          return_date: currentPrefs.returnDate || null,
+          adults: currentPrefs.travelers || 1,
           // Prefer the dedicated numeric field -- falls back to text parsing
           // only for older sessions/messages that predate this field.
-          totalBudget:  (currentPrefs.budgetAmount && currentPrefs.budgetAmount > 0)
-                          ? currentPrefs.budgetAmount
-                          : parseNumericBudget(currentPrefs.budgetLevel),
+          totalBudget: (currentPrefs.budgetAmount && currentPrefs.budgetAmount > 0)
+            ? currentPrefs.budgetAmount
+            : parseNumericBudget(currentPrefs.budgetLevel),
         }),
       });
       clearTimeout(hardTimeout);
@@ -477,11 +482,15 @@ export default function PlanTripWithTravelAI() {
   async function handleSend() {
     if (!userInput.trim() || isSending) return;
     const userMsg = userInput.trim();
-    
+
     if (accessToken) {
-      saveRecentSearchToDB(accessToken, userMsg).catch((err) => {
-        console.warn('[PlanTrip] Failed to save recent search:', err);
-      });
+      saveRecentSearchToDB(accessToken, userMsg)
+        .then(() => {
+          if (onNewSearchSaved) onNewSearchSaved();
+        })
+        .catch((err) => {
+          console.warn('[PlanTrip] Failed to save recent search:', err);
+        });
     }
     setUserInput('');
     setIsSending(true);
@@ -520,7 +529,7 @@ export default function PlanTripWithTravelAI() {
             ...prev,
             [targetDestName]: {
               flights: data.flights || prev[targetDestName]?.flights || [],
-              hotels:  data.hotels  || prev[targetDestName]?.hotels  || [],
+              hotels: data.hotels || prev[targetDestName]?.hotels || [],
               noFlightsFound: !data.flights || data.flights.length === 0,
             },
           }));
@@ -622,10 +631,10 @@ export default function PlanTripWithTravelAI() {
       const response = await saveTripToDB(accessToken, {
         plan,
         title: tripTitle.trim() || `${plan.startCity || preferences.destination} Trip`,
-        selectedComponents:    components,
-        totalPricePerPerson:   totalPerPerson,
-        totalPriceAll:         totalAll,
-        selectedPackageIds:    agentPackages.map(p => p.id),
+        selectedComponents: components,
+        totalPricePerPerson: totalPerPerson,
+        totalPriceAll: totalAll,
+        selectedPackageIds: agentPackages.map(p => p.id),
       });
       if (response.success) {
         setSaveSuccess(true);
@@ -648,18 +657,18 @@ export default function PlanTripWithTravelAI() {
     try {
       const { components, totalPerPerson, totalAll } = buildSelectedComponents();
       const response = await confirmBooking(accessToken, {
-        tripId:              savedTripId,
-        destination:         plan?.startCity || preferences.destination,
-        originCity:          preferences.originCity,
-        departDate:          preferences.departDate,
-        returnDate:          preferences.returnDate,
-        travelers:           preferences.travelers || 1,
-        selectedComponents:  components,
+        tripId: savedTripId,
+        destination: plan?.startCity || preferences.destination,
+        originCity: preferences.originCity,
+        departDate: preferences.departDate,
+        returnDate: preferences.returnDate,
+        travelers: preferences.travelers || 1,
+        selectedComponents: components,
         totalPricePerPerson: totalPerPerson,
-        totalPriceAll:       totalAll,
-        travelerName:        travelerName.trim(),
-        travelerEmail:       travelerEmail.trim(),
-        travelerPhone:       travelerPhone.trim() || undefined,
+        totalPriceAll: totalAll,
+        travelerName: travelerName.trim(),
+        travelerEmail: travelerEmail.trim(),
+        travelerPhone: travelerPhone.trim() || undefined,
       });
       if (response.success) {
         setBookingConfirmation(response.booking);
@@ -674,11 +683,11 @@ export default function PlanTripWithTravelAI() {
   function packageToDestCard(pkg) {
     const components = pkg.components || [];
     return {
-      id:          `pkg-${pkg.id}`,
-      name:        pkg.destination_name,
-      country:     pkg.country || 'New Zealand',
-      emoji:       packageEmoji(pkg),
-      highlights:  components.slice(0, 3).map(c => c.title),
+      id: `pkg-${pkg.id}`,
+      name: pkg.destination_name,
+      country: pkg.country || 'New Zealand',
+      emoji: packageEmoji(pkg),
+      highlights: components.slice(0, 3).map(c => c.title),
       bookmeDeals: [],
     };
   }
@@ -730,8 +739,8 @@ export default function PlanTripWithTravelAI() {
       if (!t) return <div key={lineIdx} style={{ height: '0.4rem' }} />;
       if (t === '---') return <hr key={lineIdx} style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.1)', margin: '0.75rem 0' }} />;
       if (t.startsWith('###')) return <h3 key={lineIdx} style={{ fontSize: '1rem', fontWeight: 700, color: '#4f46e5', margin: '0.75rem 0 0.4rem 0' }}>{parseBoldText(t.replace(/^###\s*/, ''))}</h3>;
-      if (t.startsWith('##'))  return <h4 key={lineIdx} style={{ fontSize: '1.1rem', fontWeight: 700, color: '#6366f1', margin: '0.9rem 0 0.5rem 0' }}>{parseBoldText(t.replace(/^##\s*/, ''))}</h4>;
-      if (t.startsWith('#'))   return <h2 key={lineIdx} style={{ fontSize: '1.2rem', fontWeight: 800, color: '#1f2937', margin: '1.1rem 0 0.6rem 0' }}>{parseBoldText(t.replace(/^#\s*/, ''))}</h2>;
+      if (t.startsWith('##')) return <h4 key={lineIdx} style={{ fontSize: '1.1rem', fontWeight: 700, color: '#6366f1', margin: '0.9rem 0 0.5rem 0' }}>{parseBoldText(t.replace(/^##\s*/, ''))}</h4>;
+      if (t.startsWith('#')) return <h2 key={lineIdx} style={{ fontSize: '1.2rem', fontWeight: 800, color: '#1f2937', margin: '1.1rem 0 0.6rem 0' }}>{parseBoldText(t.replace(/^#\s*/, ''))}</h2>;
       if (t.startsWith('- ') || t.startsWith('* ')) {
         return (
           <div key={lineIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginLeft: '0.5rem', marginBottom: '0.3rem' }}>
@@ -751,427 +760,372 @@ export default function PlanTripWithTravelAI() {
 
   // -- Landing screen (shown before the first message is sent) --------------
   if (showLanding) {
-  return (
-    <>
-      <Navbar />
-
-      <div style={{ minHeight: '100vh', background: '#f5f4f1', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3rem 1.5rem', fontFamily: 'Georgia, "Times New Roman", serif' }}>
-
-        <div style={{ width: '100%', maxWidth: 900, background: '#faf9f6', border: '1px solid #e2e0da', borderRadius: 20, padding: '2.5rem 2.5rem 2rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-
-          {/* Top-left brand */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '2.5rem' }}>
-            <img src={travelAILogo} alt="Travel AI" style={{ height: 28, width: 'auto', objectFit: 'contain', mixBlendMode: 'multiply' }} />
-          </div>
-
-          {/* Hero */}
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <img src={travelAILogo} alt="Travel AI" style={{ height: 110, width: 'auto', objectFit: 'contain', marginBottom: '0.75rem', mixBlendMode: 'multiply', display: 'inline-block' }} />
-            <p style={{ fontFamily: 'Arial, sans-serif', fontSize: 13, color: '#9ca3af', margin: 0 }}>
-              You're in <strong style={{ color: '#4b5563' }}>Auckland International</strong>
-            </p>
-          </div>
-
-          {/* Suggestion pills */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10, marginBottom: '2rem' }}>
-            {EXPLORE_SUGGESTIONS.map(place => (
-              <button
-                key={place}
-                onClick={() => handlePillClick(place)}
-                style={{
-                  fontFamily: 'Georgia, serif', fontSize: 13, fontWeight: 600, color: '#374151',
-                  background: '#fdfcfa', border: '1px solid #d9d6cd', borderRadius: 999,
-                  padding: '8px 18px', cursor: 'pointer', transition: 'all 0.15s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#f3f1ea'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#fdfcfa'; }}
-              >
-                Explore {place}
-              </button>
-            ))}
-          </div>
-
-          {/* Ask input */}
-          <div style={{ background: '#ffffff', border: '1px solid #e5e3dc', borderRadius: 16, padding: '1.5rem', minHeight: 160, display: 'flex', flexDirection: 'column' }}>
-            <textarea
-              value={userInput}
-              onChange={e => setUserInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder="Ask here where do you want to go?"
-              style={{
-                flex: 1, border: 'none', outline: 'none', resize: 'none',
-                fontFamily: 'Georgia, serif', fontSize: 18, color: '#9ca3af',
-                background: 'transparent', width: '100%',
-              }}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                onClick={handleSend}
-                disabled={!userInput.trim() || isSending}
-                style={{
-                  fontFamily: 'Arial, sans-serif', fontSize: 15, fontWeight: 700, color: '#fff',
-                  background: !userInput.trim() ? '#a5a3f5' : 'linear-gradient(135deg,#6366f1,#4f46e5)',
-                  border: 'none', borderRadius: 999, padding: '12px 24px',
-                  cursor: !userInput.trim() ? 'default' : 'pointer',
-                  display: 'flex', alignItems: 'center', gap: 8,
-                }}
-              >
-                {isSending ? 'Thinking...' : 'Submit'}
-              </button>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <p style={{ fontFamily: 'Arial, sans-serif', fontSize: 12, color: '#b4b2a8', textAlign: 'center', marginTop: '1.75rem', marginBottom: 0 }}>
-            AI-powered . By using AI Mode you agree to our{' '}
-            <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>Terms</span> &{' '}
-            <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>Privacy Policy</span>
+    const landingContent = (
+      <div style={{ width: '100%', background: '#ffffff', border: isDashboardMode ? 'none' : '1px solid #e2e0da', borderRadius: 20, padding: isDashboardMode ? '1rem 0' : '2.5rem 2.5rem 2rem', boxShadow: isDashboardMode ? 'none' : '0 1px 3px rgba(0,0,0,0.04)' }}>
+        {/* Hero */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <img src={travelAILogo} alt="Travel AI" style={{ height: isDashboardMode ? 80 : 110, width: 'auto', objectFit: 'contain', marginBottom: '0.75rem', mixBlendMode: 'multiply', display: 'inline-block' }} />
+          <p style={{ fontFamily: 'Arial, sans-serif', fontSize: 13, color: '#9ca3af', margin: 0 }}>
+            You're in <strong style={{ color: '#4b5563' }}>Auckland International</strong>
           </p>
         </div>
-      </div>
-    </>
-  );
-}
 
-  return (
-  <>
-    <Navbar />
-
-    <div style={{ minHeight: '100vh', background: '#f5f4f1', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1.5rem', fontFamily: 'Georgia, "Times New Roman", serif' }}>
-
-      <div style={{ width: '100%', maxWidth: 1400, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-
-        {/* Header -- same light branding continued from the landing screen */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <img src={travelAILogo} alt="Travel AI" style={{ height: 30, width: 'auto', objectFit: 'contain', mixBlendMode: 'multiply' }} />
-          </div>
-          <button
-            onClick={() => navigate('/')}
-            style={{ fontFamily: 'Arial, sans-serif', background: '#fff', border: '1px solid #e2e0da', color: '#4b5563', fontWeight: 600, fontSize: '0.82rem', padding: '0.45rem 1.1rem', borderRadius: 9999, cursor: 'pointer' }}
-          >
-            Home
-          </button>
+        {/* Suggestion pills */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10, marginBottom: '2rem' }}>
+          {EXPLORE_SUGGESTIONS.map(place => (
+            <button
+              key={place}
+              onClick={() => handlePillClick(place)}
+              style={{
+                fontFamily: 'Georgia, serif', fontSize: 13, fontWeight: 600, color: '#374151',
+                background: '#fdfcfa', border: '1px solid #d9d6cd', borderRadius: 999,
+                padding: '8px 18px', cursor: 'pointer', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#f3f1ea'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#fdfcfa'; }}
+            >
+              Explore {place}
+            </button>
+          ))}
         </div>
 
-      {/* Main split view */}
-      <div style={{ display: 'flex', flexDirection: 'row', gap: '1.25rem', minHeight: 0, minWidth: 0, maxWidth: '100%', height: 'calc(100vh - 130px)', position: 'relative' }}>
-
-        {/* -- LEFT: Chat -- */}
-        <div style={{ flex: 2, display: 'flex', flexDirection: 'column', background: '#ffffff', borderRadius: 16, border: '1px solid #e2e0da', overflow: 'hidden', minWidth: 0, minHeight: 0, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-
-          {/* Chat header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '1rem', background: '#f8f7f4', borderBottom: '1px solid #e5e3dc' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#818cf8,#3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', boxShadow: '0 0 10px rgba(99,102,241,0.4)' }}>🤖</div>
-            <div>
-              <div style={{ fontWeight: 600, color: '#1f2937' }}>TravelAI Consultant</div>
-              <div style={{ fontSize: '0.75rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ width: 8, height: 8, background: '#34d399', borderRadius: '50%', display: 'inline-block' }} /> Online &amp; Listening
-              </div>
-            </div>
-            {bookingSearched && (
-              <div style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#38bdf8', background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.3)', padding: '3px 10px', borderRadius: 20 }}>
-                ✈️ Searching flights &amp; hotels...
-              </div>
-            )}
-          </div>
-
-          {/* Messages */}
-          <div style={{
-            flex: (readyToPlan && plan) ? '0 0 auto' : 1,
-            maxHeight: (readyToPlan && plan) ? '25vh' : 'none',
-            minHeight: (readyToPlan && plan) ? '25vh' : 0,
-            padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem',
-          }}>
-            {messages.map((msg, index) => {
-              const isUser = msg.role === 'user';
-              return (
-                <div key={index} style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start' }}>
-                  <div style={{
-                    maxWidth: '92%', padding: '1.1rem 1.35rem',
-                    borderRadius: isUser ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
-                    background:   isUser ? 'linear-gradient(135deg,#4f46e5,#3b82f6)' : '#f1f0ec',
-                    border:       isUser ? 'none' : '1px solid #e2e0da',
-                    boxShadow:    '0 4px 12px rgba(0,0,0,0.15)',
-                    color: '#1f2937', fontSize: '0.98rem', lineHeight: 1.6,
-                  }}>
-                    {isUser ? msg.content : renderFormattedMessage(msg.content)}
-                  </div>
-                </div>
-              );
-            })}
-            {isSending && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#6b7280', fontSize: '0.85rem' }}>
-                <span className="spinner" style={{ width: 14, height: 14 }} /> TravelAI is thinking...
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* ✨ Itinerary panel -- appears inside chat panel when plan is ready */}
-          {readyToPlan && plan && (
-            <div style={{ borderTop: '1px solid #e5e3dc', background: '#ffffff', flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem' }}>
-
-              {/* Header row -- title + neutral status only */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, flexShrink: 0 }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: '#4f46e5' }}>✨ Your Itinerary</h3>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  {loadingPkgs && (
-                    <span style={{ fontSize: '0.68rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span className="spinner" style={{ width: 10, height: 10 }} /> packages...
-                    </span>
-                  )}
-                  {bookingSearched && Object.values(bookingResults).includes('loading') && (
-                    <span style={{ fontSize: '0.68rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span className="spinner" style={{ width: 10, height: 10 }} /> Searching prices...
-                    </span>
-                  )}
-                  {bookingSearched && !Object.values(bookingResults).includes('loading') && (
-                    <span style={{ fontSize: '0.68rem', color: '#059669', background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.35)', padding: '2px 10px', borderRadius: 20 }}>
-                      ✅ Prices loaded
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Plan summary */}
-              <p style={{ fontSize: '0.8rem', color: '#374151', margin: 0, lineHeight: 1.5, flexShrink: 0 }}>{plan.summary}</p>
-
-              {/* Destination cards */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                {allDestCards.map(({ dest, agentPkg }) => (
-                  <DestinationCard
-                    key={dest.id}
-                    dest={dest}
-                    agentPkg={agentPkg}
-                    onRemove={removeDestination}
-                    bookingData={bookingResults[dest.name]}
-                    selectedFlight={selectedFlights[dest.id]}
-                    selectedHotel={selectedHotels[dest.id]}
-                    onSelectFlight={handleSelectFlight}
-                    onSelectHotel={handleSelectHotel}
-                    budgetLevel={plan?.budgetLevel || preferences.budgetLevel}
-                  />
-                ))}
-              </div>
-
-              {/* Find Flights & Hotels CTA -- after destinations so user reviews the plan first */}
-              {!bookingSearched && (
-                <button
-                  onClick={() => triggerBookingSearch(plan, preferences)}
-                  style={{
-                    width: '100%', padding: '12px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                    color: 'white', fontWeight: 700, fontSize: '0.85rem',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    boxShadow: '0 4px 16px rgba(79,70,229,0.2)',
-                    flexShrink: 0,
-                  }}
-                >
-                  ✈️ Find Live Flights &amp; Hotels for All Destinations
-                </button>
-              )}
-
-              {/* Booking selection summary */}
-              {hasBookingSelections && (
-                <div style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '8px 12px', fontSize: '0.78rem', flexShrink: 0 }}>
-                  <div style={{ fontWeight: 600, color: '#4f46e5', marginBottom: 5 }}>Selection summary</div>
-                  {selectedComponents.map((c, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', color: '#374151', marginBottom: 2 }}>
-                      <span>{c.componentType === 'flight' ? '✈️' : '🏨'} {c.title}</span>
-                      <span style={{ color: '#059669', fontWeight: 700 }}>NZD ${c.pricePerPerson?.toFixed(0)}</span>
-                    </div>
-                  ))}
-                  <div style={{ borderTop: '1px solid #e5e3dc', marginTop: 6, paddingTop: 6, display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
-                    <span style={{ color: '#1f2937' }}>Total . {preferences.travelers || 1} traveller{preferences.travelers > 1 ? 's' : ''}</span>
-                    <span style={{ color: '#4f46e5' }}>NZD ${totalAll?.toFixed(0)}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Save bar */}
-              {bookingSearched && (
-                <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 6, paddingBottom: 4, flexShrink: 0 }}>
-                  <button
-                    onClick={() => {
-                      if (!isSaving && !saveSuccess && allDestCards.length > 0) {
-                        handleSaveTrip();
-                      }
-                    }}
-                    disabled={isSaving || saveSuccess || allDestCards.length === 0}
-                    style={{
-                      background: 'linear-gradient(135deg,#10b981,#059669)',
-                      color: 'white',
-                      fontWeight: 600,
-                      fontSize: '0.85rem',
-                      padding: '0.6rem 1.4rem',
-                      borderRadius: 8,
-                      border: 'none',
-                      cursor: (isSaving || saveSuccess || allDestCards.length === 0) ? 'default' : 'pointer',
-                      opacity: (isSaving || allDestCards.length === 0) ? 0.6 : 1,
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    {isSaving ? 'Saving...' : saveSuccess ? 'Saved! v' : 'Save Itinerary'}
-                  </button>
-                </div>
-              )}
-
-              {/* -- Booking confirmation -- appears once the trip is saved -- */}
-              {saveSuccess && !bookingConfirmation && hasBookingSelections && (
-                <div style={{ borderTop: '1px solid #e5e3dc', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#4f46e5' }}>
-                    🔒 Confirm Your Booking
-                  </div>
-                  <p style={{ margin: 0, fontSize: '0.72rem', color: '#6b7280', lineHeight: 1.4 }}>
-                    This locks in your selected flights and hotels at today's price. Payment will be required next to finalise it.
-                  </p>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <input
-                      type="text"
-                      placeholder="Full Name *"
-                      value={travelerName}
-                      onChange={e => setTravelerName(e.target.value)}
-                      style={{ flex: '1 1 160px', background: '#f8f7f4', border: '1px solid #d1d5db', borderRadius: 8, padding: '0.5rem 0.75rem', color: '#1f2937', fontSize: '0.8rem' }}
-                    />
-                    <input
-                      type="email"
-                      placeholder="Email *"
-                      value={travelerEmail}
-                      onChange={e => setTravelerEmail(e.target.value)}
-                      style={{ flex: '1 1 160px', background: '#f8f7f4', border: '1px solid #d1d5db', borderRadius: 8, padding: '0.5rem 0.75rem', color: '#1f2937', fontSize: '0.8rem' }}
-                    />
-                    <input
-                      type="tel"
-                      placeholder="Phone (optional)"
-                      value={travelerPhone}
-                      onChange={e => setTravelerPhone(e.target.value)}
-                      style={{ flex: '1 1 140px', background: '#f8f7f4', border: '1px solid #d1d5db', borderRadius: 8, padding: '0.5rem 0.75rem', color: '#1f2937', fontSize: '0.8rem' }}
-                    />
-                  </div>
-                  <button
-                    onClick={handleConfirmBooking}
-                    disabled={isConfirmingBooking || !travelerName.trim() || !travelerEmail.trim()}
-                    style={{
-                      background: (!travelerName.trim() || !travelerEmail.trim()) ? '#d1d5db' : 'linear-gradient(135deg,#8b5cf6,#7c3aed)',
-                      color: 'white', fontWeight: 600, fontSize: '0.85rem', padding: '0.6rem 1rem', borderRadius: 8, border: 'none',
-                      cursor: (!travelerName.trim() || !travelerEmail.trim()) ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    {isConfirmingBooking ? 'Confirming...' : '🔒 Confirm Booking'}
-                  </button>
-                </div>
-              )}
-
-              {/* -- Booking confirmed -- show confirmation code -- */}
-              {bookingConfirmation && (
-                <div style={{ borderTop: '1px solid #e5e3dc', paddingTop: '1rem', flexShrink: 0 }}>
-                  <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 10, padding: '14px 16px' }}>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#4f46e5', marginBottom: 4 }}>
-                      ✅ Booking Reserved!
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: '#374151', marginBottom: 8 }}>
-                      Confirmation code: <strong style={{ color: '#1f2937', fontFamily: 'monospace', letterSpacing: '0.05em' }}>{bookingConfirmation.confirmationCode}</strong>
-                    </div>
-                    <div style={{ fontSize: '0.72rem', color: '#6b7280' }}>
-                      Status: <span style={{ color: '#b45309', textTransform: 'capitalize' }}>{bookingConfirmation.status?.replace('_', ' ')}</span> -- payment required to finalise. We've noted your details and will follow up.
-                    </div>
-                    <button
-                      onClick={() => navigate('/my-trips')}
-                      style={{ marginTop: 10, background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', color: '#4f46e5', fontSize: '0.78rem', fontWeight: 600, padding: '0.4rem 0.9rem', borderRadius: 8, cursor: 'pointer' }}
-                    >
-                      View My Trips
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {error && (
-            <div style={{ background: 'rgba(239,68,68,0.08)', color: '#dc2626', borderTop: '1px solid rgba(239,68,68,0.2)', padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-              ⚠️ {error}
-            </div>
-          )}
-
-          {/* Input */}
-          <div style={{ padding: '1rem', background: '#f8f7f4', borderTop: '1px solid #e5e3dc', display: 'flex', gap: 10, alignItems: 'center' }}>
-            <input
-              type="text"
-              placeholder="Tell TravelAI your destination, interests, dates, or plans..."
-              value={userInput}
-              onChange={e => setUserInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleSend(); }}
-              disabled={isSending}
-              style={{ all: 'unset', flex: 1, background: '#ffffff', border: '1px solid #d1d5db', borderRadius: 8, padding: '0.6rem 1rem', color: '#1f2937', fontFamily: 'Georgia, serif', fontSize: '0.9rem', boxSizing: 'border-box', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
-            />
+        {/* Ask input */}
+        <div style={{ background: '#ffffff', border: '1px solid #e5e3dc', borderRadius: 16, padding: '1.5rem', minHeight: 120, display: 'flex', flexDirection: 'column' }}>
+          <textarea
+            value={userInput}
+            onChange={e => setUserInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+            placeholder="Ask here where do you want to go?"
+            style={{
+              flex: 1, border: 'none', outline: 'none', resize: 'none',
+              fontFamily: 'Georgia, serif', fontSize: 18, color: '#9ca3af',
+              background: 'transparent', width: '100%',
+            }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
             <button
               onClick={handleSend}
-              disabled={isSending || !userInput.trim()}
-              style={{ all: 'unset', cursor: isSending || !userInput.trim() ? 'default' : 'pointer', background: isSending || !userInput.trim() ? '#e5e7eb' : 'linear-gradient(135deg,#6366f1,#4f46e5)', color: '#fff', borderRadius: 8, width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+              disabled={!userInput.trim() || isSending}
+              style={{
+                fontFamily: 'Arial, sans-serif', fontSize: 15, fontWeight: 700, color: '#fff',
+                background: !userInput.trim() ? '#a5a3f5' : 'linear-gradient(135deg,#6366f1,#4f46e5)',
+                border: 'none', borderRadius: 999, padding: '12px 24px',
+                cursor: !userInput.trim() ? 'default' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'rotate(-45deg) translate(2px,-2px)' }}>
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
+              {isSending ? 'Thinking...' : 'Submit'}
             </button>
           </div>
         </div>
 
-        {/* -- RIGHT: Tracker + Itinerary -- */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: 0, maxWidth: '100%', overflowY: 'auto', overflowX: 'hidden', paddingRight: 4 }}>
+        {/* Footer */}
+        <p style={{ fontFamily: 'Arial, sans-serif', fontSize: 12, color: '#b4b2a8', textAlign: 'center', marginTop: '1.75rem', marginBottom: 0 }}>
+          AI-powered . By using AI Mode you agree to our{' '}
+          <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>Terms</span> &{' '}
+          <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>Privacy Policy</span>
+        </p>
+      </div>
+    );
 
-          {/* Both the tracker and itinerary-placeholder are hidden until the
-              user has actually sent a trip prompt -- messages starts with just
-              the assistant's greeting (length 1), so anything beyond that
-              means the conversation has genuinely started. */}
-          {messages.length > 1 && (
-            <>
-          {/* Preference Tracker */}
-          <div style={{ padding: '1.5rem', background: '#ffffff', borderRadius: 16, border: '1px solid #e2e0da', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', minWidth: 0 }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 1.25rem 0', color: '#1f2937', display: 'flex', alignItems: 'center', gap: 8 }}>
-              🎯 Live Consultant Tracker
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
-              {[
-                { label: '📍 Destination', value: preferences.destination, key: 'destination' },
-                { label: '🛫 Flying From',  value: preferences.originCity, key: 'originCity' },
-                { label: '📅 Duration',    value: preferences.days > 0 ? `${preferences.days} Days` : null, key: 'days' },
-                { label: '🗓 Depart Date', value: preferences.departDate, key: 'departDate' },
-                { label: '🗓 Return Date', value: preferences.returnDate, key: 'returnDate' },
-                { label: '👥 Travelers',   value: preferences.travelers > 0 ? `${preferences.travelers} Traveler(s)` : null, key: 'travelers' },
-                { label: '💰 Budget',      value: preferences.budgetAmount > 0
-                    ? `$${preferences.budgetAmount.toLocaleString()}`
-                    : (preferences.flightBudget > 0 || preferences.hotelBudgetPerNight > 0)
-                      ? `✈️ $${preferences.flightBudget.toLocaleString()} . 🏨 $${preferences.hotelBudgetPerNight.toLocaleString()}/night`
-                      : preferences.budgetLevel, key: 'budgetLevel' },
-              ].map(row => (
-                <div key={row.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f0ede6', paddingBottom: 8, minWidth: 0, gap: 8 }}>
-                  <span style={{ fontSize: '0.82rem', color: '#374151', fontWeight: 500, flexShrink: 0 }}>{row.label}</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600, textTransform: 'capitalize', color: row.value ? '#38bdf8' : '#fbbf24', textAlign: 'right', wordBreak: 'break-word', minWidth: 0 }}>
-                    {row.value || 'Finding...'}
-                  </span>
-                </div>
-              ))}
-              {preferences.location_types?.length > 0 && (
+    if (isDashboardMode) {
+      return landingContent;
+    }
+
+    return (
+      <>
+        <Navbar />
+        <div style={{ minHeight: '100vh', background: '#f5f4f1', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3rem 1.5rem', fontFamily: 'Georgia, "Times New Roman", serif' }}>
+          <div style={{ width: '100%', maxWidth: 900 }}>
+            {landingContent}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  const activeContent = (
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+
+
+          {/* Main split view */}
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '1.25rem', minHeight: 0, minWidth: 0, maxWidth: '100%', height: isDashboardMode ? '600px' : 'calc(100vh - 130px)', position: 'relative' }}>
+
+            {/* -- LEFT: Chat -- */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#ffffff', borderRadius: 16, border: '1px solid #e2e0da', overflow: 'hidden', minWidth: 0, minHeight: 0, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+
+              {/* Chat header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '1rem', background: '#f8f7f4', borderBottom: '1px solid #e5e3dc' }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#818cf8,#3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', boxShadow: '0 0 10px rgba(99,102,241,0.4)' }}>🤖</div>
                 <div>
-                  <span style={{ fontSize: '0.82rem', color: '#e2e8f0', fontWeight: 500 }}>🏷️ Interests</span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 7 }}>
-                    {preferences.location_types.map((t, i) => (
-                      <span key={i} style={{ fontSize: '0.72rem', padding: '3px 9px', borderRadius: 9999, background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#c7d2fe', fontWeight: 500 }}>{t}</span>
+                  <div style={{ fontWeight: 600, color: '#1f2937' }}>AI Planner</div>
+                </div>
+                {bookingSearched && (
+                  <div style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#38bdf8', background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.3)', padding: '3px 10px', borderRadius: 20 }}>
+                    ✈️ Searching flights &amp; hotels...
+                  </div>
+                )}
+              </div>
+
+              {/* Messages */}
+              <div
+                ref={chatContainerRef}
+                style={{
+                  flex: (readyToPlan && plan) ? '0 0 auto' : 1,
+                  maxHeight: (readyToPlan && plan) ? '25vh' : 'none',
+                  minHeight: (readyToPlan && plan) ? '25vh' : 0,
+                  padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem',
+                }}
+              >
+                {messages.map((msg, index) => {
+                  const isUser = msg.role === 'user';
+                  return (
+                    <div key={index} style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start' }}>
+                      <div style={{
+                        maxWidth: '92%', padding: '1.1rem 1.35rem',
+                        borderRadius: isUser ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
+                        background: isUser ? 'linear-gradient(135deg,#4f46e5,#3b82f6)' : '#f1f0ec',
+                        border: isUser ? 'none' : '1px solid #e2e0da',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        color: '#1f2937', fontSize: '0.98rem', lineHeight: 1.6,
+                      }}>
+                        {isUser ? msg.content : renderFormattedMessage(msg.content)}
+                      </div>
+                    </div>
+                  );
+                })}
+                {isSending && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#6b7280', fontSize: '0.85rem' }}>
+                    <span className="spinner" style={{ width: 14, height: 14 }} /> TravelAI is thinking...
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* ✨ Itinerary panel -- appears inside chat panel when plan is ready */}
+              {readyToPlan && plan && (
+                <div style={{ borderTop: '1px solid #e5e3dc', background: '#ffffff', flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem' }}>
+
+                  {/* Header row -- title + neutral status only */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, flexShrink: 0 }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: '#4f46e5' }}>✨ Your Itinerary</h3>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      {loadingPkgs && (
+                        <span style={{ fontSize: '0.68rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span className="spinner" style={{ width: 10, height: 10 }} /> packages...
+                        </span>
+                      )}
+                      {bookingSearched && Object.values(bookingResults).includes('loading') && (
+                        <span style={{ fontSize: '0.68rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span className="spinner" style={{ width: 10, height: 10 }} /> Searching prices...
+                        </span>
+                      )}
+                      {bookingSearched && !Object.values(bookingResults).includes('loading') && (
+                        <span style={{ fontSize: '0.68rem', color: '#059669', background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.35)', padding: '2px 10px', borderRadius: 20 }}>
+                          ✅ Prices loaded
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Plan summary */}
+                  <p style={{ fontSize: '0.8rem', color: '#374151', margin: 0, lineHeight: 1.5, flexShrink: 0 }}>{plan.summary}</p>
+
+                  {/* Destination cards */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                    {allDestCards.map(({ dest, agentPkg }) => (
+                      <DestinationCard
+                        key={dest.id}
+                        dest={dest}
+                        agentPkg={agentPkg}
+                        onRemove={removeDestination}
+                        bookingData={bookingResults[dest.name]}
+                        selectedFlight={selectedFlights[dest.id]}
+                        selectedHotel={selectedHotels[dest.id]}
+                        onSelectFlight={handleSelectFlight}
+                        onSelectHotel={handleSelectHotel}
+                        budgetLevel={plan?.budgetLevel || preferences.budgetLevel}
+                      />
                     ))}
                   </div>
+
+                  {/* Find Flights & Hotels CTA -- after destinations so user reviews the plan first */}
+                  {!bookingSearched && (
+                    <button
+                      onClick={() => triggerBookingSearch(plan, preferences)}
+                      style={{
+                        width: '100%', padding: '12px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                        background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                        color: 'white', fontWeight: 700, fontSize: '0.85rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                        boxShadow: '0 4px 16px rgba(79,70,229,0.2)',
+                        flexShrink: 0,
+                      }}
+                    >
+                      ✈️ Find Live Flights &amp; Hotels for All Destinations
+                    </button>
+                  )}
+
+                  {/* Booking selection summary */}
+                  {hasBookingSelections && (
+                    <div style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '8px 12px', fontSize: '0.78rem', flexShrink: 0 }}>
+                      <div style={{ fontWeight: 600, color: '#4f46e5', marginBottom: 5 }}>Selection summary</div>
+                      {selectedComponents.map((c, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', color: '#374151', marginBottom: 2 }}>
+                          <span>{c.componentType === 'flight' ? '✈️' : '🏨'} {c.title}</span>
+                          <span style={{ color: '#059669', fontWeight: 700 }}>NZD ${c.pricePerPerson?.toFixed(0)}</span>
+                        </div>
+                      ))}
+                      <div style={{ borderTop: '1px solid #e5e3dc', marginTop: 6, paddingTop: 6, display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+                        <span style={{ color: '#1f2937' }}>Total . {preferences.travelers || 1} traveller{preferences.travelers > 1 ? 's' : ''}</span>
+                        <span style={{ color: '#4f46e5' }}>NZD ${totalAll?.toFixed(0)}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Save bar */}
+                  {bookingSearched && (
+                    <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 6, paddingBottom: 4, flexShrink: 0 }}>
+                      <button
+                        onClick={() => {
+                          if (!isSaving && !saveSuccess && allDestCards.length > 0) {
+                            handleSaveTrip();
+                          }
+                        }}
+                        disabled={isSaving || saveSuccess || allDestCards.length === 0}
+                        style={{
+                          background: 'linear-gradient(135deg,#10b981,#059669)',
+                          color: 'white',
+                          fontWeight: 600,
+                          fontSize: '0.85rem',
+                          padding: '0.6rem 1.4rem',
+                          borderRadius: 8,
+                          border: 'none',
+                          cursor: (isSaving || saveSuccess || allDestCards.length === 0) ? 'default' : 'pointer',
+                          opacity: (isSaving || allDestCards.length === 0) ? 0.6 : 1,
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {isSaving ? 'Saving...' : saveSuccess ? 'Saved!' : 'Save Itinerary'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* -- Booking confirmation -- appears once the trip is saved -- */}
+                  {saveSuccess && !bookingConfirmation && hasBookingSelections && (
+                    <div style={{ borderTop: '1px solid #e5e3dc', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#4f46e5' }}>
+                        🔒 Confirm Your Booking
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.72rem', color: '#6b7280', lineHeight: 1.4 }}>
+                        This locks in your selected flights and hotels at today's price. Payment will be required next to finalise it.
+                      </p>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <input
+                          type="text"
+                          placeholder="Full Name *"
+                          value={travelerName}
+                          onChange={e => setTravelerName(e.target.value)}
+                          style={{ flex: '1 1 160px', background: '#f8f7f4', border: '1px solid #d1d5db', borderRadius: 8, padding: '0.5rem 0.75rem', color: '#1f2937', fontSize: '0.8rem' }}
+                        />
+                        <input
+                          type="email"
+                          placeholder="Email *"
+                          value={travelerEmail}
+                          onChange={e => setTravelerEmail(e.target.value)}
+                          style={{ flex: '1 1 160px', background: '#f8f7f4', border: '1px solid #d1d5db', borderRadius: 8, padding: '0.5rem 0.75rem', color: '#1f2937', fontSize: '0.8rem' }}
+                        />
+                        <input
+                          type="tel"
+                          placeholder="Phone (optional)"
+                          value={travelerPhone}
+                          onChange={e => setTravelerPhone(e.target.value)}
+                          style={{ flex: '1 1 140px', background: '#f8f7f4', border: '1px solid #d1d5db', borderRadius: 8, padding: '0.5rem 0.75rem', color: '#1f2937', fontSize: '0.8rem' }}
+                        />
+                      </div>
+                      <button
+                        onClick={handleConfirmBooking}
+                        disabled={isConfirmingBooking || !travelerName.trim() || !travelerEmail.trim()}
+                        style={{
+                          background: (!travelerName.trim() || !travelerEmail.trim()) ? '#d1d5db' : 'linear-gradient(135deg,#8b5cf6,#7c3aed)',
+                          color: 'white', fontWeight: 600, fontSize: '0.85rem', padding: '0.6rem 1rem', borderRadius: 8, border: 'none',
+                          cursor: (!travelerName.trim() || !travelerEmail.trim()) ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {isConfirmingBooking ? 'Confirming...' : '🔒 Confirm Booking'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* -- Booking confirmed -- show confirmation code -- */}
+                  {bookingConfirmation && (
+                    <div style={{ borderTop: '1px solid #e5e3dc', paddingTop: '1rem', flexShrink: 0 }}>
+                      <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 10, padding: '14px 16px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#4f46e5', marginBottom: 4 }}>
+                          ✅ Booking Reserved!
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#374151', marginBottom: 8 }}>
+                          Confirmation code: <strong style={{ color: '#1f2937', fontFamily: 'monospace', letterSpacing: '0.05em' }}>{bookingConfirmation.confirmationCode}</strong>
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#6b7280' }}>
+                          Status: <span style={{ color: '#b45309', textTransform: 'capitalize' }}>{bookingConfirmation.status?.replace('_', ' ')}</span> -- payment required to finalise. We've noted your details and will follow up.
+                        </div>
+                        <button
+                          onClick={() => navigate('/my-trips')}
+                          style={{ marginTop: 10, background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', color: '#4f46e5', fontSize: '0.78rem', fontWeight: 600, padding: '0.4rem 0.9rem', borderRadius: 8, cursor: 'pointer' }}
+                        >
+                          View My Trips
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
+
+              {error && (
+                <div style={{ background: 'rgba(239,68,68,0.08)', color: '#dc2626', borderTop: '1px solid rgba(239,68,68,0.2)', padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
+                  ⚠️ {error}
+                </div>
+              )}
+
+              {/* Input */}
+              <div style={{ padding: '1rem', background: '#f8f7f4', borderTop: '1px solid #e5e3dc', display: 'flex', gap: 10, alignItems: 'center' }}>
+                <AnimatedTripPlannerInput
+                  value={userInput}
+                  onChange={e => setUserInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleSend(); }}
+                  disabled={isSending}
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={isSending || !userInput.trim()}
+                  style={{ all: 'unset', cursor: isSending || !userInput.trim() ? 'default' : 'pointer', background: isSending || !userInput.trim() ? '#e5e7eb' : 'linear-gradient(135deg,#6366f1,#4f46e5)', color: '#fff', borderRadius: 8, width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'rotate(-45deg) translate(2px,-2px)' }}>
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      );
+
+      if (isDashboardMode) {
+        return activeContent;
+      }
+
+      return (
+        <>
+          <Navbar />
+          <div style={{ minHeight: '100vh', background: '#f5f4f1', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1.5rem', fontFamily: 'Georgia, "Times New Roman", serif' }}>
+            <div style={{ width: '100%', maxWidth: 1400 }}>
+              {activeContent}
             </div>
           </div>
-
-            </>
-          )}
-        </div>
-      </div>
-      </div>
-    </div>
-  </>
-);
-}
+        </>
+      );
+    }

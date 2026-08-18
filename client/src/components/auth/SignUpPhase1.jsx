@@ -19,6 +19,7 @@ const CURRENCIES = [
   { code: 'SGD', label: '🇸🇬 SGD — Singapore Dollar' },
   { code: 'CHF', label: '🇨🇭 CHF — Swiss Franc' },
   { code: 'CNY', label: '🇨🇳 CNY — Chinese Yuan' },
+  { code: 'AED', label: '🇦🇪 AED — UAE Dirham' },
 ];
 
 const LOCATION_TYPES = [

@@ -14,7 +14,8 @@ const TravellerProfilePage = lazy(() => import('./components/dashboard/Traveller
 const AgentDashboard       = lazy(() => import('./components/dashboard/AgentDashboard'));
 const AgentProfilePage     = lazy(() => import('./components/dashboard/AgentProfilePage'));
 const AdminDashboard       = lazy(() => import('./components/admin/AdminDashboard'));
-const AgentsList           = lazy(() => import('./components/agents/AgentsList'));
+const PackagesList         = lazy(() => import('./components/packages/PackagesList'));
+const PackageDetailPublic  = lazy(() => import('./components/packages/PackageDetailPublic'));
 const AgentDetailPublic    = lazy(() => import('./components/agents/AgentDetailPublic'));
 const PlanTripWithTravelAI = lazy(() => import('./components/trips/PlanTripWithTravelAI'));
 const TripDetailPage       = lazy(() => import('./components/trips/TripDetailPage'));
@@ -73,7 +74,7 @@ function PrivateRoute({ children }) {
 
   if (isLoading) return null;
 
-  return user ? children : <Navigate to="/login" replace />;
+  return user ? children : <Navigate to="/login?reason=session-expired" replace />;
 }
 
 function GuestRoute({ children }) {
@@ -249,7 +250,8 @@ export default function App() {
                   }
                 />
 
-                <Route path="/agents" element={<AgentsList />} />
+                <Route path="/packages" element={<PackagesList />} />
+                <Route path="/packages/:id" element={<PackageDetailPublic />} />
                 <Route path="/agents/:id" element={<AgentDetailPublic />} />
 
                 <Route

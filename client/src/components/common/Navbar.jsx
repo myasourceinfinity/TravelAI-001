@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import '../home/HomePage.css';
@@ -132,11 +132,11 @@ export default function Navbar() {
               )}
 
               <Link
-                to="/agents"
+                to="/packages"
                 onClick={closeMobileMenu}
-                className={`home-nav-link ${isActive('/agents')}`}
+                className={`home-nav-link ${isActive('/packages')}`}
               >
-                Agents
+                Packages
               </Link>
 
               <Link

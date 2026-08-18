@@ -2,10 +2,12 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../common/Navbar';
+import PopularDestinationsCarousel from '../common/PopularDestinationsCarousel';
 import './HomePage.css';
 import travelAILogo from '../../assets/travelai-logo.png';
-import { getRecentSearches, saveRecentSearchToDB } from '../../services/recentSearchService';
+import { getRecentSearches, saveRecentSearchToDB, getPopularDestinations } from '../../services/recentSearchService';
 import { chatWithAI } from '../../services/tripService';
+import AnimatedTripPlannerInput from '../trips/AnimatedTripPlannerInput';
 
 // ── Inline Logo for footer (Navbar has its own) ──────────────────────────────
 
@@ -63,6 +65,8 @@ export default function HomePage() {
 
 //traveller homepage
   const [recentSearches, setRecentSearches] = useState([]);
+  const [popularDestinations, setPopularDestinations] = useState([]);
+  const [popularLoading, setPopularLoading] = useState(true);
   const userRole = getUserRole(user);
  
   const isTravellerHome =
@@ -96,6 +100,57 @@ export default function HomePage() {
     };
   }, [isTravellerHome, accessToken]);
 
+  const DEFAULT_POPULAR_DESTINATIONS = [
+    { name: 'Burj Khalifa', subtitle: 'Skyline views · Downtown Dubai', searchCount: 0, isFeatured: true },
+    { name: 'Dubai Mall', subtitle: 'Shopping, dining & entertainment', searchCount: 0, isFeatured: true },
+    { name: 'Palm Jumeirah', subtitle: 'Beaches, resorts & sea views', searchCount: 0, isFeatured: true },
+    { name: 'Dubai Frame', subtitle: 'Old and new Dubai panoramas', searchCount: 0, isFeatured: true },
+  ];
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPopularDestinations() {
+      setPopularLoading(true);
+
+      if (!accessToken) {
+        if (!cancelled) {
+          setPopularDestinations(DEFAULT_POPULAR_DESTINATIONS);
+          setPopularLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const data = await getPopularDestinations(accessToken);
+        if (!cancelled) {
+          setPopularDestinations(data.popularDestinations || DEFAULT_POPULAR_DESTINATIONS);
+        }
+      } catch (err) {
+        console.error('[HomePage] Failed to load popular destinations:', err);
+        if (!cancelled) {
+          setPopularDestinations(DEFAULT_POPULAR_DESTINATIONS);
+        }
+      } finally {
+        if (!cancelled) {
+          setPopularLoading(false);
+        }
+      }
+    }
+
+    loadPopularDestinations();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken]);
+
+  const popularDestRef = useRef(null);
+
+  function scrollPopularDest(direction) {
+    popularDestRef.current?.scrollBy({ left: direction * 360, behavior: 'smooth' });
+  }
+
   async function saveRecentSearch(query) {
     const cleanQuery = String(query || '').trim();
 
@@ -107,6 +162,27 @@ export default function HomePage() {
     } catch (err) {
       console.error('[HomePage] Failed to save recent search:', err);
     }
+  }
+
+  function getDestinationImage(destination) {
+    const name = String(destination?.name || '').toLowerCase();
+
+    if (name.includes('burj khalifa')) return 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('dubai mall')) return 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('palm jumeirah')) return 'https://images.unsplash.com/photo-1546412414-e1885259563a?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('dubai frame')) return 'https://images.unsplash.com/photo-1512632578888-169bbbc64f33?auto=format&fit=crop&w=900&q=85';
+    return 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=85';
+  }
+
+  function handleDestinationClick(destination) {
+    const prompt = `I'd like to plan a trip to ${destination.name}.`;
+    if (isTravellerHome) {
+      setUserInput(prompt);
+      return;
+    }
+
+    sessionStorage.setItem('pending_trip_description', prompt);
+    navigate('/plan-trip');
   }
 
   useEffect(() => {
@@ -235,10 +311,7 @@ export default function HomePage() {
                   <div className="traveller-chat-header">
                     <div className="traveller-chat-avatar">🤖</div>
                     <div>
-                      <div className="traveller-chat-title">TravelAI Consultant</div>
-                      <div className="traveller-chat-status">
-                        <span className="traveller-chat-status-dot" /> Online &amp; Listening
-                      </div>
+                      <div className="traveller-chat-title">AI Planner</div>
                     </div>
                   </div>
 
@@ -257,9 +330,7 @@ export default function HomePage() {
                   {chatError && <div className="traveller-chat-error">⚠️ {chatError}</div>}
 
                   <div className="traveller-chat-input-row">
-                    <input
-                      type="text"
-                      placeholder="Tell TravelAI your destination, interests, dates, or plans..."
+                    <AnimatedTripPlannerInput
                       value={userInput}
                       onChange={(e) => setUserInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
@@ -267,11 +338,29 @@ export default function HomePage() {
                     />
                     <button
                       type="button"
-                      className="traveller-chat-send-btn"
                       onClick={handleSend}
                       disabled={isSending || !userInput.trim()}
+                      style={{
+                        all: 'unset',
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#ffffff',
+                        cursor: (isSending || !userInput.trim()) ? 'default' : 'pointer',
+                        opacity: (isSending || !userInput.trim()) ? 0.6 : 1,
+                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)',
+                        transition: 'all 0.2s ease',
+                        flexShrink: 0
+                      }}
                     >
-                      {isSending ? 'Thinking...' : 'Send'}
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -440,55 +529,15 @@ export default function HomePage() {
           </a>
         </div>
 
-        <div className="home-dest-grid">
-          {/* Destination 1: Paris */}
-          <div className="home-dest-card">
-            <div className="home-dest-banner paris"></div>
-            <div className="home-dest-footer">
-              <div className="home-dest-details">
-                <span className="home-dest-name">Paris</span>
-                <span className="home-dest-country">France</span>
-              </div>
-              <span className="home-dest-rating">★ 4.8</span>
-            </div>
-          </div>
-
-          {/* Destination 2: Bali */}
-          <div className="home-dest-card">
-            <div className="home-dest-banner bali"></div>
-            <div className="home-dest-footer">
-              <div className="home-dest-details">
-                <span className="home-dest-name">Bali</span>
-                <span className="home-dest-country">Indonesia</span>
-              </div>
-              <span className="home-dest-rating">★ 4.8</span>
-            </div>
-          </div>
-
-          {/* Destination 3: Dubai */}
-          <div className="home-dest-card">
-            <div className="home-dest-banner dubai"></div>
-            <div className="home-dest-footer">
-              <div className="home-dest-details">
-                <span className="home-dest-name">Dubai</span>
-                <span className="home-dest-country">UAE</span>
-              </div>
-              <span className="home-dest-rating">★ 4.8</span>
-            </div>
-          </div>
-
-          {/* Destination 4: New York */}
-          <div className="home-dest-card">
-            <div className="home-dest-banner newyork"></div>
-            <div className="home-dest-footer">
-              <div className="home-dest-details">
-                <span className="home-dest-name">New York</span>
-                <span className="home-dest-country">USA</span>
-              </div>
-              <span className="home-dest-rating">★ 4.8</span>
-            </div>
-          </div>
-        </div>
+        <PopularDestinationsCarousel
+          popularDestinations={popularDestinations}
+          loading={popularLoading}
+          scrollRef={popularDestRef}
+          onScrollLeft={() => scrollPopularDest(-1)}
+          onScrollRight={() => scrollPopularDest(1)}
+          onDestinationClick={handleDestinationClick}
+          getDestinationImage={getDestinationImage}
+        />
       </section>
     </div>
   );

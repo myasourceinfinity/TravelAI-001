@@ -119,7 +119,7 @@ export default function TripDetailPage() {
         );
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          if (res.status === 401) { await logout(); navigate('/'); return; }
+          if (res.status === 401) { await logout(); navigate('/login?reason=session-expired'); return; }
           if (res.status === 404) { setError('Trip not found.'); return; }
           throw new Error(data.error || 'Failed to load trip.');
         }

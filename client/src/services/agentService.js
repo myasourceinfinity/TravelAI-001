@@ -58,3 +58,16 @@ export function submitAgentReview(id, token, { rating, comment }) {
     },
   });
 }
+
+export function submitPackageReview(id, token, { rating, comment }) {
+  return request(`/public/packages/${id}/reviews`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: {
+      rating,
+      comment,
+    },
+  });
+}

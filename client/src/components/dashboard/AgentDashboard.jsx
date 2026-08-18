@@ -5,6 +5,7 @@ import { getProfile, updateProfile } from '../../services/authService';
 import { getAgentPackages, createSinglePackage, updateSinglePackage } from '../../services/tripService';
 import Navbar from '../common/Navbar';
 import BulkPackageUpload from '../common/BulkPackageUpload';
+import { getAgentEnquiries, addEnquiryFollowUp } from '../../services/recentPackageService';
 
 const COMPONENT_META = {
   flight: { icon: '✈️', label: 'Flight', colour: '#0284c7' },
@@ -70,11 +71,25 @@ function PackageCard({ pkg, onEdit }) {
           </p>
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{ fontSize: 11, color: '#475569', marginBottom: 2 }}>Base Price</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#4f46e5' }}>
-            {pkg.currency} ${Number(pkg.price_per_person).toFixed(0)}
-          </div>
-          <div style={{ fontSize: 11, color: '#64748b' }}>per person</div>
+          {pkg.promo_price ? (
+            <>
+              <div style={{ fontSize: 11, color: '#dc2626', fontWeight: 700, marginBottom: 2 }}>🔥 Promo Price</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#dc2626' }}>
+                {pkg.currency} ${Number(pkg.promo_price).toFixed(0)}
+              </div>
+              <div style={{ fontSize: 11, color: '#64748b', textDecoration: 'line-through' }}>
+                Was {pkg.currency} ${Number(pkg.price_per_person).toFixed(0)}
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 11, color: '#475569', marginBottom: 2 }}>Base Price</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#4f46e5' }}>
+                {pkg.currency} ${Number(pkg.price_per_person).toFixed(0)}
+              </div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>per person</div>
+            </>
+          )}
         </div>
         <span style={{ fontSize: 18, color: '#64748b', marginLeft: 8 }}>
           {expanded ? '▲' : '▼'}
@@ -184,6 +199,7 @@ export default function AgentDashboard() {
     duration_days: '',
     duration_nights: '',
     base_price: '',
+    promo_price: '',
     currency_code: 'NZD',
     platform_service_fee_type: 'fixed',
     platform_service_fee_value: '0',
@@ -201,6 +217,78 @@ export default function AgentDashboard() {
 
   const [editingPkgId, setEditingPkgId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
+
+  const [enquiries, setEnquiries] = useState([]);
+  const [enquiriesLoading, setEnquiriesLoading] = useState(false);
+  const [noteTextInputs, setNoteTextInputs] = useState({});
+  const [noteTypeInputs, setNoteTypeInputs] = useState({});
+  const [savingNotes, setSavingNotes] = useState({});
+  const [notesError, setNotesError] = useState({});
+  const [notesSuccess, setNotesSuccess] = useState({});
+
+  const fetchEnquiries = useCallback(async () => {
+    if (!accessToken) return;
+    setEnquiriesLoading(true);
+    try {
+      const data = await getAgentEnquiries(accessToken);
+      const enqs = data.enquiries || [];
+      setEnquiries(enqs);
+
+      // Initialize note types to 'note'
+      const initialTypes = {};
+      enqs.forEach(enq => {
+        initialTypes[enq.id] = 'note';
+      });
+      setNoteTypeInputs(initialTypes);
+    } catch (err) {
+      console.error('[AgentDashboard] Failed to fetch enquiries:', err);
+    } finally {
+      setEnquiriesLoading(false);
+    }
+  }, [accessToken]);
+
+  const handleAddFollowUp = async (enquiryId) => {
+    const noteText = noteTextInputs[enquiryId] || '';
+    const noteType = noteTypeInputs[enquiryId] || 'note';
+
+    if (!noteText.trim()) {
+      setNotesError(prev => ({ ...prev, [enquiryId]: 'Please enter note text.' }));
+      return;
+    }
+
+    setSavingNotes(prev => ({ ...prev, [enquiryId]: true }));
+    setNotesError(prev => ({ ...prev, [enquiryId]: null }));
+    setNotesSuccess(prev => ({ ...prev, [enquiryId]: null }));
+
+    try {
+      const res = await addEnquiryFollowUp(accessToken, enquiryId, { noteType, noteText });
+      setNotesSuccess(prev => ({ ...prev, [enquiryId]: 'Follow-up logged successfully!' }));
+      setNoteTextInputs(prev => ({ ...prev, [enquiryId]: '' })); // Clear input
+
+      // Append the new follow-up to the enquiry's local follow_ups array
+      setEnquiries(prevEnqs =>
+        prevEnqs.map(e => {
+          if (e.id === enquiryId) {
+            return {
+              ...e,
+              follow_ups: [res.followUp, ...(e.follow_ups || [])]
+            };
+          }
+          return e;
+        })
+      );
+    } catch (err) {
+      setNotesError(prev => ({ ...prev, [enquiryId]: err.message || 'Failed to log follow-up.' }));
+    } finally {
+      setSavingNotes(prev => ({ ...prev, [enquiryId]: false }));
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'enquiries') {
+      fetchEnquiries();
+    }
+  }, [activeTab, fetchEnquiries]);
 
   const fetchProfileAndPackages = useCallback(async () => {
     if (!accessToken) return;
@@ -222,7 +310,7 @@ export default function AgentDashboard() {
     } catch (err) {
       if (err.status === 401) {
         await logout();
-        navigate('/');
+        navigate('/login?reason=session-expired');
       } else {
         setError(err.message);
       }
@@ -329,6 +417,7 @@ export default function AgentDashboard() {
       duration_days: pkg.duration_days,
       duration_nights: pkg.duration_nights,
       base_price: pkg.price_per_person,
+      promo_price: pkg.promo_price || '',
       currency_code: pkg.currency || 'NZD',
       platform_service_fee_type: pkg.platform_service_fee_type || 'fixed',
       platform_service_fee_value: pkg.platform_service_fee_value || '0',
@@ -512,6 +601,23 @@ export default function AgentDashboard() {
             >
               <span style={{ fontSize: 16 }}>📥</span> Bulk Import
             </button>
+
+            <button 
+              onClick={() => {
+                setActiveTab('enquiries');
+                setPkgError(null);
+                setPkgSuccess(null);
+              }} 
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+                background: activeTab === 'enquiries' ? 'linear-gradient(135deg, #4f46e5, #3b82f6)' : 'transparent',
+                color: activeTab === 'enquiries' ? '#ffffff' : '#475569',
+                border: 'none', borderRadius: 10, padding: '12px 16px', cursor: 'pointer',
+                fontWeight: 600, fontSize: 14, transition: 'all 0.2s', textAlign: 'left'
+              }}
+            >
+              <span style={{ fontSize: 16 }}>📧</span> Recent Enquiries
+            </button>
           </div>
 
           {/* Right Column: Main Content Canvas */}
@@ -633,7 +739,7 @@ export default function AgentDashboard() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 12 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Days *</label>
                     <input type="number" min="0" name="duration_days" value={newPkg.duration_days} onChange={handlePkgChange} required style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(15,23,42,0.15)', outline: 'none' }} />
@@ -645,6 +751,10 @@ export default function AgentDashboard() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Base Price *</label>
                     <input type="number" step="0.01" min="0" name="base_price" value={newPkg.base_price} onChange={handlePkgChange} required style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(15,23,42,0.15)', outline: 'none' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Promo Price</label>
+                    <input type="number" step="0.01" min="0" name="promo_price" value={newPkg.promo_price} onChange={handlePkgChange} placeholder="Optional" style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(15,23,42,0.15)', outline: 'none' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Currency *</label>
@@ -737,6 +847,313 @@ export default function AgentDashboard() {
                 providerId={profile?.profile_id}
                 onImportSuccess={fetchProfileAndPackages}
               />
+            )}
+
+            {activeTab === 'enquiries' && (
+              <>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', marginBottom: 20 }}>
+                  📧 Recent Traveller Enquiries
+                </h2>
+                
+                {enquiriesLoading ? (
+                  <p style={{ color: '#64748b', fontSize: '0.85rem' }}>Loading enquiries...</p>
+                ) : enquiries.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
+                    <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: 12 }}>📭</span>
+                    <p style={{ margin: 0, fontWeight: 500 }}>No enquiries yet.</p>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem' }}>When travellers enquire or suggest offer prices on your packages, they will appear here.</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {enquiries.map((enq) => (
+                      <div key={enq.id} style={{
+                        background: '#ffffff',
+                        border: '1px solid rgba(15, 23, 42, 0.08)',
+                        borderRadius: 12,
+                        padding: '16px 20px',
+                        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.02)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                          <span style={{ fontWeight: 700, color: '#0f172a', fontSize: 15 }}>
+                            {enq.package_name}
+                          </span>
+                          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                            <span style={{ fontSize: 10, background: '#e2e8f0', color: '#475569', padding: '2px 8px', borderRadius: 12, fontWeight: 700 }}>
+                              📋 {enq.follow_ups?.length || 0} logs
+                            </span>
+                            <span style={{ fontSize: 11, background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>
+                              {enq.destination_name}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: 12, borderRadius: 8, flexWrap: 'wrap', gap: 12 }}>
+                          <div>
+                            <div style={{ fontSize: 11, color: '#64748b' }}>Traveller</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>
+                              {enq.traveller_first_name} {enq.traveller_last_name}
+                            </div>
+                            <div style={{ fontSize: 11, color: '#475569', marginBottom: 4 }}>
+                              {enq.traveller_email}
+                            </div>
+                            {/* Contact buttons */}
+                            <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                              <a
+                                href={`mailto:${enq.traveller_email}?subject=Regarding your enquiry for ${enq.package_name}`}
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                                  background: '#e0e7ff', color: '#4338ca', border: 'none',
+                                  borderRadius: 4, padding: '3px 8px', fontSize: 11,
+                                  fontWeight: 700, textDecoration: 'none', cursor: 'pointer'
+                                }}
+                              >
+                                ✉️ Email
+                              </a>
+                              {enq.traveller_phone && (
+                                <a
+                                  href={`tel:${enq.traveller_phone}`}
+                                  style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                                    background: '#dcfce7', color: '#15803d', border: 'none',
+                                    borderRadius: 4, padding: '3px 8px', fontSize: 11,
+                                    fontWeight: 700, textDecoration: 'none', cursor: 'pointer'
+                                  }}
+                                >
+                                  📞 Call
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: 11, color: '#64748b' }}>Base Price</div>
+                            <div style={{ fontSize: 14, fontWeight: 700, color: '#475569' }}>
+                              {enq.currency_code} {Number(enq.base_price).toLocaleString()}
+                            </div>
+                          </div>
+                          {enq.offer_price !== null && enq.offer_price !== undefined && (() => {
+                            const base = Number(enq.base_price);
+                            const offer = Number(enq.offer_price);
+                            const diff = base - offer;
+                            const pct = ((diff / base) * 100).toFixed(1);
+                            return (
+                              <div style={{ textAlign: 'right', background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.15)', borderRadius: 6, padding: '4px 10px' }}>
+                                <div style={{ fontSize: 11, color: '#4f46e5', fontWeight: 600 }}>Traveller Offer</div>
+                                <div style={{ fontSize: 16, fontWeight: 800, color: '#4f46e5' }}>
+                                  {enq.currency_code} {offer.toLocaleString()}
+                                </div>
+                                <div style={{ fontSize: 10, color: '#6366f1', fontWeight: 500, marginTop: 2 }}>
+                                  -{pct}% off base (-{enq.currency_code} {diff.toLocaleString()})
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+
+                        {/* Preferred Contact & Question details */}
+                        {(enq.preferred_contact_method || enq.enquiry_question) && (
+                          <div style={{
+                            padding: '12px 16px',
+                            background: '#f0fdf4',
+                            border: '1px solid #bbf7d0',
+                            borderRadius: 8,
+                            fontSize: 13,
+                            color: '#166534',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 8,
+                            textAlign: 'left'
+                          }}>
+                            {enq.preferred_contact_method && (
+                              <div>
+                                <strong>Preferred contact:</strong>{' '}
+                                <span style={{ textTransform: 'capitalize', color: '#14532d' }}>
+                                  {enq.preferred_contact_method === 'phone' ? `Phone call (${enq.traveller_phone || 'No phone number provided'})` : 'Email'}
+                                </span>
+                              </div>
+                            )}
+                            {enq.enquiry_question && (
+                              <div>
+                                <strong style={{ display: 'block', marginBottom: 2 }}>Question:</strong>
+                                <p style={{ margin: 0, fontStyle: 'italic', whiteSpace: 'pre-wrap', color: '#14532d' }}>
+                                  "{enq.enquiry_question}"
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Agent Notes & Follow-ups Timeline */}
+                        <div style={{
+                          padding: '20px',
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: 12,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 16,
+                          textAlign: 'left'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <label htmlFor={`agent-note-${enq.id}`} style={{ fontSize: 13, fontWeight: 800, color: '#334155' }}>
+                              📋 Enquiry Follow-up History Log
+                            </label>
+                            <span style={{ fontSize: 11, background: '#e2e8f0', color: '#475569', padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>
+                              {enq.follow_ups?.length || 0} activities logged
+                            </span>
+                          </div>
+
+                          {/* Log New Action form */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 8, padding: 12 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>Activity Type:</span>
+                              <select
+                                value={noteTypeInputs[enq.id] || 'note'}
+                                onChange={(e) => setNoteTypeInputs(prev => ({ ...prev, [enq.id]: e.target.value }))}
+                                style={{
+                                  padding: '4px 8px',
+                                  borderRadius: 6,
+                                  border: '1px solid #cbd5e1',
+                                  fontSize: 12,
+                                  outline: 'none',
+                                  color: '#334155',
+                                  background: '#f8fafc',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <option value="note">📝 General Note</option>
+                                <option value="phone">📞 Phone Call</option>
+                                <option value="email">✉️ Email Sent</option>
+                                <option value="meeting">🤝 Meeting</option>
+                              </select>
+                            </div>
+
+                            <textarea
+                              id={`agent-note-${enq.id}`}
+                              rows={2}
+                              placeholder="Write details of this follow-up..."
+                              value={noteTextInputs[enq.id] || ''}
+                              onChange={(e) => setNoteTextInputs(prev => ({ ...prev, [enq.id]: e.target.value }))}
+                              style={{
+                                width: '100%',
+                                boxSizing: 'border-box',
+                                padding: '8px 12px',
+                                borderRadius: 6,
+                                border: '1px solid #cbd5e1',
+                                fontSize: 12,
+                                outline: 'none',
+                                resize: 'vertical',
+                                fontFamily: 'inherit',
+                                color: '#334155'
+                              }}
+                            />
+
+                            {notesError[enq.id] && (
+                              <span style={{ fontSize: 11, color: '#dc2626' }}>⚠️ {notesError[enq.id]}</span>
+                            )}
+                            {notesSuccess[enq.id] && (
+                              <span style={{ fontSize: 11, color: '#166534' }}>✅ {notesSuccess[enq.id]}</span>
+                            )}
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                              <button
+                                type="button"
+                                disabled={savingNotes[enq.id]}
+                                onClick={() => handleAddFollowUp(enq.id)}
+                                style={{
+                                  padding: '6px 14px',
+                                  background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: 6,
+                                  fontWeight: 700,
+                                  fontSize: 11,
+                                  cursor: savingNotes[enq.id] ? 'not-allowed' : 'pointer',
+                                  transition: 'all 0.2s',
+                                  boxShadow: '0 2px 6px rgba(79,70,229,0.15)'
+                                }}
+                              >
+                                {savingNotes[enq.id] ? 'Logging...' : 'Log Follow-up'}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Timeline List */}
+                          {enq.follow_ups && enq.follow_ups.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: 10, borderLeft: '2px solid #e2e8f0', margin: '4px 0 4px 10px', gap: 16 }}>
+                              {enq.follow_ups.map((log) => {
+                                let typeIcon = '📝';
+                                let typeLabel = 'General Note';
+                                let bgStyle = { background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#334155' };
+
+                                if (log.note_type === 'phone') {
+                                  typeIcon = '📞';
+                                  typeLabel = 'Phone Call';
+                                  bgStyle = { background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#15803d' };
+                                } else if (log.note_type === 'email') {
+                                  typeIcon = '✉️';
+                                  typeLabel = 'Email Sent';
+                                  bgStyle = { background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8' };
+                                } else if (log.note_type === 'meeting') {
+                                  typeIcon = '🤝';
+                                  typeLabel = 'Meeting';
+                                  bgStyle = { background: '#fdf2f8', border: '1px solid #fbcfe8', color: '#be185d' };
+                                }
+
+                                return (
+                                  <div key={log.id} style={{ position: 'relative', paddingLeft: 16 }}>
+                                    {/* Small circle dot on the line */}
+                                    <div style={{
+                                      position: 'absolute',
+                                      left: -17,
+                                      top: 4,
+                                      width: 10,
+                                      height: 10,
+                                      borderRadius: '50%',
+                                      background: bgStyle.color,
+                                      border: '2px solid #ffffff'
+                                    }} />
+
+                                    <div style={{
+                                      ...bgStyle,
+                                      padding: '10px 14px',
+                                      borderRadius: 8,
+                                      fontSize: 12
+                                    }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, fontWeight: 700, fontSize: 11 }}>
+                                        <span>{typeIcon} {typeLabel}</span>
+                                        <span style={{ fontWeight: 500, opacity: 0.8 }}>
+                                          {log.created_at ? new Date(log.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : ''}
+                                        </span>
+                                      </div>
+                                      <p style={{ margin: 0, lineHeight: 1.5, whiteSpace: 'pre-wrap', fontWeight: 500 }}>
+                                        {log.note_text}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p style={{ margin: 0, fontSize: 12, color: '#64748b', fontStyle: 'italic', textAlign: 'center', padding: '10px 0' }}>
+                              No interactions logged yet. Use the form above to add notes of your conversations.
+                            </p>
+                          )}
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: '#94a3b8' }}>
+                          <span>Interacted: {enq.interaction_count} times</span>
+                          <span>
+                            {enq.last_interacted_at ? new Date(enq.last_interacted_at).toLocaleString() : ''}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
 
 

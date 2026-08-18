@@ -36,6 +36,7 @@ const getMatchingPackages = async (req, res) => {
         '' AS country,
         p.duration_days,
         p.base_price AS price_per_person,
+        p.promo_price,
         p.currency_code AS currency,
         p.description,
         COALESCE(
@@ -86,6 +87,7 @@ const getMyPackages = async (req, res) => {
         p.duration_days,
         p.duration_nights,
         p.base_price AS price_per_person,
+        p.promo_price,
         p.currency_code AS currency,
         p.platform_service_fee_type,
         p.platform_service_fee_value,
@@ -160,6 +162,12 @@ function castRow(row) {
     const val = Number(row.base_price);
     if (!isNaN(val)) casted.base_price = val;
   }
+  if (row.promo_price !== undefined && row.promo_price !== '') {
+    const val = Number(row.promo_price);
+    if (!isNaN(val)) casted.promo_price = val;
+  } else if (row.promo_price === '') {
+    casted.promo_price = null;
+  }
   if (row.platform_service_fee_value !== undefined && row.platform_service_fee_value !== '') {
     const val = Number(row.platform_service_fee_value);
     if (!isNaN(val)) casted.platform_service_fee_value = val;
@@ -226,10 +234,10 @@ const createSinglePackage = async (req, res) => {
       INSERT INTO agent_packages (
         provider_id, provider_type, destination_name, package_name, package_type,
         travel_mode, summary, description, duration_days, duration_nights,
-        base_price, currency_code, platform_service_fee_type, platform_service_fee_value,
+        base_price, promo_price, currency_code, platform_service_fee_type, platform_service_fee_value,
         min_travelers, max_travelers, is_customizable, status, is_active, featured_until
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
-      RETURNING id, package_name;
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+      RETURNING id, package_name, promo_price;
     `;
 
     const values = [
@@ -244,6 +252,7 @@ const createSinglePackage = async (req, res) => {
       pkg.duration_days,
       pkg.duration_nights,
       pkg.base_price,
+      pkg.promo_price || null,
       pkg.currency_code,
       pkg.platform_service_fee_type || null,
       pkg.platform_service_fee_value || null,
@@ -631,18 +640,19 @@ const updateSinglePackage = async (req, res) => {
         duration_days = $9,
         duration_nights = $10,
         base_price = $11,
-        currency_code = $12,
-        platform_service_fee_type = $13,
-        platform_service_fee_value = $14,
-        min_travelers = $15,
-        max_travelers = $16,
-        is_customizable = $17,
-        status = $18,
-        is_active = $19,
-        featured_until = $20,
+        promo_price = $12,
+        currency_code = $13,
+        platform_service_fee_type = $14,
+        platform_service_fee_value = $15,
+        min_travelers = $16,
+        max_travelers = $17,
+        is_customizable = $18,
+        status = $19,
+        is_active = $20,
+        featured_until = $21,
         updated_at = NOW()
-      WHERE id = $21
-      RETURNING id, package_name;
+      WHERE id = $22
+      RETURNING id, package_name, promo_price;
     `;
 
     const values = [
@@ -657,6 +667,7 @@ const updateSinglePackage = async (req, res) => {
       pkg.duration_days,
       pkg.duration_nights,
       pkg.base_price,
+      pkg.promo_price || null,
       pkg.currency_code,
       pkg.platform_service_fee_type || null,
       pkg.platform_service_fee_value || null,

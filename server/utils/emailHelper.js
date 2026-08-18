@@ -28,7 +28,7 @@ transporter.verify()
   .then(() => console.log('✔  SMTP transport ready'))
   .catch(err => console.warn('⚠  SMTP transport NOT ready:', err.message));
 
-const FROM = `"${process.env.SMTP_FROM_NAME || 'AITravelBuddy'}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`;
+const FROM = `"${process.env.SMTP_FROM_NAME || 'TravelAI'}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // sendVerificationEmail
@@ -39,12 +39,12 @@ async function sendVerificationEmail({ to, firstName, token }) {
   const mailOptions = {
     from:    FROM,
     to,
-    subject: '✈️ Verify your AITravelBuddy account',
+    subject: '✈️ Verify your TravelAI account',
     html: `
       <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px; background: #0e1117; color: #e6eaf3; border-radius: 16px;">
         <h2 style="color: #7b93db; margin: 0 0 8px;">Hi ${firstName || 'there'} 👋</h2>
         <p style="color: #a0aec0; line-height: 1.6; margin: 16px 0;">
-          Thanks for signing up for <strong style="color: #e6eaf3;">AITravelBuddy</strong>!
+          Thanks for signing up for <strong style="color: #e6eaf3;">TravelAI</strong>!
           Please verify your email address by clicking the button below.
         </p>
         <div style="text-align: center; margin: 28px 0;">
@@ -80,12 +80,12 @@ async function sendPasswordResetEmail({ to, firstName, token }) {
   const mailOptions = {
     from:    FROM,
     to,
-    subject: '🔑 Reset your AITravelBuddy password',
+    subject: '🔑 Reset your TravelAI password',
     html: `
       <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px; background: #0e1117; color: #e6eaf3; border-radius: 16px;">
         <h2 style="color: #7b93db; margin: 0 0 8px;">Hi ${firstName || 'there'} 👋</h2>
         <p style="color: #a0aec0; line-height: 1.6; margin: 16px 0;">
-          We received a request to reset your <strong style="color: #e6eaf3;">AITravelBuddy</strong> password.
+          We received a request to reset your <strong style="color: #e6eaf3;">TravelAI</strong> password.
           Click the button below to set a new password.
         </p>
         <div style="text-align: center; margin: 28px 0;">
@@ -116,4 +116,57 @@ async function sendPasswordResetEmail({ to, firstName, token }) {
   return { sent: true, messageId: info.messageId };
 }
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail };
+// ═══════════════════════════════════════════════════════════════════════════════
+// sendEnquiryEmail
+// ═══════════════════════════════════════════════════════════════════════════════
+async function sendEnquiryEmail({
+  agentEmail,
+  agentName,
+  travellerName,
+  travellerEmail,
+  travellerPhone,
+  packageName,
+  offerPrice,
+  preferredContactMethod,
+  question
+}) {
+  const defaultPlaceholder = "Let us know how we can help you - e.g. travel dates, group preferences, accessibility needs, or anything else we should know.";
+  const finalQuestion = question && question.trim() ? question : defaultPlaceholder;
+
+  const mailOptions = {
+    from:    FROM,
+    to:      agentEmail,
+    subject: `✈️ New Package Enquiry / Offer for ${packageName}`,
+    html: `
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px; background: #0e1117; color: #e6eaf3; border-radius: 16px;">
+        <h2 style="color: #10b981; margin: 0 0 8px;">Hi ${agentName || 'Consultant'} 👋</h2>
+        <p style="color: #a0aec0; line-height: 1.6; margin: 16px 0;">
+          You have received a new enquiry for your package <strong>${packageName}</strong>.
+        </p>
+        <div style="background: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0;">
+          <h3 style="color: #e6eaf3; margin-top: 0; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 6px;">Enquiry Details</h3>
+          <p style="margin: 8px 0; color: #a0aec0;"><strong style="color: #e6eaf3;">Traveller:</strong> ${travellerName}</p>
+          <p style="margin: 8px 0; color: #a0aec0;"><strong style="color: #e6eaf3;">Email:</strong> ${travellerEmail}</p>
+          ${travellerPhone ? `<p style="margin: 8px 0; color: #a0aec0;"><strong style="color: #e6eaf3;">Phone:</strong> ${travellerPhone}</p>` : ''}
+          ${offerPrice ? `<p style="margin: 8px 0; color: #a0aec0;"><strong style="color: #e6eaf3;">Suggested Offer Price:</strong> ${offerPrice}</p>` : ''}
+          <p style="margin: 8px 0; color: #a0aec0;"><strong style="color: #e6eaf3;">Preferred Contact Method:</strong> ${preferredContactMethod === 'phone' ? 'Phone call' : 'Email'}</p>
+          <div style="margin-top: 16px; padding: 12px; background: #0f172a; border-left: 4px solid #10b981; border-radius: 4px;">
+            <strong style="color: #e6eaf3; display: block; margin-bottom: 4px;">Traveller's Question:</strong>
+            <span style="color: #a0aec0; font-style: italic; white-space: pre-wrap;">"${finalQuestion}"</span>
+          </div>
+        </div>
+        <hr style="border: none; border-top: 1px solid #2d3748; margin: 24px 0;" />
+        <p style="color: #4a5568; font-size: 12px; text-align: center;">
+          This is an automated notification from TravelAI. Please reply directly to the traveler's email or phone number listed above.
+        </p>
+      </div>
+    `,
+  };
+
+  console.log(`📧 Sending enquiry email to agent ${agentEmail}...`);
+  const info = await transporter.sendMail(mailOptions);
+  console.log(`✔  Enquiry email sent — Message ID: ${info.messageId}`);
+  return { sent: true, messageId: info.messageId };
+}
+
+module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendEnquiryEmail };

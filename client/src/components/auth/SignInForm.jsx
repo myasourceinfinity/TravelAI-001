@@ -28,7 +28,13 @@ export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
     try {
       const data = await loginWithGoogle(credentialResponse.credential);
       if (data?.accessToken || data?.user) {
-        navigate(sessionStorage.getItem('pending_trip_description') ? '/plan-trip' : '/');
+        const pendingPkgId = sessionStorage.getItem('pending_package_id');
+        if (pendingPkgId) {
+          sessionStorage.removeItem('pending_package_id');
+          navigate(`/packages/${pendingPkgId}`);
+        } else {
+          navigate(sessionStorage.getItem('pending_trip_description') ? '/plan-trip' : '/');
+        }
       }
     } catch (_) { /* handled by context */ }
   }
@@ -59,7 +65,13 @@ export default function SignInForm({ onGoToSignUp, onForgotPassword }) {
     if (Object.keys(errs).length > 0) return;
     try {
       await login({ email: form.email.trim().toLowerCase(), password: form.password });
-      navigate(sessionStorage.getItem('pending_trip_description') ? '/plan-trip' : '/');
+      const pendingPkgId = sessionStorage.getItem('pending_package_id');
+      if (pendingPkgId) {
+        sessionStorage.removeItem('pending_package_id');
+        navigate(`/packages/${pendingPkgId}`);
+      } else {
+        navigate(sessionStorage.getItem('pending_trip_description') ? '/plan-trip' : '/');
+      }
     } catch (_) { /* authError set by context */ }
   }
 

@@ -2,9 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../common/Navbar';
+import PopularDestinationsCarousel from '../common/PopularDestinationsCarousel';
 import '../home/HomePage.css';
-import { getRecentSearches, saveRecentSearchToDB } from '../../services/recentSearchService';
+import { getMyAttractions, getPopularDestinations, getRecentSearches } from '../../services/recentSearchService';
 import { chatWithAI } from '../../services/tripService';
+import AnimatedTripPlannerInput from '../trips/AnimatedTripPlannerInput';
+import travelAILogo from '../../assets/travelai-logo.png';
+import PlanTripWithTravelAI from '../trips/PlanTripWithTravelAI';
 
 function formatSearchDate(value) {
   if (!value) return '';
@@ -16,14 +20,51 @@ function formatSearchDate(value) {
   });
 }
 
+/**
+ * Client-side fallback: strips travel-intent phrases from a raw user query
+ * and returns only the destination/place portion in Title Case.
+ * Used only for legacy rows that predate server-side extraction.
+ */
+function cleanQueryLabel(query) {
+  if (!query) return '';
+  let s = query.trim();
+
+  const prefixes = [
+    /^(i\s+)?(want|wanna|would like|like)\s+(to\s+)?(go|travel|visit|explore|plan|take a trip|fly|head)\s+(to\s+)?/i,
+    /^(plan\s+)?(me\s+)?a\s+(trip|travel|holiday|vacation|journey)(\s+to)?\s*/i,
+    /^(let'?s\s+)?(go|travel|visit|explore)\s+(to\s+)?/i,
+    /^(take me to|show me|book me a trip to|book a trip to|how about)\s+/i,
+    /^(i am|i'm|we are|we're)\s+(going|travelling|traveling|flying)\s+to\s+/i,
+  ];
+  for (const re of prefixes) s = s.replace(re, '');
+
+  // Keep only the part before the first comma, period, digit qualifier, etc.
+  const stop = s.match(/^([^,\.!?\d]+?)(?:\s*[,\.!?]|\s+\d|$)/i);
+  if (stop) s = stop[1];
+
+  return s.trim().replace(/\b\w/g, c => c.toUpperCase()) || query;
+}
+
 export default function TravellerDashboard() {
   const navigate = useNavigate();
   const { user, accessToken } = useAuth();
 
   const chatMessagesRef = useRef(null);
+  const popularDeckRef = useRef(null);
+  const plannerRef = useRef(null);
   const hasMountedMessagesRef = useRef(false);
 
+  const DEFAULT_POPULAR_DESTINATIONS = [
+    { name: 'Burj Khalifa', subtitle: 'Skyline views · Downtown Dubai', searchCount: 0, isFeatured: true },
+    { name: 'Dubai Mall', subtitle: 'Shopping, dining & entertainment', searchCount: 0, isFeatured: true },
+    { name: 'Palm Jumeirah', subtitle: 'Beaches, resorts & sea views', searchCount: 0, isFeatured: true },
+    { name: 'Dubai Frame', subtitle: 'Old and new Dubai panoramas', searchCount: 0, isFeatured: true },
+  ];
+
   const [recentSearches, setRecentSearches] = useState([]);
+  const [popularDestinations, setPopularDestinations] = useState([]);
+  const [myAttractions, setMyAttractions] = useState([]);
+  const [plannerQuery, setPlannerQuery] = useState('');
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -50,27 +91,55 @@ export default function TravellerDashboard() {
     location_types: [],
   });
 
+  const refreshRecentSearches = async () => {
+    if (!accessToken) return;
+    try {
+      const [recentData, attractionsData] = await Promise.all([
+        getRecentSearches(accessToken),
+        getMyAttractions(accessToken),
+      ]);
+      setRecentSearches(recentData.recentSearches || []);
+      setMyAttractions(attractionsData.popularDestinations || []);
+    } catch (err) {
+      console.error('[TravellerDashboard] Failed to refresh recent searches:', err);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
 
-    async function loadRecentSearches() {
+    async function loadDashboardData() {
       if (!accessToken) {
         setRecentSearches([]);
+        setPopularDestinations([]);
         return;
       }
 
       try {
-        const data = await getRecentSearches(accessToken);
+        const [recentData, popularData, attractionsData] = await Promise.all([
+          getRecentSearches(accessToken),
+          getPopularDestinations(accessToken),
+          getMyAttractions(accessToken),
+        ]);
 
         if (!cancelled) {
-          setRecentSearches(data.recentSearches || []);
+          setRecentSearches(recentData.recentSearches || []);
+          setPopularDestinations(
+            popularData.popularDestinations?.length > 0
+              ? popularData.popularDestinations
+              : DEFAULT_POPULAR_DESTINATIONS
+          );
+          setMyAttractions(attractionsData.popularDestinations || DEFAULT_POPULAR_DESTINATIONS);
         }
       } catch (err) {
         console.error('[TravellerDashboard] Failed to load recent searches:', err);
+        if (!cancelled) {
+          setPopularDestinations(DEFAULT_POPULAR_DESTINATIONS);
+        }
       }
     }
 
-    loadRecentSearches();
+    loadDashboardData();
 
     return () => {
       cancelled = true;
@@ -88,19 +157,6 @@ export default function TravellerDashboard() {
 
     chatBox.scrollTop = chatBox.scrollHeight;
   }, [messages]);
-
-  async function saveRecentSearch(query) {
-    const cleanQuery = String(query || '').trim();
-
-    if (!cleanQuery || !accessToken) return;
-
-    try {
-      const data = await saveRecentSearchToDB(accessToken, cleanQuery);
-      setRecentSearches(data.recentSearches || []);
-    } catch (err) {
-      console.error('[TravellerDashboard] Failed to save recent search:', err);
-    }
-  }
 
   function parseBoldText(text) {
     const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -224,14 +280,9 @@ export default function TravellerDashboard() {
     });
   }
 
-  async function handleSend() {
-    if (!userInput.trim() || isSending) return;
-
-    const userMsg = userInput.trim();
-
-    saveRecentSearch(userMsg).catch((err) => {
-      console.warn('[TravellerDashboard] Failed to save recent search:', err);
-    });
+  async function handleSend(prompt) {
+    const userMsg = String((typeof prompt === 'string' ? prompt : userInput) || '').trim();
+    if (!userMsg || isSending) return;
 
     setUserInput('');
     setIsSending(true);
@@ -250,6 +301,13 @@ export default function TravellerDashboard() {
       if (data?.extractedPreferences) {
         setPreferences((prev) => ({ ...prev, ...data.extractedPreferences }));
       }
+
+      if (data?.recentSearch) {
+        setRecentSearches((prev) => [data.recentSearch, ...prev].slice(0, 5));
+        getPopularDestinations(accessToken)
+          .then((popularData) => setPopularDestinations(popularData.popularDestinations || []))
+          .catch((loadErr) => console.error('[TravellerDashboard] Failed to refresh popular destinations:', loadErr));
+      }
     } catch (err) {
       setChatError(err.message || 'Something went wrong while chatting with TravelAI.');
     } finally {
@@ -257,12 +315,86 @@ export default function TravellerDashboard() {
     }
   }
 
-  function handleRecentSearchClick(query) {
+  function handleRecentSearchClick(search) {
+    const query = search?.query;
     const cleanQuery = String(query || '').trim();
 
     if (!cleanQuery) return;
 
     sessionStorage.setItem('pending_trip_description', cleanQuery);
+    if (search?.analysis) {
+      sessionStorage.setItem('recent_search_analysis', JSON.stringify(search.analysis));
+    }
+    navigate('/plan-trip');
+  }
+
+  function getDestinationImage(destination) {
+    const name = String(destination?.name || '').toLowerCase();
+
+    // --- Specific AI highlight / landmark mappings ---
+    if (name.includes('burj khalifa')) return 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('dubai mall')) return 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('palm jumeirah')) return 'https://images.unsplash.com/photo-1546412414-e1885259563a?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('dubai frame')) return 'https://images.unsplash.com/photo-1512632578888-169bbbc64f33?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('eiffel tower')) return 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('louvre')) return 'https://images.unsplash.com/photo-1566127992631-137a642a90f4?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('montmartre')) return 'https://images.unsplash.com/photo-1551634979-2b11f8c946fe?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('colosseum') || name.includes('coliseum')) return 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('vatican')) return 'https://images.unsplash.com/photo-1531572753322-ad063cecc140?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('trevi fountain')) return 'https://images.unsplash.com/photo-1525874684015-58379d421a52?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('sagrada familia')) return 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('park güell') || name.includes('park guell')) return 'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('la rambla') || name.includes('las ramblas')) return 'https://images.unsplash.com/photo-1464790719320-516ecd75af6c?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('sky tower')) return 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('waiheke')) return 'https://images.unsplash.com/photo-1508278236937-a1d2a0441dea?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('harbour bridge') || name.includes('harbor bridge')) return 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('opera house')) return 'https://images.unsplash.com/photo-1523428096881-5bd79d043006?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('bondi beach')) return 'https://images.unsplash.com/photo-1500948304999-5df8d29f4bc0?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('senso-ji') || name.includes('sensoji') || name.includes('senso ji')) return 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('shibuya')) return 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('meiji')) return 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('milford sound')) return 'https://images.unsplash.com/photo-1609137144813-7d9921338f24?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('shotover') || name.includes('skyline gondola')) return 'https://images.unsplash.com/photo-1609137144813-7d9921338f24?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('te puia') || name.includes('geothermal') || name.includes('rotorua') || name.includes('redwood')) return 'https://images.unsplash.com/photo-1561481654-39b1df7af6d1?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('times square')) return 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('central park')) return 'https://images.unsplash.com/photo-1444084316824-dc26d6657664?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('statue of liberty')) return 'https://images.unsplash.com/photo-1605130284535-11dd9eedc58a?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('gardens by the bay') || name.includes('marina bay')) return 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('hagia sophia') || name.includes('grand bazaar')) return 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('lake ashi') || name.includes('mt. fuji') || name.includes('mount fuji') || name.includes('hot spring')) return 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('ubud') || name.includes('tanah lot') || name.includes('bali')) return 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=900&q=85';
+
+    // --- City / country level fallbacks ---
+    if (name.includes('maldives') || name.includes('maldive')) return 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('paris')) return 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('london')) return 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('tokyo')) return 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('new york') || name.includes('nyc')) return 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('sydney')) return 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('singapore')) return 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('bangkok')) return 'https://images.unsplash.com/photo-1508009603885-50cf7c8dd0d5?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('istanbul')) return 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('rome')) return 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('barcelona')) return 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('amsterdam')) return 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('prague')) return 'https://images.unsplash.com/photo-1541849546-216549ae216d?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('auckland')) return 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?auto=format&fit=crop&w=900&q=85';
+    if (name.includes('queenstown')) return 'https://images.unsplash.com/photo-1609137144813-7d9921338f24?auto=format&fit=crop&w=900&q=85';
+
+    // Generic fallback — search Unsplash by the exact attraction name
+    const encoded = encodeURIComponent(destination?.name || 'travel attraction');
+    return `https://source.unsplash.com/900x600/?${encoded},travel,landmark`;
+  }
+
+
+  function scrollPopularDeck() {
+    popularDeckRef.current?.scrollBy({ left: 360, behavior: 'smooth' });
+  }
+
+  function handleAttractionClick(destination) {
+    // Write the attraction name to sessionStorage (same key used by HomePage / PackageDetail)
+    // then navigate to /plan-trip where PlanTripWithTravelAI will pick it up on mount.
+    sessionStorage.setItem('pending_trip_description', `I'd like to plan a trip to ${destination.name}.`);
     navigate('/plan-trip');
   }
 
@@ -272,138 +404,15 @@ export default function TravellerDashboard() {
 
       <header className="traveller-home-section">
         <div className="traveller-home-grid">
-          <div className="traveller-home-card traveller-home-hero-card">
-            <span className="traveller-home-badge">AI Travel Assistant</span>
-
-            <div className="traveller-chat-grid">
-              <div className="traveller-chat-panel">
-                <div className="traveller-chat-header">
-                  <div className="traveller-chat-avatar">🤖</div>
-
-                  <div>
-                    <div className="traveller-chat-title">TravelAI Consultant</div>
-                    <div className="traveller-chat-status">
-                      <span className="traveller-chat-status-dot" />
-                      Online &amp; Listening
-                    </div>
-                  </div>
-                </div>
-
-                <div className="traveller-chat-messages" ref={chatMessagesRef}>
-                  {messages.map((msg, index) => {
-                    const isUser = msg.role === 'user';
-
-                    return (
-                      <div
-                        key={index}
-                        className={`traveller-chat-message ${isUser ? 'user' : 'assistant'}`}
-                      >
-                        {isUser ? msg.content : renderFormattedMessage(msg.content)}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {chatError && (
-                  <div className="traveller-chat-error">⚠️ {chatError}</div>
-                )}
-
-                <div className="traveller-chat-input-row">
-                  <input
-                    type="text"
-                    placeholder="Tell TravelAI your destination, interests, dates, or plans..."
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSend();
-                      }
-                    }}
-                    disabled={isSending}
-                  />
-
-                  <button
-                    type="button"
-                    className="traveller-chat-send-btn"
-                    onClick={handleSend}
-                    disabled={isSending || !userInput.trim()}
-                  >
-                    {isSending ? 'Thinking...' : 'Send'}
-                  </button>
-                </div>
-              </div>
-
-              <div className="traveller-tracker-panel">
-                <div className="traveller-tracker-header">
-                  <span className="traveller-tracker-title">
-                    🎯 Live Consultant Tracker
-                  </span>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>📍 Destination</span>
-                  <strong>{preferences.destination || 'Finding...'}</strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>🛫 Flying From</span>
-                  <strong>{preferences.originCity || 'Finding...'}</strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>📅 Duration</span>
-                  <strong>{preferences.days > 0 ? `${preferences.days} Days` : 'Finding...'}</strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>🗓 Depart Date</span>
-                  <strong>{preferences.departDate || 'Finding...'}</strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>🗓 Return Date</span>
-                  <strong>{preferences.returnDate || 'Finding...'}</strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>👥 Travelers</span>
-                  <strong>
-                    {preferences.travelers > 0
-                      ? `${preferences.travelers} Traveler(s)`
-                      : 'Finding...'}
-                  </strong>
-                </div>
-
-                <div className="traveller-tracker-row">
-                  <span>💰 Budget</span>
-                  <strong>
-                    {preferences.budgetAmount > 0
-                      ? `$${preferences.budgetAmount.toLocaleString()}`
-                      : preferences.flightBudget > 0 || preferences.hotelBudgetPerNight > 0
-                        ? `✈️ $${preferences.flightBudget.toLocaleString()} · 🏨 $${preferences.hotelBudgetPerNight.toLocaleString()}/night`
-                        : preferences.budgetLevel || 'Finding...'}
-                  </strong>
-                </div>
-
-                {preferences.location_types?.length > 0 && (
-                  <div className="traveller-tracker-tags">
-                    {preferences.location_types.map((type, idx) => (
-                      <span key={idx} className="traveller-tracker-tag">
-                        {type}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+          <div ref={plannerRef} className="traveller-home-card traveller-home-hero-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column' }}>
+            <PlanTripWithTravelAI isDashboardMode={true} onNewSearchSaved={refreshRecentSearches} prefillQuery={plannerQuery} />
           </div>
 
           <aside className="traveller-home-card traveller-recent-card">
             <div className="traveller-recent-header">
               <div>
                 <span className="traveller-recent-kicker">AI History</span>
-                <h2>Recent Search</h2>
+                <h2>Recent Searches</h2>
               </div>
 
               <span className="traveller-recent-count">{recentSearches.length}/5</span>
@@ -421,13 +430,16 @@ export default function TravellerDashboard() {
                     key={item.id || index}
                     type="button"
                     className="traveller-recent-item"
-                    onClick={() => handleRecentSearchClick(item.query)}
+                    onClick={() => handleRecentSearchClick(item)}
                   >
                     <span className="traveller-recent-number">{index + 1}</span>
 
                     <span className="traveller-recent-text">
-                      <strong>{item.query}</strong>
-                      <small>{formatSearchDate(item.createdAt)}</small>
+                      <strong>{item.destination || cleanQueryLabel(item.query)}</strong>
+                      <small>
+                        {item.durationDays ? `${item.durationDays} days · ` : ''}
+                        {formatSearchDate(item.completedAt || item.createdAt)}
+                      </small>
                     </span>
 
                     <span className="traveller-recent-arrow">→</span>
@@ -441,57 +453,23 @@ export default function TravellerDashboard() {
 
       <section className="home-dest-section" id="explore">
         <div className="home-dest-header">
-          <h2 className="home-section-title">Popular Destinations</h2>
-          <a href="#explore" className="home-view-all">
-            View all <span>→</span>
-          </a>
+          <h2 className="home-section-title">
+            {myAttractions.some(a => !a.isFeatured) ? 'Your Trip Attractions' : 'Popular Destinations'}
+          </h2>
+          <button type="button" className="home-view-all traveller-deck-next" onClick={scrollPopularDeck}>
+            Explore more <span>→</span>
+          </button>
         </div>
 
-        <div className="home-dest-grid">
-          <div className="home-dest-card">
-            <div className="home-dest-banner paris" />
-            <div className="home-dest-footer">
-              <div className="home-dest-details">
-                <span className="home-dest-name">Paris</span>
-                <span className="home-dest-country">France</span>
-              </div>
-              <span className="home-dest-rating">★ 4.8</span>
-            </div>
-          </div>
-
-          <div className="home-dest-card">
-            <div className="home-dest-banner bali" />
-            <div className="home-dest-footer">
-              <div className="home-dest-details">
-                <span className="home-dest-name">Bali</span>
-                <span className="home-dest-country">Indonesia</span>
-              </div>
-              <span className="home-dest-rating">★ 4.8</span>
-            </div>
-          </div>
-
-          <div className="home-dest-card">
-            <div className="home-dest-banner dubai" />
-            <div className="home-dest-footer">
-              <div className="home-dest-details">
-                <span className="home-dest-name">Dubai</span>
-                <span className="home-dest-country">UAE</span>
-              </div>
-              <span className="home-dest-rating">★ 4.8</span>
-            </div>
-          </div>
-
-          <div className="home-dest-card">
-            <div className="home-dest-banner newyork" />
-            <div className="home-dest-footer">
-              <div className="home-dest-details">
-                <span className="home-dest-name">New York</span>
-                <span className="home-dest-country">USA</span>
-              </div>
-              <span className="home-dest-rating">★ 4.8</span>
-            </div>
-          </div>
-        </div>
+        <PopularDestinationsCarousel
+          popularDestinations={myAttractions}
+          loading={false}
+          scrollRef={popularDeckRef}
+          onScrollLeft={() => scrollPopularDeck(-1)}
+          onScrollRight={() => scrollPopularDeck(1)}
+          onDestinationClick={handleAttractionClick}
+          getDestinationImage={getDestinationImage}
+        />
       </section>
     </div>
   );
