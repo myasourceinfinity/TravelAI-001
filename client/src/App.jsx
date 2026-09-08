@@ -1,4 +1,12 @@
 import './index.css';
+import './css/base.css';
+import './css/layout.css';
+import './css/components.css';
+import './css/responsive.css';
+import './css/fonts.css';
+import './css/tokens.css';
+import './css/reset.css';
+
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -7,14 +15,16 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import SplashScreen from './components/common/SplashScreen';
 import Footer from './components/common/Footer';
+import Navbar from './components/common/Navbar'; // Global Navbar Support
 
-const HomePage = lazy(() => import('./components/home/HomePage'));
+const HomePage             = lazy(() => import('./components/home/HomePage'));
 const TravellerDashboard   = lazy(() => import('./components/dashboard/TravellerDashboard'));
 const TravellerProfilePage = lazy(() => import('./components/dashboard/TravellerProfilePage'));
 const AgentDashboard       = lazy(() => import('./components/dashboard/AgentDashboard'));
 const AgentProfilePage     = lazy(() => import('./components/dashboard/AgentProfilePage'));
 const AdminDashboard       = lazy(() => import('./components/admin/AdminDashboard'));
-const AgentsList           = lazy(() => import('./components/agents/AgentsList'));
+const PackagesList         = lazy(() => import('./components/packages/PackagesList'));
+const PackageDetailPublic  = lazy(() => import('./components/packages/PackageDetailPublic'));
 const AgentDetailPublic    = lazy(() => import('./components/agents/AgentDetailPublic'));
 const PlanTripWithTravelAI = lazy(() => import('./components/trips/PlanTripWithTravelAI'));
 const TripDetailPage       = lazy(() => import('./components/trips/TripDetailPage'));
@@ -49,12 +59,24 @@ function ScrollToTop() {
   return null;
 }
 
+function AppNavbar() {
+  const { pathname } = useLocation();
+  const { isLoading } = useAuth();
+
+  const hiddenRoutes = ['/login', '/signup', '/verify-email', '/reset-password'];
+
+  if (isLoading || hiddenRoutes.includes(pathname)) {
+    return null;
+  }
+
+  return <Navbar />;
+}
+
 function AppFooter() {
   const { pathname } = useLocation();
   const { isLoading } = useAuth();
 
   const hiddenRoutes = [
-    '/',
     '/login',
     '/signup',
     '/verify-email',
@@ -73,7 +95,7 @@ function PrivateRoute({ children }) {
 
   if (isLoading) return null;
 
-  return user ? children : <Navigate to="/login" replace />;
+  return user ? children : <Navigate to="/login?reason=session-expired" replace />;
 }
 
 function GuestRoute({ children }) {
@@ -81,7 +103,7 @@ function GuestRoute({ children }) {
 
   if (isLoading) return null;
 
-  return user ? <Navigate to="/" replace /> : children;
+  return user ? <Navigate to="/dashboard" replace /> : children;
 }
 
 function AdminRoute({ children }) {
@@ -125,15 +147,12 @@ function HomeRoute() {
 
   if (isLoading) return null;
 
-  if (!user) {
-    return <HomePage />;
-  }
-
   if (ADMIN_ROLES.includes(user?.role_type)) {
     return <Navigate to="/admin" replace />;
   }
 
-  return <Navigate to="/dashboard" replace />;
+  // Standard user logged-in ho ya guest, Root (/) hamesha HomePage render karega
+  return <HomePage />;
 }
 
 export default function App() {
@@ -157,120 +176,116 @@ export default function App() {
         <BrowserRouter>
           <AuthProvider>
             <ScrollToTop />
+            <AppNavbar />
             <main className="app-main-shell">
-            <Suspense
-              fallback={
-                <div className="app-route-loader">
-                  <LoadingSpinner />
-                </div>
-              }
-            >
-              <Routes>
-                <Route path="/" element={<HomeRoute />} />
+              <Suspense
+                fallback={
+                  <div className="app-route-loader">
+                    <LoadingSpinner />
+                  </div>
+                }
+              >
+                <Routes>
+                  <Route path="/" element={<HomeRoute />} />
 
-                <Route
-                  path="/login"
-                  element={
-                    <GuestRoute>
-                      <AuthPage />
-                    </GuestRoute>
-                  }
-                />
+                  <Route
+                    path="/login"
+                    element={
+                      <GuestRoute>
+                        <AuthPage />
+                      </GuestRoute>
+                    }
+                  />
 
-                <Route
-                  path="/signup"
-                  element={
-                    <GuestRoute>
-                      <AuthPage />
-                    </GuestRoute>
-                  }
-                />
+                  <Route
+                    path="/signup"
+                    element={
+                      <GuestRoute>
+                        <AuthPage />
+                      </GuestRoute>
+                    }
+                  />
 
-                <Route
-                  path="/verify-email"
-                  element={
-                    <GuestRoute>
-                      <AuthPage />
-                    </GuestRoute>
-                  }
-                />
+                  <Route
+                    path="/verify-email"
+                    element={
+                      <GuestRoute>
+                        <AuthPage />
+                      </GuestRoute>
+                    }
+                  />
 
-                <Route
-                  path="/reset-password"
-                  element={
-                    <GuestRoute>
-                      <AuthPage />
-                    </GuestRoute>
-                  }
-                />
+                  <Route
+                    path="/reset-password"
+                    element={
+                      <GuestRoute>
+                        <AuthPage />
+                      </GuestRoute>
+                    }
+                  />
 
-                <Route
-                  path="/dashboard"
-                  element={
-                    <PrivateRoute>
-                      <DashboardRoute />
-                    </PrivateRoute>
-                  }
-                />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <PrivateRoute>
+                        <DashboardRoute />
+                      </PrivateRoute>
+                    }
+                  />
 
-                <Route
-                  path="/profile"
-                  element={
-                    <PrivateRoute>
-                      <ProfileRoute />
-                    </PrivateRoute>
-                  }
-                />
+                  <Route
+                    path="/profile"
+                    element={
+                      <PrivateRoute>
+                        <ProfileRoute />
+                      </PrivateRoute>
+                    }
+                  />
 
-                <Route
-                  path="/plan-trip"
-                  element={
-                    <PrivateRoute>
-                      <PlanTripWithTravelAI />
-                    </PrivateRoute>
-                  }
-                />
+                  <Route
+                    path="/plan-trip"
+                    element={
+                      <PrivateRoute>
+                        <PlanTripWithTravelAI />
+                      </PrivateRoute>
+                    }
+                  />
 
-                <Route
-                  path="/trip/:id"
-                  element={
-                    <PrivateRoute>
-                      <TripDetailPage />
-                    </PrivateRoute>
-                  }
-                />
+                  <Route
+                    path="/trip/:id"
+                    element={
+                      <PrivateRoute>
+                        <TripDetailPage />
+                      </PrivateRoute>
+                    }
+                  />
 
-                <Route
-                  path="/my-trips"
-                  element={
-                    <PrivateRoute>
-                      <MyTrips />
-                    </PrivateRoute>
-                  }
-                />
+                  <Route
+                    path="/my-trips"
+                    element={
+                      <PrivateRoute>
+                        <MyTrips />
+                      </PrivateRoute>
+                    }
+                  />
 
-                <Route path="/agents" element={<AgentsList />} />
-                <Route path="/agents/:id" element={<AgentDetailPublic />} />
+                  <Route path="/packages" element={<PackagesList />} />
+                  <Route path="/packages/:id" element={<PackageDetailPublic />} />
+                  <Route path="/agents/:id" element={<AgentDetailPublic />} />
 
-                <Route
-                  path="/admin"
-                  element={
-                    <AdminRoute>
-                      <AdminDashboard />
-                    </AdminRoute>
-                  }
-                />
+                  <Route
+                    path="/admin"
+                    element={
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
+                    }
+                  />
 
-                <Route
-                  path="*"
-                  element={
-                    <PrivateRoute>
-                      <Navigate to="/dashboard" replace />
-                    </PrivateRoute>
-                  }
-                />
-              </Routes>
-            </Suspense>
+                  {/* Catch-all route to home instead of forcing private redirect */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
             </main>
             <AppFooter />
           </AuthProvider>

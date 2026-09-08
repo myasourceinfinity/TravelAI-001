@@ -33,7 +33,16 @@ export function getRecentPackages(token) {
   });
 }
 
-export function saveRecentPackageActivity(token, { packageId, activityType = 'enquire' }) {
+export function getAgentEnquiries(token) {
+  return request('/recent-packages/agent', {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export function saveRecentPackageActivity(token, { packageId, activityType = 'enquire', offerPrice = null, preferredContactMethod = null, enquiryQuestion = null }) {
   return request('/recent-packages', {
     method: 'POST',
     headers: {
@@ -42,6 +51,19 @@ export function saveRecentPackageActivity(token, { packageId, activityType = 'en
     body: {
       packageId,
       activityType,
+      offerPrice,
+      preferredContactMethod,
+      enquiryQuestion,
     },
+  });
+}
+
+export function addEnquiryFollowUp(token, activityId, { noteType, noteText }) {
+  return request(`/recent-packages/enquiries/${activityId}/follow-ups`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: { noteType, noteText },
   });
 }

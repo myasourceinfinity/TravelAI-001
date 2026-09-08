@@ -16,7 +16,7 @@ const LOCATION_TYPE_OPTIONS = [
   '❄️ Arctic',
 ];
 
-const CURRENCY_OPTIONS = ['USD', 'EUR', 'GBP', 'INR', 'AUD', 'CAD', 'JPY', 'SGD', 'AED'];
+const CURRENCY_OPTIONS = ['USD', 'EUR', 'GBP', 'INR', 'AUD', 'CAD', 'JPY', 'SGD', 'AED', 'NZD'];
 
 export default function TravellerProfilePage() {
   const navigate = useNavigate();
@@ -61,7 +61,7 @@ export default function TravellerProfilePage() {
     } catch (err) {
         if (err.status === 401) {
         await logout();
-        navigate('/');
+        navigate('/login?reason=session-expired');
         } else {
         setError(err.message || 'Failed to load profile.');
         }
@@ -445,7 +445,7 @@ export default function TravellerProfilePage() {
                 </div>
             ) : recentPackageError ? (
                 <div className="dashboard-error-card" style={{ padding: 20 }}>
-                <p className="text-secondary">⚠️ {recentPackageError}</p>
+                <p className="text-secondary">⚠️ {String(recentPackageError).toLowerCase().includes('failed to fetch') ? 'No recent package' : recentPackageError}</p>
                 <button className="btn btn-primary btn-sm mt-4" onClick={fetchRecentPackages}>
                     Retry
                 </button>
@@ -459,9 +459,9 @@ export default function TravellerProfilePage() {
                     </p>
                 <button
                     className="btn btn-primary btn-sm mt-4"
-                    onClick={() => navigate('/agents')}
+                    onClick={() => navigate('/packages')}
                 >
-                    Browse Agents
+                    Browse Packages
                 </button>
                 </div>
             ) : (
@@ -507,6 +507,12 @@ export default function TravellerProfilePage() {
                         <span>{duration}</span>
                         <strong>{price}</strong>
                         </div>
+                        {pkg.offer_price !== null && pkg.offer_price !== undefined && (
+                          <div style={{ fontSize: 13, display: 'flex', justifyContent: 'space-between', marginTop: 6, paddingTop: 6, borderTop: '1px dashed #e2e8f0', color: '#4f46e5' }}>
+                            <span>Your Offer:</span>
+                            <strong>{pkg.currency_code || 'USD'} {Number(pkg.offer_price).toLocaleString()}</strong>
+                          </div>
+                        )}
 
                         <small style={{ display: 'block', marginTop: 10, color: '#94a3b8' }}>
                         {pkg.last_interacted_at

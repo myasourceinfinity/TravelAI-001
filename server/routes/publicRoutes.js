@@ -17,10 +17,16 @@ const {
   listPublicAgents,
   getPublicAgentDetail,
   createAgentReview,
+  listPublicPackages,
+  getPublicPackageDetail,
+  createPackageReview,
 } = require('../controllers/publicAgentController');
 
 router.get('/agents',     listPublicAgents);
 router.get('/agents/:id', getPublicAgentDetail);
 router.post('/agents/:id/reviews', authMiddleware, createAgentReview);
+router.get('/packages',   listPublicPackages);
+router.get('/packages/:id', getPublicPackageDetail);
+router.post('/packages/:id/reviews', authMiddleware, createPackageReview);
 
 module.exports = router;

@@ -104,6 +104,19 @@ function validatePackage(pkg) {
     }
   }
 
+  // 9b. promo_price
+  if (pkg.promo_price !== undefined && pkg.promo_price !== null && pkg.promo_price !== '') {
+    const val = Number(pkg.promo_price);
+    if (isNaN(val) || val < 0) {
+      errors.push('promo_price must be a numeric value >= 0.00');
+    } else if (pkg.base_price !== undefined && pkg.base_price !== null && pkg.base_price !== '') {
+      const baseVal = Number(pkg.base_price);
+      if (!isNaN(baseVal) && val >= baseVal) {
+        errors.push('promo_price must be less than base_price');
+      }
+    }
+  }
+
   // 10. currency_code
   if (!pkg.currency_code || String(pkg.currency_code).trim() === '') {
     errors.push('currency_code is required');

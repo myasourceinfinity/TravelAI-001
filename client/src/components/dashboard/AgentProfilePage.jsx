@@ -27,7 +27,7 @@ export default function AgentProfilePage() {
     } catch (err) {
       if (err.status === 401) {
         await logout();
-        navigate('/');
+        navigate('/login?reason=session-expired');
       } else {
         setError(err.message);
       }

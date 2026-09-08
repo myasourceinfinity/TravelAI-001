@@ -1,0 +1,172 @@
+/* ==========================================================================
+   home.css — home page composition (hero + section specifics)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+.hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  min-height: 100svh;
+  padding: calc(var(--header-h) + var(--space-16)) var(--container-pad)
+    var(--space-20);
+  text-align: center;
+  overflow: hidden;
+}
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+      180deg,
+      rgba(4, 8, 12, 0.45) 0%,
+      rgba(4, 8, 12, 0) 26%
+    ),
+    linear-gradient(
+      0deg,
+      rgb(8, 11, 13) 0%,
+      rgba(8, 11, 13, 0.25) 22%,
+      rgba(8, 11, 13, 0) 48%
+    );
+}
+.hero__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1148px;
+}
+.hero__title {
+  font-size: var(--fs-hero);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  color: #fff;
+  text-wrap: balance;
+}
+.hero__text {
+  margin-top: var(--space-4);
+  max-width: 42ch;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+}
+.hero__text p + p { margin-top: 0.75em; }
+.hero__cta { margin-top: var(--space-8); }
+
+/* --------------------------------------------------------------------------
+   Intro copy width guards
+   -------------------------------------------------------------------------- */
+.measure {
+  max-width: 46ch;
+}
+
+/* Section head that spans full width (How It Works, headline over grid) */
+.section-head--full .section-title {
+  max-width: 20ch;
+  font-size: var(--fs-h2-lg);
+}
+
+/* Small layout utilities (replace one-off inline styles) */
+.divider--section { margin-block: clamp(40px, 6vw, 56px); }
+.mt-5 { margin-top: var(--space-5); }
+.center-row {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-10);
+}
+.split--bordered {
+  padding-bottom: clamp(40px, 6vw, 56px);
+  border-bottom: 0.8px solid var(--color-border);
+}
+
+/* About: closing quote row */
+.about-quote {
+  margin-top: var(--space-14);
+  padding-top: var(--space-8);
+  border-top: 0.8px solid var(--color-border);
+}
+
+/* --------------------------------------------------------------------------
+   CTA (full-bleed image band)
+   -------------------------------------------------------------------------- */
+.cta {
+  position: relative;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  text-align: center;
+  padding: clamp(80px, 14vw, 150px) var(--container-pad);
+  overflow: hidden;
+}
+.cta__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cta__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(
+    120% 90% at 50% 50%,
+    rgba(8, 11, 13, 0.28) 0%,
+    rgba(8, 11, 13, 0.72) 100%
+  );
+}
+.cta__kicker {
+  font-style: italic;
+  font-size: clamp(14px, 2.4vw, 15.5px);
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.5);
+}
+.cta__title {
+  max-width: 16ch;
+  margin: 6px auto 0;
+  font-size: var(--fs-cta);
+  font-weight: 600;
+  line-height: 1.03;
+  letter-spacing: -0.048em;
+  color: #fff;
+}
+.cta__sub {
+  margin-top: var(--space-5);
+  font-size: clamp(12px, 2vw, 13px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+.cta__btn { margin-top: var(--space-10); }
+
+/* --------------------------------------------------------------------------
+   Testimonials layout (photos left, copy right on desktop)
+   -------------------------------------------------------------------------- */
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(40px, 5vw, 60px);
+  align-items: start;
+}
+.testimonials-copy {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.testimonials-copy .section-title {
+  font-size: clamp(26px, 4vw, 32px);
+  letter-spacing: -0.035em;
+  margin-top: var(--space-8);
+}

@@ -262,7 +262,7 @@ export default function MyTrips() {
       } catch (err) {
         if (err.status === 401) {
           await logout();
-          navigate('/');
+          navigate('/login?reason=session-expired');
         } else {
           setError(err.message || 'Failed to load trips');
         }

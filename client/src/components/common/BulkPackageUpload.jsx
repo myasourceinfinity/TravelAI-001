@@ -224,6 +224,12 @@ export default function BulkPackageUpload({ token, mode = 'agent', providerId, o
             <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginTop: 8 }}>
               Supported: .csv · .xlsx · .txt (tab or comma delimited)
             </span>
+            <div style={{ marginTop: 12, fontSize: '0.75rem', color: '#64748b' }}>
+              Download templates: 
+              <a href="/samples/packages_sample.csv" download style={{ color: '#4f46e5', fontWeight: 600, textDecoration: 'none', margin: '0 6px' }}>CSV</a> | 
+              <a href="/samples/packages_sample.xlsx" download style={{ color: '#4f46e5', fontWeight: 600, textDecoration: 'none', margin: '0 6px' }}>Excel (.xlsx)</a> | 
+              <a href="/samples/packages_sample.txt" download style={{ color: '#4f46e5', fontWeight: 600, textDecoration: 'none', margin: '0 6px' }}>TXT</a>
+            </div>
             {bulkFile && (
               <div style={{ marginTop: 8, fontSize: 12, color: '#4f46e5', fontWeight: 600 }}>
                 Selected: {bulkFile.name} ({(bulkFile.size / 1024).toFixed(1)} KB)

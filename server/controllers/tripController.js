@@ -855,6 +855,65 @@ function generateMockChatResponse(messages) {
   };
 }
 
+function hasUsefulSearchData(preferences = {}) {
+  if (!String(preferences.destination || '').trim()) return false;
+
+  return Boolean(
+    preferences.days > 0 ||
+    preferences.travelers > 0 ||
+    preferences.budgetAmount > 0 ||
+    String(preferences.budgetLevel || '').trim() ||
+    String(preferences.departDate || '').trim() ||
+    String(preferences.returnDate || '').trim() ||
+    String(preferences.originCity || '').trim() ||
+    (Array.isArray(preferences.location_types) && preferences.location_types.length > 0)
+  );
+}
+
+async function persistCompletedSearch(userId, messages, result) {
+  const preferences = result.extractedPreferences || {};
+  if (!hasUsefulSearchData(preferences)) return null;
+
+  const query = String(messages[messages.length - 1]?.content || '').trim();
+  if (!query) return null;
+
+  const response = String(result.message || '').trim();
+  const responseSummary = response.replace(/\s+/g, ' ').slice(0, 500);
+  const analysis = {
+    preferences,
+    readyToPlan: Boolean(result.readyToPlan),
+    plan: result.plan || null,
+  };
+
+  const saved = await pool.query(
+    `INSERT INTO recent_searches (
+      user_id, query, destination, origin_city, duration_days, travelers,
+      budget_amount, budget_level, depart_date, return_date, interests,
+      response_summary, ai_response, analysis, completed_at
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8,
+      NULLIF($9, '')::date, NULLIF($10, '')::date, $11::jsonb,
+      $12, $13, $14::jsonb, NOW()
+    ) RETURNING
+      id, query, destination AS "destination", origin_city AS "originCity",
+      duration_days AS "durationDays", travelers, budget_amount AS "budgetAmount",
+      budget_level AS "budgetLevel", depart_date AS "departDate",
+      return_date AS "returnDate", interests, response_summary AS "responseSummary",
+      ai_response AS "aiResponse", analysis, completed_at AS "completedAt",
+      created_at AS "createdAt"`,
+    [
+      userId, query, preferences.destination.trim(), preferences.originCity || null,
+      preferences.days || null, preferences.travelers || null,
+      preferences.budgetAmount || null, preferences.budgetLevel || null,
+      preferences.departDate || '', preferences.returnDate || '',
+      JSON.stringify(preferences.location_types || []), responseSummary, response,
+      JSON.stringify(analysis),
+    ]
+  );
+
+  return saved.rows[0];
+}
+
 const chatWithAI = async (req, res) => {
   console.log('>>>>> RUNNING FIXED chatWithAI in tripController.js — MARKER v3 <<<<<');
   const { userId } = req.user;
@@ -1065,6 +1124,15 @@ const chatWithAI = async (req, res) => {
           console.log('[BudgetCheck] Could not determine budget fit — no usable price data found.');
         }
       }
+    }
+
+    // Persist only after OpenAI has answered and supplied meaningful travel data.
+    // A persistence issue must never discard a valid chat response.
+    try {
+      result.recentSearch = await persistCompletedSearch(userId, messages, result);
+    } catch (searchErr) {
+      console.error('[chatWithAI] Failed to persist completed search:', searchErr.message);
+      result.recentSearch = null;
     }
 
     return res.status(200).json(result);

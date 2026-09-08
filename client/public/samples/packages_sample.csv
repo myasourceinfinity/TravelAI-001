@@ -1,0 +1,3 @@
+provider_id,provider_type,destination_name,package_name,package_type,travel_mode,summary,description,duration_days,duration_nights,base_price,currency_code,platform_service_fee_type,platform_service_fee_value,min_travelers,max_travelers,is_customizable,status,is_active
+3,Agent,Queenstown,Queenstown Ski Explorer Package,leisure,flight,5-day adventure in Queenstown,Skiing and Gondola ride with hotel included,5,4,1500.00,NZD,fixed,50.00,1,4,true,active,true
+3,Agent,Rotorua,Rotorua Thermal Splendour,family,car,Relax in Rotorua mud pools,Thermal springs family tour and spa inclusions,3,2,650.00,NZD,percentage,5.00,2,6,false,draft,true

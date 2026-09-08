@@ -1,0 +1,136 @@
+/* ==========================================================================
+   responsive.css — intentional breakpoint behavior
+   Load last so these rules win where needed.
+   ========================================================================== */
+
+/* ---- Laptop / tablet: relax 4-up steps to 2-up --------------------------- */
+@media (max-width: 1000px) {
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .step:nth-child(2) { border-right: 0; }
+  .step:nth-child(1),
+  .step:nth-child(2) {
+    border-bottom: 0.8px solid var(--color-border);
+  }
+}
+
+/* ---- Map + testimonials: stack the two editorial columns ---------------- */
+@media (max-width: 900px) {
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+  .testimonials-copy {
+    order: -1; /* lead with the heading on narrow screens */
+  }
+  .testimonials-copy .notes {
+    margin-top: var(--space-8);
+  }
+}
+
+/* ---- Tablet: collapse header nav into a menu ---------------------------- */
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: flex;
+  }
+  .nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: var(--space-1) var(--container-pad) var(--space-4);
+    background: var(--color-surface-nav);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-bottom: 0.8px solid var(--color-border);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity var(--dur-normal) var(--ease-standard),
+      transform var(--dur-normal) var(--ease-standard),
+      visibility var(--dur-normal) var(--ease-standard);
+  }
+  .site-header.nav-open .nav {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+  .nav__link {
+    padding: 14px 2px;
+    font-size: 15px;
+    color: var(--color-text);
+    border-bottom: 0.8px solid var(--color-border);
+  }
+  .nav__link::after { display: none; }
+}
+
+/* ---- Small tablets: single-column card grids --------------------------- */
+@media (max-width: 720px) {
+  .destinations,
+  .features,
+  .journeys {
+    grid-template-columns: 1fr;
+  }
+  .destinations { margin-top: var(--space-8); }
+  .journeys { margin-top: var(--space-8); }
+
+  .dest-card {
+    aspect-ratio: 3 / 4;
+  }
+}
+
+/* ---- Steps to single column on phones ---------------------------------- */
+@media (max-width: 560px) {
+  .steps {
+    grid-template-columns: 1fr;
+    margin-top: var(--space-10);
+  }
+  .step {
+    border-right: 0;
+    border-bottom: 0.8px solid var(--color-border);
+    padding: 28px 0;
+  }
+  .step:last-child { border-bottom: 0; }
+
+  .notes {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  .advisor {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ---- Testimonial photos: keep 2×2 but allow shrink; go 1-col very small - */
+@media (max-width: 380px) {
+  .testimonial-grid {
+    grid-template-columns: 1fr;
+  }
+  .person-card { aspect-ratio: 3 / 4; }
+}
+
+/* ---- Large desktop: keep imagery generous, text measured --------------- */
+@media (min-width: 1440px) {
+  .lede,
+  .measure {
+    max-width: 48ch;
+  }
+}
+
+/* ---- Short viewports: don't force full-height hero --------------------- */
+@media (max-height: 640px) and (min-width: 769px) {
+  .hero {
+    min-height: auto;
+    padding-block: calc(var(--header-h) + var(--space-16)) var(--space-16);
+  }
+}

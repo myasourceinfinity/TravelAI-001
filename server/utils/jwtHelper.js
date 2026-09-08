@@ -14,7 +14,7 @@ const crypto = require('crypto');
 
 const ACCESS_SECRET   = process.env.JWT_SECRET          || 'dev_access_secret_change_me';
 const REFRESH_SECRET  = process.env.JWT_REFRESH_SECRET  || 'dev_refresh_secret_change_me';
-const ACCESS_EXPIRY   = process.env.JWT_EXPIRY          || '15m';
+const ACCESS_EXPIRY   = process.env.JWT_EXPIRY          || '5m';
 const REFRESH_EXPIRY  = process.env.JWT_REFRESH_EXPIRY  || '7d';
 
 /**
