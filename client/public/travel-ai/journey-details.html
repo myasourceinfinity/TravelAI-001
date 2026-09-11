@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>The Dubai Signature Journey — Travel AI</title>
+  <meta name="description" content="The Dubai Signature Journey — a 7 day, 6 night considered introduction to Dubai. See what's included, the full program, sample daily schedule and food." />
+  <meta name="theme-color" content="#080b0d" />
+  <link rel="canonical" href="https://travel-ai.example/journey-details.html" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="The Dubai Signature Journey — Travel AI" />
+  <meta property="og:description" content="A considered introduction to Dubai — iconic experiences, time to unwind and moments beyond the expected." />
+  <meta property="og:image" content="assets/images/detail/gallery-main.webp" />
+
+  <link rel="preload" as="image" href="assets/images/detail/gallery-main.webp" fetchpriority="high" />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-400.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-600.woff2" crossorigin />
+
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/motion.css" />
+  <link rel="stylesheet" href="css/detail.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <!-- Motion Foundation: GSAP 3.x + ScrollTrigger (pinned CDN) & Motion Engine -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script defer src="js/motion/gsap-presets.js"></script>
+  <script defer src="js/motion/gsap-text.js"></script>
+  <script defer src="js/motion/gsap-engine.js"></script>
+  <script defer src="js/site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header id="site-header" class="site-header"></header>
+
+  <main id="main">
+    <!-- Breadcrumb + title -->
+    <div class="container detail-top">
+      <nav aria-label="Breadcrumb">
+        <ol class="breadcrumb" data-motion="fade-up">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="journeys.html">Journeys</a></li>
+          <li><span aria-current="page">The Dubai Signature Journey</span></li>
+        </ol>
+      </nav>
+      <h1 class="detail-title" data-motion="line-reveal">The Dubai Signature Journey</h1>
+    </div>
+
+    <!-- Gallery -->
+    <div class="container">
+      <div class="gallery" data-motion-stagger>
+        <figure class="gallery__fig gallery__main" data-motion="fade-up">
+          <img src="assets/images/detail/gallery-main.webp" width="1200" height="675"
+               alt="The Burj Al Arab rising above the Madinat Jumeirah resort, Dubai"
+               fetchpriority="high" decoding="async" data-motion="image-reveal" />
+        </figure>
+        <figure class="gallery__fig gallery__top" data-motion="fade-up">
+          <img src="assets/images/detail/gallery-palm.webp"
+               alt="Aerial view of Palm Jumeirah, Dubai" loading="lazy" decoding="async" data-motion="image-reveal" />
+        </figure>
+        <div class="gallery__bottom" data-motion="fade-up">
+          <figure class="gallery__fig">
+            <img src="assets/images/detail/gallery-beach.webp"
+                 alt="The Burj Al Arab seen from the beach" loading="lazy" decoding="async" data-motion="image-reveal" />
+          </figure>
+          <figure class="gallery__fig">
+            <img src="assets/images/detail/gallery-dusk.webp"
+                 alt="The Burj Al Arab and coastline at dusk" loading="lazy" decoding="async" data-motion="image-reveal" />
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content + sidebar -->
+    <div class="container">
+      <div class="detail-layout">
+
+        <div class="detail-main">
+          <!-- About -->
+          <section class="detail-section" id="about" aria-labelledby="about-h">
+            <h2 class="detail-section__title" id="about-h" data-motion="line-reveal">About Package</h2>
+            <div class="prose" data-motion="fade-up">
+              <p>We don't believe in showing you hundreds of holidays and leaving you to choose. Instead, our Travel AI Agents bring together a considered collection of journeys across Dubai and Japan — each with its own character, pace and way of experiencing the destination.</p>
+              <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966, when designers at Letraset and James Mosley, the librarian at St Bride Printing Library in London, took a 1914 Cicero translation and scrambled it to make dummy text for Letraset's Body Type sheets. It has survived not only many decades, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
+              <p>It was popularised thanks to these sheets and more recently with desktop publishing software like Aldus PageMaker and Microsoft Word including versions of Lorem Ipsum.</p>
+            </div>
+          </section>
+
+          <!-- What's included -->
+          <section class="detail-section" id="included" aria-labelledby="included-h">
+            <h2 class="detail-section__title" id="included-h" data-motion="line-reveal">What's Included In This Package</h2>
+            <ul class="feature-grid" data-motion-stagger>
+              <li data-motion="fade-up"><img class="feat__icon" src="assets/icons/detail/feat-1.svg" alt="" /><span>6 nights accommodation</span></li>
+              <li data-motion="fade-up"><img class="feat__icon" src="assets/icons/detail/feat-8.svg" alt="" /><span>Three integration sessions during the retreat</span></li>
+              <li data-motion="fade-up"><img class="feat__icon" src="assets/icons/detail/feat-3.svg" alt="" /><span>7 daily delicious and nutritious meals</span></li>
+              <li data-motion="fade-up"><img class="feat__icon" src="assets/icons/detail/feat-4.svg" alt="" /><span>Optional sessions with ancestral tools</span></li>
+              <li data-motion="fade-up"><img class="feat__icon" src="assets/icons/detail/feat-5.svg" alt="" /><span>Water, tea, coffee served throughout the day</span></li>
+              <li data-motion="fade-up"><img class="feat__icon" src="assets/icons/detail/feat-1.svg" alt="" /><span>Post retreat online integration</span></li>
+              <li data-motion="fade-up"><img class="feat__icon" src="assets/icons/detail/feat-7.svg" alt="" /><span>Daily meditation classes</span></li>
+              <li data-motion="fade-up"><img class="feat__icon" src="assets/icons/detail/feat-8.svg" alt="" /><span>Pre and post retreat support from our team</span></li>
+              <li data-motion="fade-up"><img class="feat__icon" src="assets/icons/detail/feat-9.svg" alt="" /><span>Specialized workshops</span></li>
+              <li data-motion="fade-up"><img class="feat__icon" src="assets/icons/detail/feat-10.svg" alt="" /><span>Wifi connection</span></li>
+            </ul>
+          </section>
+
+          <!-- Special -->
+          <section class="detail-section" aria-labelledby="special-h">
+            <h2 class="detail-section__title" id="special-h" data-motion="line-reveal">What Makes This Retreat Special</h2>
+            <div class="prose" data-motion="fade-up">
+              <p>Eqylife Center specializes in organizing silent retreats, providing a serene and peaceful environment for individuals seeking inner reflection, relaxation, and personal growth. The center offers a tranquil space away from the noise and distractions of everyday life, allowing students to disconnect, find stillness, and explore their inner selves.</p>
+            </div>
+          </section>
+
+          <!-- Full program -->
+          <section class="detail-section" id="program" aria-labelledby="program-h">
+            <h2 class="detail-section__title" id="program-h" data-motion="line-reveal">Full Program</h2>
+            <div class="checkins" data-motion="fade-up">
+              <p class="checkin"><img src="assets/icons/detail/checkin.svg" alt="" />Check-in: <strong>6:00 PM</strong></p>
+              <p class="checkin"><img src="assets/icons/detail/checkin.svg" alt="" />Check-out: <strong>4:00 PM</strong></p>
+            </div>
+            <div class="prose" data-motion="fade-up">
+              <p>You can come any time of the year. From May to mid-October you can enjoy the sun, the sea and the natural environment between meditation walks and excursions.</p>
+            </div>
+          </section>
+
+          <!-- Sample schedule -->
+          <section class="detail-section" id="schedule" aria-labelledby="schedule-h">
+            <h2 class="detail-section__title" id="schedule-h" data-motion="line-reveal">Sample Daily Schedule</h2>
+            <div class="schedule" data-motion-stagger>
+              <div class="schedule__cell" data-motion="fade-up"><p class="schedule__time">05:00</p><p class="schedule__desc">Morning wake-up bell, Meditate in the hall</p></div>
+              <div class="schedule__cell" data-motion="fade-up"><p class="schedule__time">07:00</p><p class="schedule__desc">Breakfast break</p></div>
+              <div class="schedule__cell" data-motion="fade-up"><p class="schedule__time">10:00</p><p class="schedule__desc">Meditate in the hall according to the teacher's instructions</p></div>
+              <div class="schedule__cell" data-motion="fade-up"><p class="schedule__time">13:30</p><p class="schedule__desc">Rest and interviews with the teacher</p></div>
+              <div class="schedule__cell" data-motion="fade-up"><p class="schedule__time">16:00</p><p class="schedule__desc">Meditate in the hall according to the teacher's instructions</p></div>
+              <div class="schedule__cell" data-motion="fade-up"><p class="schedule__time">20:00</p><p class="schedule__desc">Retire to your own room — Lights out</p></div>
+            </div>
+            <div class="prose" data-motion="fade-up">
+              <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966, when designers at Letraset and James Mosley, the librarian at St Bride Printing Library in London, took a 1914 Cicero translation and scrambled it to make dummy text for Letraset's Body Type sheets. It has survived not only many decades, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
+            </div>
+          </section>
+
+          <!-- Food -->
+          <section class="detail-section" id="food" aria-labelledby="food-h">
+            <h2 class="detail-section__title" id="food-h" data-motion="line-reveal">Food</h2>
+            <div class="prose" data-motion="fade-up">
+              <p>Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words.</p>
+            </div>
+            <div class="diet-cols" data-motion="fade-up">
+              <div class="diet-col">
+                <h3 class="diet-col__head">Meals Provided</h3>
+                <ul class="check-list">
+                  <li><img src="assets/icons/detail/check.svg" alt="" />Breakfast</li>
+                  <li><img src="assets/icons/detail/check.svg" alt="" />Lunch</li>
+                  <li><img src="assets/icons/detail/check.svg" alt="" />Dinner</li>
+                  <li><img src="assets/icons/detail/check.svg" alt="" />Snacks</li>
+                </ul>
+              </div>
+              <div class="diet-col">
+                <h3 class="diet-col__head">Diets Catered</h3>
+                <ul class="check-list">
+                  <li><img src="assets/icons/detail/check.svg" alt="" />Egg-free</li>
+                  <li><img src="assets/icons/detail/check.svg" alt="" />Gluten Free</li>
+                  <li><img src="assets/icons/detail/check.svg" alt="" />Vegan</li>
+                  <li><img src="assets/icons/detail/check.svg" alt="" />Vegetarian</li>
+                </ul>
+              </div>
+            </div>
+            <ul class="food-gallery" data-motion-stagger>
+              <li data-motion="fade-up"><img src="assets/images/detail/food-1.webp" alt="Poached egg on toast with greens" loading="lazy" decoding="async" data-motion="image-reveal" /></li>
+              <li data-motion="fade-up"><img src="assets/images/detail/food-2.webp" alt="French toast with berries and banana" loading="lazy" decoding="async" data-motion="image-reveal" /></li>
+              <li data-motion="fade-up"><img src="assets/images/detail/food-3.webp" alt="Ramen bowl with egg and vegetables" loading="lazy" decoding="async" data-motion="image-reveal" /></li>
+              <li data-motion="fade-up"><img src="assets/images/detail/food-4.webp" alt="Plated fine-dining dish" loading="lazy" decoding="async" data-motion="image-reveal" /></li>
+            </ul>
+          </section>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="detail-sidebar" aria-label="Package details">
+          <div class="pkg" data-motion="fade-up">
+            <p class="pkg__price"><span>from</span> $1,000</p>
+            <ul class="pkg__meta">
+              <li><img src="assets/icons/detail/location.svg" alt="Location" />Gura Humorului, Romania</li>
+              <li><img src="assets/icons/detail/calendar.svg" alt="Dates" />Feb 15 – 21, 2026 (7 days, 6 nights)</li>
+              <li><img src="assets/icons/detail/users.svg" alt="Group size" />12 guests</li>
+            </ul>
+            <nav class="pkg__nav" aria-label="On this page">
+              <a href="#about">About Retreats</a>
+              <a href="#program">Full Program</a>
+              <a href="#food">Food</a>
+            </nav>
+            <a class="btn-hero pkg__cta" href="contact.html">
+              Get in touch
+              <span class="btn-hero__icon" aria-hidden="true">
+                <svg class="icon icon--arrow" viewBox="0 0 9 9" focusable="false"><path d="M2.25 6.75 6.75 2.25M6.75 5.76V2.25H3.24" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </a>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+</body>
+</html>

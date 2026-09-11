@@ -1,0 +1,610 @@
+/* ==========================================================================
+   motion.css — cinematic editorial motion system
+   Reusable animation primitives for premium scroll-driven reveals.
+   Load after components.css, before responsive.css.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Default hidden state (only when JS is confirmed ready)
+   Without .js-ready, all content remains fully visible.
+   -------------------------------------------------------------------------- */
+.js-ready [data-motion] {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+/* Typography, image, and parallax reveals manage their own visibility */
+.js-ready [data-motion="line-reveal"],
+.js-ready [data-motion="char-scroll"],
+.js-ready [data-motion="copy-follow"],
+.js-ready [data-motion="parallax"],
+.js-ready [data-motion="contact-title"],
+.js-ready [data-motion="hero-title"],
+.js-ready [data-motion="hero-text"] {
+  opacity: 1;
+  will-change: auto;
+}
+.js-ready [data-motion="image-reveal"] {
+  opacity: 0.9;
+  will-change: transform, opacity;
+}
+
+/* --------------------------------------------------------------------------
+   2. Revealed state (applied by IntersectionObserver)
+   -------------------------------------------------------------------------- */
+/* `.js-ready` is required here, not decorative: without it this selector is
+   (0,2,0), which ties with every hidden-state rule below — `.js-ready
+   [data-motion="fade-up"]`, the `hero-*` rules, `image-reveal`, and their
+   mobile overrides — and loses on source order, so a revealed element never
+   returned to its resting position (fade-up stayed 20px low, images stayed at
+   scale(1.03), and on mobile at opacity .95). At (0,3,0) the reset wins. */
+.js-ready [data-motion].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Allow interactive component hover lifts once revealed */
+.btn-hero[data-motion].is-visible:hover {
+  transform: translateY(-1px);
+}
+.btn-hero[data-motion].is-visible:active {
+  transform: translateY(0);
+}
+.btn[data-motion].is-visible:active {
+  transform: translateY(1px);
+}
+
+/* --------------------------------------------------------------------------
+   2b. GSAP Motion Engine Active
+   When the centralized GSAP motion engine initializes (.gsap-active on <html>),
+   disable CSS entrance transitions so the browser does not fight GSAP's
+   per-frame updates, while preserving CSS :hover transitions.
+   -------------------------------------------------------------------------- */
+.gsap-active [data-motion="fade-up"],
+.gsap-active [data-motion="fade-in"],
+.gsap-active [data-motion="fade-down"],
+.gsap-active [data-motion="fade-left"],
+.gsap-active [data-motion="fade-right"],
+.gsap-active [data-motion="text-reveal"],
+.gsap-active [data-motion="scale-reveal"],
+.gsap-active [data-motion="image-reveal"],
+.gsap-active [data-motion="line-reveal"] .line-inner,
+.gsap-active [data-motion="char-reveal"] .char-unit,
+.gsap-active [data-motion="divider"],
+.gsap-active [data-motion="border-reveal"],
+.gsap-active [data-motion="hero-image"],
+.gsap-active [data-motion="hero-overlay"],
+.gsap-active [data-motion="hero-title"],
+.gsap-active [data-motion="hero-title"] .line-inner,
+.gsap-active [data-motion="hero-text"],
+.gsap-active [data-motion="hero-text"] p,
+.gsap-active [data-motion="hero-cta"],
+.gsap-active .site-header .brand,
+.gsap-active .site-header .nav__link,
+.gsap-active .site-header .nav-link-signin,
+.gsap-active .site-header .nav-cta-btn,
+.gsap-active [data-motion="about-hero-image"],
+.gsap-active [data-motion="about-hero-title"],
+.gsap-active [data-motion="about-hero-eyebrow"],
+.gsap-active [data-motion="about-hero-lede"],
+.gsap-active [data-motion="about-hero-title"] .line-inner,
+.gsap-active .about-hero__img,
+.gsap-active .about-hero__inner,
+.gsap-active [data-motion="contact-image"],
+.gsap-active [data-motion="contact-title"],
+.gsap-active [data-motion="contact-eyebrow"],
+.gsap-active [data-motion="contact-sub"],
+.gsap-active [data-motion="contact-form"],
+.gsap-active [data-motion="contact-title"] .line-inner,
+.gsap-active .contact-media__img {
+  transition: none !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Motion primitives — initial transforms + transitions
+   -------------------------------------------------------------------------- */
+
+/* -- Fade Up (default section reveal) ------------------------------------ */
+.js-ready [data-motion="fade-up"],
+.js-ready [data-motion="contact-eyebrow"],
+.js-ready [data-motion="contact-sub"],
+.js-ready [data-motion="contact-form"] {
+  transform: translateY(20px);
+  transition:
+    opacity var(--motion-reveal) var(--ease-reveal),
+    transform var(--motion-reveal) var(--ease-reveal);
+  transition-delay: var(--motion-delay, 0ms);
+}
+
+/* -- Fade In (opacity only) ---------------------------------------------- */
+.js-ready [data-motion="fade-in"] {
+  transform: none;
+  transition:
+    opacity var(--motion-reveal) var(--ease-reveal);
+  transition-delay: var(--motion-delay, 0ms);
+}
+
+/* -- Text Reveal (editorial rise from below) ------------------------------
+   The Vita entrance: text starts below its resting position and rises into
+   place as it fades in. Same mechanism and easing as fade-up, but a larger
+   amplitude tier reserved for text, so containers and cards can keep the
+   quieter 20px move. --ease-reveal has both control points inside [0,1], so
+   it decelerates without overshoot or bounce.
+
+   --text-index staggers consecutive text-reveal siblings within one block and
+   composes additively with the --motion-delay inherited from a parent
+   [data-motion-stagger], so a card's copy still cascades in that card's turn. */
+.js-ready [data-motion="text-reveal"] {
+  transform: translateY(var(--motion-text-rise));
+  transition:
+    opacity var(--motion-reveal) var(--ease-reveal),
+    transform var(--motion-reveal) var(--ease-reveal);
+  transition-delay: calc(var(--motion-delay, 0ms) + var(--text-index, 0) * var(--stagger-small));
+}
+
+/* Required: the global `[data-motion].is-visible { transform: none }` sits
+   earlier in this file, so at equal specificity it would lose to the rule
+   above and the rise would never resolve. */
+[data-motion="text-reveal"].is-visible {
+  transform: none;
+}
+
+/* Count preceding text-reveal siblings — scoped to one parent by `~` */
+[data-motion="text-reveal"] ~ [data-motion="text-reveal"] { --text-index: 1; }
+[data-motion="text-reveal"] ~ [data-motion="text-reveal"] ~ [data-motion="text-reveal"] { --text-index: 2; }
+[data-motion="text-reveal"] ~ [data-motion="text-reveal"] ~ [data-motion="text-reveal"] ~ [data-motion="text-reveal"] { --text-index: 3; }
+[data-motion="text-reveal"] ~ [data-motion="text-reveal"] ~ [data-motion="text-reveal"] ~ [data-motion="text-reveal"] ~ [data-motion="text-reveal"] { --text-index: 4; }
+
+/* Card / block interiors use the quieter tier (Vita's 20px metadata family) */
+.dest-card,
+.journey-card,
+.person-card,
+.step,
+.feature,
+.note,
+.about-belief,
+.about-place,
+.about-stat,
+.about-timeline__row,
+.about-join {
+  --motion-text-rise: 18px;
+}
+
+/* -- Line Reveal (editorial masked line emergence) ----------------------- */
+.line-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em; /* Protect descenders: g, j, p, q, y */
+  margin-bottom: -0.12em;
+}
+
+.js-ready [data-motion="line-reveal"] .line-inner {
+  display: block;
+  transform: translateY(115%);
+  opacity: 0;
+  transition:
+    opacity var(--motion-reveal) var(--ease-cinematic),
+    transform var(--motion-reveal) var(--ease-cinematic);
+  transition-delay: calc(var(--motion-delay, 0ms) + (var(--line-index, 0) * var(--stagger-line)));
+  will-change: transform, opacity;
+}
+
+/* `.js-ready` for the same reason as §2: at (0,3,0) this ties with both the
+   hidden-state rule above and its `@media (max-width: 768px)` override, and
+   loses to whichever comes later — so on phones the mobile override pinned
+   every line at translateY(105%) behind its own mask and the heading never
+   appeared at all. (0,4,0) settles it. */
+.js-ready [data-motion="line-reveal"].is-visible .line-inner {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* -- Char Scroll (scroll-progressive editorial statements) ---------------
+   Progress is written by JS as --reveal-progress (0-1) on the nearest
+   [data-motion-scope], or on the element itself. Every character reads that
+   single custom property through its own overlapping window, so the reveal
+   is driven purely by scroll position: no transition, no delay, no timer.
+
+   Characters stay display:inline — the split text occupies exactly the same
+   box as the unsplit text, so line breaking, kerning and text-wrap: balance
+   are untouched and there is no layout shift at any width. -------------- */
+
+/* Accessible text lives in .sr-only; this layer is the aria-hidden visual */
+.char-layer {
+  display: inline;
+}
+
+/* The heading itself rises into place while its characters light up. Transform
+   only — opacity is never touched here, so the muted characters remain visible
+   for the whole entrance. The explicit .is-visible rule is required because the
+   global `[data-motion].is-visible { transform: none }` sits earlier in this
+   file and would otherwise lose at equal specificity. */
+.js-ready [data-motion="char-scroll"] {
+  transform: translateY(var(--motion-text-rise));
+  transition: transform var(--motion-reveal) var(--ease-reveal);
+}
+[data-motion="char-scroll"].is-visible {
+  transform: none;
+}
+
+.js-ready [data-motion="char-scroll"] .char-unit {
+  /* Where this character begins lighting, along total progress */
+  --char-start: calc(var(--i, 0) / var(--char-total, 1) * var(--motion-editorial-span));
+  /* This character's own 0-1 progress */
+  --char-local: clamp(
+    0,
+    calc((var(--reveal-progress, 1) - var(--char-start)) / var(--motion-editorial-fade)),
+    1
+  );
+  opacity: calc(
+    var(--motion-editorial-idle) + (1 - var(--motion-editorial-idle)) * var(--char-local)
+  );
+}
+
+/* Whole-element fallback for headings too long to split (see prepareCharScroll) */
+.js-ready [data-motion="char-scroll"].is-whole {
+  --char-local: clamp(0, calc(var(--reveal-progress, 1) / var(--motion-editorial-fade)), 1);
+  opacity: calc(
+    var(--motion-editorial-idle) + (1 - var(--motion-editorial-idle)) * var(--char-local)
+  );
+}
+
+/* Settled: drop the per-character calc chain entirely once fully revealed */
+.js-ready [data-motion="char-scroll"].is-settled .char-unit,
+.js-ready .is-settled [data-motion="char-scroll"] .char-unit,
+.js-ready [data-motion="char-scroll"].is-settled.is-whole,
+.js-ready .is-settled [data-motion="char-scroll"].is-whole {
+  opacity: 1;
+}
+
+/* -- Copy Follow (supporting description trailing an editorial heading) ---
+   Reads the same --reveal-progress as its heading via [data-motion-scope],
+   through a later window: begins around 50%, completes around 95%. ------ */
+.js-ready [data-motion="copy-follow"] {
+  --copy-local: clamp(
+    0,
+    calc((var(--reveal-progress, 1) - var(--motion-editorial-copy)) / 0.45),
+    1
+  );
+  opacity: calc(
+    var(--motion-editorial-idle) + (1 - var(--motion-editorial-idle)) * var(--copy-local)
+  );
+  transform: translateY(calc((1 - var(--copy-local)) * 4px));
+}
+
+.js-ready .is-settled [data-motion="copy-follow"],
+.js-ready [data-motion="copy-follow"].is-settled {
+  opacity: 1;
+  transform: none;
+}
+
+/* -- Fade Down (header / nav entrance) ----------------------------------- */
+.js-ready [data-motion="fade-down"] {
+  transform: translateY(-8px);
+  transition:
+    opacity var(--motion-normal) var(--ease-reveal),
+    transform var(--motion-normal) var(--ease-reveal);
+  transition-delay: var(--motion-delay, 0ms);
+}
+
+/* -- Fade Left / Fade Right (directional reveals) ------------------------- */
+.js-ready [data-motion="fade-left"] {
+  transform: translateX(20px);
+  transition:
+    opacity var(--motion-reveal) var(--ease-reveal),
+    transform var(--motion-reveal) var(--ease-reveal);
+  transition-delay: var(--motion-delay, 0ms);
+}
+
+.js-ready [data-motion="fade-right"] {
+  transform: translateX(-20px);
+  transition:
+    opacity var(--motion-reveal) var(--ease-reveal),
+    transform var(--motion-reveal) var(--ease-reveal);
+  transition-delay: var(--motion-delay, 0ms);
+}
+
+/* -- Divider / Border reveal --------------------------------------------- */
+.js-ready [data-motion="divider"],
+.js-ready [data-motion="border-reveal"] {
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* -- Scale Reveal (maps, subtle containers) ------------------------------ */
+.js-ready [data-motion="scale-reveal"] {
+  transform: scale(.98);
+  opacity: 0.85;
+  transition:
+    opacity var(--dur-slow) var(--ease-reveal),
+    transform var(--motion-slow) var(--ease-cinematic);
+  transition-delay: var(--motion-delay, 0ms);
+}
+
+/* -- Image Reveal (cinematic image entrance) ----------------------------- */
+.js-ready [data-motion="image-reveal"] {
+  transform: scale(1.03);
+  opacity: 0.9;
+  transition:
+    opacity var(--dur-slow) var(--ease-reveal),
+    transform var(--motion-reveal) var(--ease-cinematic);
+  transition-delay: var(--motion-delay, 0ms);
+}
+[data-motion="image-reveal"].is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* --------------------------------------------------------------------------
+   4. Hero entrance choreography (CSS states, toggled by JS)
+   -------------------------------------------------------------------------- */
+
+/* Hero image — cinematic scale entrance */
+.js-ready [data-motion="hero-image"] {
+  opacity: 0;
+  transform: scale(1.06) translateY(10px);
+  transition:
+    opacity var(--motion-reveal) ease-out,
+    transform var(--motion-cinematic) var(--ease-cinematic);
+}
+
+/* Hero overlay — gradual darkness reveal */
+.js-ready [data-motion="hero-overlay"] {
+  opacity: 0;
+  transition: opacity 1.0s ease-out;
+}
+
+/* Hero title line reveal */
+.hero__title .line-mask {
+  overflow: hidden;
+  display: block;
+}
+.hero__title .line-inner {
+  display: block;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+  will-change: transform, opacity;
+}
+.js-ready [data-motion="hero-title"] .line-inner {
+  opacity: 0;
+  transform: translateY(100%);
+  transition:
+    opacity var(--motion-hero-title) var(--ease-cinematic),
+    transform var(--motion-hero-title) var(--ease-cinematic);
+}
+.js-ready [data-motion="hero-title"].is-visible .line-inner,
+.js-ready .is-visible [data-motion="hero-title"] .line-inner,
+.js-ready [data-motion="hero-title"] .line-inner.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero supporting text */
+.js-ready [data-motion="hero-text"] p {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity var(--motion-reveal) var(--ease-cinematic),
+    transform var(--motion-reveal) var(--ease-cinematic);
+}
+.js-ready [data-motion="hero-text"].is-visible p,
+.js-ready .is-visible [data-motion="hero-text"] p,
+.js-ready [data-motion="hero-text"] p.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero CTA button */
+.js-ready [data-motion="hero-cta"] {
+  opacity: 0;
+  transform: translateY(25px) scale(0.96);
+  transition:
+    opacity var(--dur-slow) var(--ease-cinematic),
+    transform var(--dur-slow) var(--ease-cinematic);
+}
+
+/* Header initial entrance state */
+.js-ready .site-header .brand,
+.js-ready .site-header .nav__link,
+.js-ready .site-header .nav-link-signin,
+.js-ready .site-header .nav-cta-btn {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+.js-ready .site-header.is-visible .brand,
+.js-ready .site-header.is-visible .nav__link,
+.js-ready .site-header.is-visible .nav-link-signin,
+.js-ready .site-header.is-visible .nav-cta-btn {
+  opacity: 1;
+  transform: none;
+}
+
+/* Hero content wrapper — scroll-driven fade (transform set by JS) */
+.js-ready [data-motion="hero-content"] {
+  transition: none; /* JS controls this directly */
+}
+[data-motion="hero-content"].is-visible {
+  /* Override: don't force transform:none on hero-content, JS manages it */
+  transform: translateY(var(--hero-scroll-y, 0px)) !important;
+  opacity: var(--hero-scroll-opacity, 1) !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. Stagger system
+   Elements inside a [data-motion="stagger"] or [data-motion-stagger] container receive auto-delays.
+   -------------------------------------------------------------------------- */
+[data-motion="stagger"] > [data-motion]:nth-child(1),
+[data-motion-stagger] > [data-motion]:nth-child(1) { --motion-delay: var(--stagger-base, 0ms); }
+[data-motion="stagger"] > [data-motion]:nth-child(2),
+[data-motion-stagger] > [data-motion]:nth-child(2) { --motion-delay: calc(var(--stagger-base, 0ms) + var(--stagger-normal)); }
+[data-motion="stagger"] > [data-motion]:nth-child(3),
+[data-motion-stagger] > [data-motion]:nth-child(3) { --motion-delay: calc(var(--stagger-base, 0ms) + var(--stagger-normal) * 2); }
+[data-motion="stagger"] > [data-motion]:nth-child(4),
+[data-motion-stagger] > [data-motion]:nth-child(4) { --motion-delay: calc(var(--stagger-base, 0ms) + var(--stagger-normal) * 3); }
+[data-motion="stagger"] > [data-motion]:nth-child(5),
+[data-motion-stagger] > [data-motion]:nth-child(5) { --motion-delay: calc(var(--stagger-base, 0ms) + var(--stagger-normal) * 4); }
+[data-motion="stagger"] > [data-motion]:nth-child(6),
+[data-motion-stagger] > [data-motion]:nth-child(6) { --motion-delay: calc(var(--stagger-base, 0ms) + var(--stagger-normal) * 5); }
+
+/* --------------------------------------------------------------------------
+   6. Card image hover — photographic zoom (consolidated single source of truth)
+   -------------------------------------------------------------------------- */
+.dest-card,
+.journey-card,
+.person-card,
+.place-card {
+  overflow: hidden;
+}
+.dest-card__img,
+.journey-card__img,
+.place-card__img {
+  transition: transform var(--motion-hover) var(--ease-reveal);
+}
+@media (hover: hover) and (pointer: fine) {
+  .dest-card:hover .dest-card__img,
+  .journey-card:hover .journey-card__img,
+  .place-card:hover .place-card__img {
+    transform: scale(1.035);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. Parallax elements — no CSS transition (JS scroll-driven)
+   -------------------------------------------------------------------------- */
+[data-motion="parallax"],
+[data-parallax] {
+  will-change: transform;
+}
+
+/* Editorial place-card parallax integration */
+.place-card__img[data-parallax] {
+  height: calc(100% + 24px);
+  margin-top: -12px;
+  transform: translateY(var(--parallax-y, 0px));
+}
+[data-motion="image-reveal"].is-visible[data-parallax] {
+  transform: translateY(var(--parallax-y, 0px)) scale(1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .place-card:hover .place-card__img[data-parallax] {
+    transform: translateY(var(--parallax-y, 0px)) scale(1.035);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. Reduced motion — respect user preference
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-motion],
+  [data-parallax],
+  .js-ready [data-motion] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+  .place-card__img[data-parallax] {
+    margin-top: 0 !important;
+    height: 100% !important;
+  }
+  .line-mask {
+    overflow: visible !important;
+  }
+  .line-inner,
+  .char-unit,
+  .char-layer,
+  .js-ready [data-motion="line-reveal"] .line-inner,
+  .js-ready [data-motion="hero-title"] .line-inner,
+  .js-ready [data-motion="hero-overlay"],
+  .js-ready [data-motion="hero-text"] p,
+  .js-ready .site-header .brand,
+  .js-ready .site-header .nav__link,
+  .js-ready .site-header .nav-link-signin,
+  .js-ready .site-header .nav-cta-btn,
+  .js-ready [data-motion="char-scroll"],
+  .js-ready [data-motion="char-scroll"].is-whole,
+  .js-ready [data-motion="char-scroll"] .char-unit,
+  .js-ready [data-motion="copy-follow"],
+  .js-ready [data-motion="text-reveal"] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+  [data-motion="hero-content"].is-visible {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .dest-card__img,
+  .journey-card__img,
+  .person-card__img,
+  .place-card__img {
+    transition: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. Mobile — lighter animation
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .js-ready [data-motion="fade-up"] {
+    transform: translateY(14px);
+  }
+  .js-ready [data-motion="fade-left"] {
+    transform: translateX(14px);
+  }
+  .js-ready [data-motion="fade-right"] {
+    transform: translateX(-14px);
+  }
+  .js-ready [data-motion="line-reveal"] .line-inner {
+    transform: translateY(105%);
+    transition-delay: calc(var(--motion-delay, 0ms) + (var(--line-index, 0) * var(--stagger-small)));
+  }
+  /* Editorial reveal: a softer, more overlapping edge than desktop (39% vs
+     22% of characters mid-transition) so small type reads calmly. The muted
+     value is unchanged — 0.40 is already legible. Layout is unchanged. */
+  :root {
+    --motion-editorial-span: 0.72;
+    --motion-editorial-fade: 0.28;
+    --motion-text-rise: 18px;
+  }
+  .dest-card,
+  .journey-card,
+  .person-card,
+  .step,
+  .feature,
+  .note,
+  .about-belief,
+  .about-place,
+  .about-stat,
+  .about-timeline__row,
+  .about-join {
+    --motion-text-rise: 12px;
+  }
+  .js-ready [data-motion="copy-follow"] {
+    transform: translateY(calc((1 - var(--copy-local)) * 3px));
+  }
+  .js-ready [data-motion="hero-image"] {
+    transform: scale(1.02);
+  }
+  .js-ready [data-motion="hero-title"] {
+    transform: translateY(14px);
+  }
+  .js-ready [data-motion="hero-text"] {
+    transform: translateY(8px);
+  }
+  .js-ready [data-motion="hero-cta"] {
+    transform: translateY(6px) scale(.99);
+  }
+  .js-ready [data-motion="image-reveal"] {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+  /* Reduce stagger on mobile */
+  [data-motion="stagger"] > [data-motion]:nth-child(n+4),
+  [data-motion-stagger] > [data-motion]:nth-child(n+4) {
+    --motion-delay: calc(var(--stagger-small) * 3) !important;
+  }
+}

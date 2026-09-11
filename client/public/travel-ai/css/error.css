@@ -1,0 +1,107 @@
+/* ==========================================================================
+   error.css — 404 / not-found page
+   ========================================================================== */
+
+.error {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  min-height: calc(100svh - 220px);
+  padding: calc(var(--header-h) + clamp(56px, 12vh, 120px)) var(--container-pad)
+    clamp(56px, 10vh, 100px);
+}
+
+/* Soft violet aura behind the numeral */
+.error__glow {
+  position: absolute;
+  z-index: -1;
+  top: 38%;
+  left: 50%;
+  width: min(720px, 90vw);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    rgba(167, 139, 250, 0.18) 0%,
+    rgba(167, 139, 250, 0.06) 38%,
+    rgba(8, 11, 13, 0) 70%
+  );
+  pointer-events: none;
+}
+
+.error__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 640px;
+}
+
+.error__eyebrow {
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.error__code {
+  margin-top: var(--space-4);
+  font-size: clamp(108px, 26vw, 260px);
+  font-weight: 600;
+  line-height: 0.86;
+  letter-spacing: -0.05em;
+  color: var(--color-text);
+  background: linear-gradient(180deg, #ffffff 0%, #a78bfa 118%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.error__title {
+  margin-top: var(--space-6);
+  font-size: clamp(26px, 5vw, 40px);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.error__text {
+  margin-top: var(--space-4);
+  max-width: 46ch;
+  font-size: var(--fs-body);
+  line-height: 1.75;
+  color: var(--color-text-secondary);
+}
+
+.error__actions {
+  margin-top: var(--space-10);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.error__links {
+  margin-top: var(--space-10);
+  padding-top: var(--space-6);
+  border-top: 0.8px solid var(--color-border);
+  width: min(100%, 460px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  justify-content: center;
+}
+.error__links a {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+.error__links a:hover,
+.error__links a:focus-visible { color: var(--color-text); }
+
+@media (max-width: 480px) {
+  .error__actions { flex-direction: column; align-items: stretch; width: 100%; }
+  .error__actions .btn { width: 100%; }
+}

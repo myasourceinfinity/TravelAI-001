@@ -1,0 +1,308 @@
+/* ==========================================================================
+   ai-planner.css — AI Travel Planner input screen styles
+   Following tokens.css, DESIGN.md, and MOTION.md conventions.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Planner Section & Layout
+   -------------------------------------------------------------------------- */
+.planner-section {
+  min-height: calc(100vh - var(--header-h));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-block: clamp(48px, 8vw, 80px);
+  background-color: var(--color-bg);
+}
+
+.planner-section--compact {
+  min-height: auto;
+  padding-top: calc(var(--header-h) + var(--space-6));
+  padding-bottom: var(--space-4);
+}
+
+.planner-container {
+  width: min(100% - (var(--container-pad) * 2), 900px);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   2. Headings & Typography
+   -------------------------------------------------------------------------- */
+.planner__header {
+  max-width: 900px;
+  margin-inline: auto;
+  margin-bottom: var(--space-6);
+}
+
+.planner__title {
+  font-size: clamp(32px, 4vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: #F3F4F6;
+  margin-bottom: var(--space-4);
+}
+
+.planner__desc {
+  font-size: clamp(14px, 1.8vw, 15px);
+  line-height: 1.6;
+  color: var(--color-text-body);
+  max-width: 680px;
+  margin-inline: auto;
+}
+
+/* --------------------------------------------------------------------------
+   3. Destination Toggle (Dubai / Japan Segmented Control)
+   -------------------------------------------------------------------------- */
+.planner__toggle-wrapper {
+  margin-bottom: var(--space-6);
+}
+
+.planner__toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background-color: #121317;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  gap: 4px;
+}
+
+.planner__toggle-btn {
+  position: relative;
+  z-index: 2;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 22px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-standard);
+  min-height: 34px;
+}
+
+.planner__toggle-btn:hover {
+  color: var(--color-text);
+}
+
+.planner__toggle-btn[aria-pressed="true"] {
+  color: #ffffff;
+  font-weight: 600;
+  background-color: var(--color-accent-solid);
+  box-shadow: 0 2px 10px rgba(123, 92, 240, 0.35);
+}
+
+.planner__toggle-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   4. Suggestion Chips
+   -------------------------------------------------------------------------- */
+.planner__chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 10px;
+  max-width: 900px;
+  margin-bottom: var(--space-6);
+  min-height: 82px; /* Prevent layout shift during destination switch */
+}
+
+.planner__chip {
+  appearance: none;
+  border: 1px solid var(--color-border);
+  background: #121317;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.planner__chip:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.planner__chip:active {
+  transform: translateY(0);
+}
+
+.planner__chip.is-active {
+  background-color: rgba(123, 92, 240, 0.18);
+  border-color: var(--color-accent-solid);
+  color: #ffffff;
+}
+
+.planner__chip:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Input Card
+   -------------------------------------------------------------------------- */
+.planner__card {
+  width: 100%;
+  max-width: 900px;
+  background-color: #121317;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  transition: border-color var(--dur-fast) var(--ease-standard),
+              box-shadow var(--dur-fast) var(--ease-standard);
+}
+
+.planner__card:focus-within {
+  border-color: rgba(123, 92, 240, 0.5);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(123, 92, 240, 0.25);
+}
+
+.planner__textarea {
+  width: 100%;
+  min-height: 84px;
+  background: transparent;
+  border: 0;
+  outline: none;
+  resize: none;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--color-text);
+  padding: 0;
+}
+
+.planner__textarea::placeholder {
+  color: var(--color-text-faint);
+}
+
+.planner__card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+  padding-top: var(--space-2);
+}
+
+.planner__shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-faint);
+  user-select: none;
+}
+
+.planner__shortcut kbd {
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.planner__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background-color: var(--color-accent-solid);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 10px 24px;
+  min-height: 41px;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard);
+}
+
+.planner__submit:hover {
+  background-color: var(--color-accent-solid-hover);
+  box-shadow: 0 0 18px rgba(123, 92, 240, 0.45);
+  transform: translateY(-1px);
+}
+
+.planner__submit:active {
+  transform: translateY(0);
+}
+
+.planner__submit:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.planner__submit[aria-busy="true"] {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+/* --------------------------------------------------------------------------
+   6. Legal Disclaimer
+   -------------------------------------------------------------------------- */
+.planner__legal {
+  margin-top: var(--space-6);
+  font-size: 12px;
+  color: var(--color-text-faint);
+  line-height: 1.5;
+}
+
+.planner__legal-link {
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.planner__legal-link:hover {
+  color: var(--color-accent);
+}
+
+/* --------------------------------------------------------------------------
+   7. Motion System Delays (MOTION.md §7b — strictly in CSS, no inline styles)
+   -------------------------------------------------------------------------- */
+.planner__title       { --motion-delay: 0ms; }
+.planner__desc        { --motion-delay: 60ms; }
+.planner__toggle-wrapper { --motion-delay: 120ms; }
+.planner__chips       { --motion-delay: 180ms; }
+.planner__card        { --motion-delay: 240ms; }
+.planner__legal       { --motion-delay: 300ms; }
+
+/* --------------------------------------------------------------------------
+   8. Reduced Motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .planner__chip:hover,
+  .planner__submit:hover {
+    transform: none;
+  }
+}

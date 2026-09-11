@@ -28,7 +28,7 @@ const signup = async (req, res) => {
     // Phase 2 — credentials
     first_name, last_name, email, phone, password, dob, nationality,
     // Phase 1 — preferences
-    budget_amount, currency, destination, location_types,
+    budget_amount, currency, destination, location_types, living_location,
   } = req.body;
 
   const ip        = req.ip || req.socket?.remoteAddress;
@@ -94,14 +94,15 @@ const signup = async (req, res) => {
     // ── 6. Insert into user_preferences ─────────────────────────────────────
     await client.query(
       `INSERT INTO user_preferences
-         (user_id, budget_amount, currency, destination, location_types)
-       VALUES ($1, $2, $3, $4, $5)`,
+         (user_id, budget_amount, currency, destination, location_types, travel_style)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         newUser.id,
         budget_amount  ? parseFloat(budget_amount) : null,
         currency?.trim() || 'USD',
         destination?.trim() || null,
         JSON.stringify(Array.isArray(location_types) ? location_types : []),
+        JSON.stringify({ living_location: living_location?.trim() || null }),
       ]
     );
 

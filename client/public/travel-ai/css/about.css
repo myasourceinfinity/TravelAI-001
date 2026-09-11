@@ -1,0 +1,569 @@
+/* ==========================================================================
+   about.css — About Us page
+   Derived from the approved Figma "AI Travel / about-us" frame (208:5332).
+
+   Loaded only by about-us.html, so the :root block below is effectively
+   page-scoped (the same technique motion.css uses inside its media query).
+   Colour comes from tokens.css; only the type ramp is local, because this
+   frame runs a denser editorial scale than the home page.
+   ========================================================================== */
+
+:root {
+  --fs-about-h1: clamp(34px, 5.2vw, 56px);        /* masthead headline       */
+  --fs-about-h2: clamp(26px, 3.6vw, 36px);        /* section headlines       */
+  --fs-about-h2-sm: clamp(24px, 3vw, 32px);       /* place card + year       */
+  --fs-about-h3: clamp(18px, 1.9vw, 20px);        /* card + row titles       */
+  --fs-about-stat: clamp(30px, 3.4vw, 40px);      /* stat numerals           */
+  --fs-about-body-lg: clamp(14px, 1.7vw, 16px);   /* story + place copy      */
+  --fs-about-small: clamp(13px, 1.4vw, 14px);     /* stat + timeline caption */
+  --fs-about-eyebrow: 12px;
+  --fs-about-lede: clamp(15px, 1.9vw, 18px);      /* masthead + CTA lede     */
+}
+
+/* ---- Shared page primitives -------------------------------------------- */
+
+.about-eyebrow {
+  font-size: var(--fs-about-eyebrow);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent-label);
+}
+
+.about-title {
+  font-size: var(--fs-about-h2);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--color-text-strong);
+}
+
+.about-body {
+  font-size: var(--fs-body-lg);
+  line-height: 1.7;
+  color: var(--color-text-body);
+}
+
+/* Section header: eyebrow above a heavy headline. */
+.about-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Standard gap from a section header to the block beneath it. */
+.about-section-body {
+  margin-top: clamp(32px, 5vw, 56px);
+}
+
+/* Reusable panel chrome (stats bar, belief card, join band). */
+.about-panel {
+  background: var(--color-surface-panel);
+  border: 0.8px solid var(--color-border-panel);
+  border-radius: var(--radius-md);
+}
+
+/* ---- 01 Masthead -------------------------------------------------------- */
+
+.about-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  min-height: clamp(360px, 42vw, 500px);
+  padding-block: calc(var(--header-h) + var(--space-16)) var(--space-16);
+  overflow: hidden;
+  background-color: #141c1f;
+  border-bottom: 0.8px solid var(--color-border);
+}
+
+.about-hero__img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-hero__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(10, 10, 12, 0.65);
+}
+
+.about-hero__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: min(800px, 100%);
+}
+
+.about-hero__eyebrow {
+  font-size: clamp(12px, 1.3vw, 14px);
+}
+
+.about-hero__title {
+  font-size: var(--fs-about-h1);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  color: var(--color-text-strong);
+}
+
+.about-hero__lede {
+  font-size: var(--fs-about-lede);
+  line-height: 1.6;
+  color: var(--color-text-body);
+  max-width: 62ch;
+}
+
+/* ---- 02 Our story + stats ----------------------------------------------- */
+
+.about-story__head {
+  max-width: 700px;
+}
+
+/* The frame splits this header 700 / 480, not 50 / 50 — enough room for the
+   headline to hold one line. Guarded above the breakpoint where layout.css
+   collapses .split to a single column (it loads before this file). */
+@media (min-width: 721px) {
+  .about-story .split {
+    grid-template-columns: minmax(0, 700fr) minmax(0, 480fr);
+  }
+}
+
+.about-story__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  font-size: var(--fs-about-body-lg);
+  line-height: 1.65;
+  color: var(--color-text-body);
+  max-width: 62ch;
+}
+
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: var(--space-8);
+}
+
+.about-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+  padding-inline: var(--space-4);
+  border-inline-end: 0.8px solid var(--color-border-panel);
+}
+
+.about-stat:last-child {
+  border-inline-end: 0;
+}
+
+.about-stat__value {
+  font-size: var(--fs-about-stat);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--color-accent-label);
+}
+
+.about-stat__label {
+  font-size: var(--fs-about-small);
+  line-height: 1.3;
+  color: var(--color-text-body);
+}
+
+/* ---- 03 Principles ------------------------------------------------------ */
+
+.about-beliefs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
+  --stagger-base: var(--stagger-normal);
+}
+
+.about-belief {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-8);
+}
+
+.about-belief__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.about-belief__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-tint);
+  color: var(--color-accent-label);
+}
+
+.about-belief__icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.about-belief__title {
+  font-size: var(--fs-about-h3);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--color-text-strong);
+}
+
+.about-belief__text {
+  font-size: var(--fs-body-lg);
+  line-height: 1.65;
+  color: var(--color-text-body);
+}
+
+/* ---- 04 How we work ----------------------------------------------------- */
+
+.about-craft {
+  display: grid;
+  grid-template-columns: minmax(0, 560px) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+}
+
+.about-craft__media {
+  position: relative;
+  aspect-ratio: 560 / 480;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: #141c1f;
+}
+
+.about-craft__img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Extra height so the editorial parallax drift never exposes an edge — the
+   same integration motion.css defines for .place-card__img[data-parallax].
+   The transform itself is owned by motion.css. */
+.about-craft__img[data-parallax] {
+  height: calc(100% + 24px);
+  margin-top: -12px;
+}
+
+.about-craft__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-6);
+}
+
+.about-craft__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  font-size: var(--fs-body-lg);
+  line-height: 1.7;
+  color: var(--color-text-body);
+  max-width: 68ch;
+}
+
+.about-craft__cta {
+  --motion-delay: 180ms;
+}
+
+/* ---- 05 Focus (destinations) -------------------------------------------- */
+
+.about-focus__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
+  --stagger-base: var(--stagger-normal);
+}
+
+.about-place {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  /* min-height rather than aspect-ratio: the frame's 624×440 proportion is the
+     floor, but the card must grow if the copy does instead of clipping it. */
+  min-height: clamp(320px, 34vw, 440px);
+  padding: var(--space-10);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: #141c1f;
+}
+
+.about-place__img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-place__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.about-place__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.about-place__title {
+  font-size: var(--fs-about-h2-sm);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--color-text-strong);
+}
+
+/* Body copy sits over photography, so it uses the on-image token rather than
+   the frame's flat #8b8c94 — same tone, reliable contrast over any crop. */
+.about-place__text {
+  font-size: var(--fs-about-body-lg);
+  line-height: 1.6;
+  color: var(--color-on-image);
+  max-width: 46ch;
+}
+
+/* ---- 06 History (timeline) ---------------------------------------------- */
+
+.about-timeline {
+  --stagger-base: var(--stagger-normal);
+}
+
+.about-timeline__row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: var(--space-12);
+  align-items: start;
+  padding: var(--space-8) 28px;
+  border: 0.8px solid var(--color-border-panel);
+}
+
+/* Collapse the shared edge so consecutive rows read as one hairline. */
+.about-timeline__row + .about-timeline__row {
+  margin-top: -0.8px;
+}
+
+.about-timeline__year {
+  font-size: var(--fs-about-h2-sm);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--color-accent-solid);
+}
+
+.about-timeline__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.about-timeline__title {
+  font-size: var(--fs-about-h3);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--color-text-strong);
+}
+
+.about-timeline__text {
+  font-size: var(--fs-about-small);
+  line-height: 1.6;
+  color: var(--color-text-body);
+}
+
+/* ---- 07 Careers band ---------------------------------------------------- */
+
+/* Deliberately not .advisor: that block forces its .btn to 12px/600
+   (components.css), which fights .btn--pill's 14px. */
+.about-join {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding: clamp(28px, 4vw, 48px);
+}
+
+.about-join__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 700px;
+}
+
+.about-join__title {
+  font-size: clamp(22px, 2.8vw, 28px);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--color-text-strong);
+}
+
+.about-join__copy {
+  font-size: var(--fs-body-lg);
+  line-height: 1.65;
+  color: var(--color-text-body);
+}
+
+/* ---- 08 Closing CTA ------------------------------------------------------
+   Reuses the .cta block from home.css for layout, full-bleed media and the
+   12px parallax budget (site.js keys that off the .cta class). Only the
+   typography and overlay differ in this frame. */
+
+.about-cta .cta__overlay {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.about-cta .cta__kicker {
+  font-style: normal;
+  font-size: clamp(13px, 1.6vw, 16px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent-label);
+}
+
+.about-cta .cta__title {
+  max-width: 20ch;
+  margin: var(--space-3) auto 0;
+  font-size: var(--fs-h2-lg);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  color: var(--color-text-strong);
+  text-align: center;
+}
+
+.about-cta .cta__sub {
+  margin: var(--space-5) auto 0;
+  font-size: var(--fs-about-lede);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--color-text-body);
+  text-align: center;
+}
+
+.about-cta .cta__btn {
+  --motion-delay: 240ms;
+  margin: var(--space-8) auto 0;
+}
+
+/* ---- Pill button arrow --------------------------------------------------- */
+
+.icon--arrow-right {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+/* ==========================================================================
+   Responsive — column counts and stacking only; everything dimensional is
+   clamp()-driven above. Breakpoints reuse the project's existing ladder.
+   ========================================================================== */
+
+@media (max-width: 1000px) {
+  .about-timeline__row {
+    gap: var(--space-8);
+  }
+}
+
+@media (max-width: 900px) {
+  /* Stats: 4-up → 2 × 2. Re-map the dividers for the new grid. */
+  .about-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6) 0;
+  }
+  .about-stat:nth-child(2n) {
+    border-inline-end: 0;
+  }
+
+  .about-craft {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+  .about-craft__media {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (max-width: 720px) {
+  .about-beliefs,
+  .about-focus__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+  .about-place {
+    padding: var(--space-8);
+  }
+  .about-join {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-6);
+  }
+}
+
+@media (max-width: 640px) {
+  /* Timeline: year moves above the entry instead of squeezing a 120px rail. */
+  .about-timeline__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-5);
+  }
+}
+
+@media (max-width: 560px) {
+  .about-belief {
+    padding: var(--space-6);
+  }
+  .about-stats {
+    padding: var(--space-6);
+  }
+}
+
+@media (max-width: 380px) {
+  .about-stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+  .about-stat {
+    border-inline-end: 0;
+  }
+}
+
+/* Comfortable touch targets on coarse pointers (the shared .btn--pill sits at
+   41px; AGENT.md asks for a 44px practical minimum). */
+@media (pointer: coarse) {
+  .about-craft__cta,
+  .about-join .btn,
+  .about-cta .cta__btn {
+    min-height: 44px;
+  }
+}

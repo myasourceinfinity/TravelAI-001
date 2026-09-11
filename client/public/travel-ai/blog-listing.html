@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>The Journal — Stories Worth Reading | Travel AI</title>
+  <meta name="description" content="Notes from our Travel AI Agents on Dubai and Japan — the neighbourhoods, seasons, meals and small details that shape how a place actually feels." />
+  <meta name="theme-color" content="#0a0a0c" />
+  <link rel="canonical" href="https://travel-ai.example/blog-listing.html" />
+
+  <!-- Open Graph / Meta -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="The Journal — Stories Worth Reading | Travel AI" />
+  <meta property="og:description" content="Notes from our Travel AI Agents on Dubai and Japan — the neighbourhoods, seasons, meals and small details that shape how a place actually feels." />
+  <meta property="og:image" content="assets/images/blog/blog-hero.webp" />
+
+  <!-- Resource Preloads -->
+  <link rel="preload" as="image" href="assets/images/blog/blog-hero.webp" fetchpriority="high" />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-400.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-600.woff2" crossorigin />
+
+  <!-- Stylesheet Hierarchy -->
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/blog.css" />
+  <link rel="stylesheet" href="css/motion.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <!-- Motion Foundation: GSAP 3.x + ScrollTrigger (pinned CDN) & Motion Engine -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script defer src="js/motion/gsap-presets.js"></script>
+  <script defer src="js/motion/gsap-text.js"></script>
+  <script defer src="js/motion/gsap-engine.js"></script>
+  <script defer src="js/site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Shared Global Header (Mounted by shell.js via site.js) -->
+  <header id="site-header" class="site-header"></header>
+
+  <main id="main">
+
+    <!-- ===================== 01 — Hero Masthead ===================== -->
+    <section class="blog-hero" aria-labelledby="blog-hero-title">
+      <img class="blog-hero__bg" src="assets/images/blog/blog-hero.webp" alt="" width="1440" height="500" fetchpriority="high" decoding="async" data-motion="image-reveal" />
+      <div class="blog-hero__scrim" aria-hidden="true"></div>
+      <div class="blog-container">
+        <div class="blog-hero__content">
+          <p class="blog-eyebrow blog-hero__eyebrow" data-motion="text-reveal">The Journal</p>
+          <h1 class="blog-hero__title" id="blog-hero-title" data-motion="line-reveal">Stories worth reading before you go.</h1>
+          <p class="blog-hero__desc" data-motion="text-reveal">Notes from our Travel AI Agents on Dubai and Japan — the neighbourhoods, seasons, meals and small details that shape how a place actually feels.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 02 — Featured Article ===================== -->
+    <section class="blog-section blog-featured" aria-labelledby="featured-section-title">
+      <div class="blog-container">
+        <div class="blog-section-head">
+          <p class="blog-eyebrow" data-motion="text-reveal">Featured Story</p>
+          <h2 class="blog-title" id="featured-section-title" data-motion="text-reveal">Curated Spotlight</h2>
+        </div>
+
+        <article class="featured-article" aria-labelledby="featured-article-heading">
+          <div class="featured-article__media" data-motion="fade-in">
+            <span class="blog-badge">Japan</span>
+            <img class="featured-article__img" src="assets/images/blog/blog-featured.webp" alt="Misty morning view of historic wooden pagodas and streets in Higashiyama, Kyoto" width="640" height="400" loading="lazy" decoding="async" data-motion="image-reveal" />
+          </div>
+          <div class="featured-article__content">
+            <p class="featured-article__meta" data-motion="text-reveal">Culture · 8 min read · 12 August 2026</p>
+            <h3 class="featured-article__title" id="featured-article-heading" data-motion="text-reveal">
+              <a href="blog-details.html">Kyoto in the quiet hours, before the city wakes.</a>
+            </h3>
+            <p class="featured-article__desc" data-motion="text-reveal">There is a fragile, fleeting version of Kyoto that exists only between 5:00 and 7:00 AM. As the mist clears off the Higashiyama hills, old temples and narrow wooden lanes emerge in absolute silence. Our lead agent shares how to wander these preserved streets properly.</p>
+            <a class="btn btn--pill btn--accent featured-article__cta" href="blog-details.html" data-motion="fade-up">
+              Read the story
+              <svg class="icon icon--arrow-right" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" />
+              </svg>
+            </a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===================== 03 — Latest Articles Grid ===================== -->
+    <section class="blog-section blog-latest" aria-labelledby="latest-stories-title">
+      <div class="blog-container">
+        <div class="blog-section-head">
+          <p class="blog-eyebrow" data-motion="text-reveal">All stories</p>
+          <h2 class="blog-title" id="latest-stories-title" data-motion="text-reveal">Written by people who've been there.</h2>
+          <p class="blog-desc" data-motion="text-reveal">Every guide, itinerary review, and culinary notebook on this journal is penned directly by one of our twelve Travel AI Agents—real human specialists based in Kyoto, Tokyo, and Dubai.</p>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="blog-filters" role="group" aria-label="Filter stories by destination or theme" data-motion="fade-up">
+          <button type="button" class="blog-filter-chip is-active" data-filter="all" aria-pressed="true">All Destinations</button>
+          <button type="button" class="blog-filter-chip" data-filter="Dubai" aria-pressed="false">Dubai</button>
+          <button type="button" class="blog-filter-chip" data-filter="Japan" aria-pressed="false">Japan</button>
+          <button type="button" class="blog-filter-chip" data-filter="Experiences" aria-pressed="false">Experiences</button>
+        </div>
+
+        <!-- 3-Column Articles Grid (Pre-rendered for file://, no-JS, and instant SEO) -->
+        <div class="blog-cards__grid" id="blog-cards-grid" data-motion-stagger>
+          <!-- Card 1 -->
+          <article class="blog-card" data-category="Culture" data-destination="Dubai" data-motion="fade-in">
+            <div class="blog-card__media">
+              <span class="blog-badge">Dubai</span>
+              <img class="blog-card__img" src="assets/images/blog/blog-card-1.webp" alt="Serene waters of Dubai Creek reflecting historic shores and distant skyline" loading="lazy" decoding="async" width="405" height="220" data-motion="image-reveal" />
+            </div>
+            <div class="blog-card__body">
+              <p class="blog-card__meta">Culture · 6 min read</p>
+              <h3 class="blog-card__title">
+                <a href="#" class="blog-card__link">The Dubai that exists after the skyline</a>
+              </h3>
+              <p class="blog-card__desc">Beyond the chrome and skyscrapers lies a city of concrete poetry, quiet salt creeks, and recipes carried across centuries.</p>
+            </div>
+            <div class="blog-card__footer">
+              <time class="blog-card__date" datetime="2026-08-10">10 August 2026</time>
+              <svg class="icon blog-card__arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" />
+              </svg>
+            </div>
+          </article>
+
+          <!-- Card 2 -->
+          <article class="blog-card" data-category="Planning" data-destination="Japan" data-motion="fade-in">
+            <div class="blog-card__media">
+              <span class="blog-badge">Japan</span>
+              <img class="blog-card__img" src="assets/images/blog/blog-card-2.webp" alt="Vibrant red Japanese autumn foliage framing a serene garden temple" loading="lazy" decoding="async" width="405" height="220" data-motion="image-reveal" />
+            </div>
+            <div class="blog-card__body">
+              <p class="blog-card__meta">Planning · 9 min read</p>
+              <h3 class="blog-card__title">
+                <a href="#" class="blog-card__link">Choosing your season in Japan</a>
+              </h3>
+              <p class="blog-card__desc">Cherry blossoms are only part of the story. Why November's deep autumn and February's quiet snow offer Japan at its most authentic.</p>
+            </div>
+            <div class="blog-card__footer">
+              <time class="blog-card__date" datetime="2026-08-08">8 August 2026</time>
+              <svg class="icon blog-card__arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" />
+              </svg>
+            </div>
+          </article>
+
+          <!-- Card 3 -->
+          <article class="blog-card" data-category="Food" data-destination="Japan" data-motion="fade-in">
+            <div class="blog-card__media">
+              <span class="blog-badge">Japan</span>
+              <img class="blog-card__img" src="assets/images/blog/blog-card-3.webp" alt="Atmospheric evening alleyway in Osaka with warm paper lanterns" loading="lazy" decoding="async" width="405" height="220" data-motion="image-reveal" />
+            </div>
+            <div class="blog-card__body">
+              <p class="blog-card__meta">Food · 5 min read</p>
+              <h3 class="blog-card__title">
+                <a href="#" class="blog-card__link">Eating well in Osaka without a reservation</a>
+              </h3>
+              <p class="blog-card__desc">The best meals in the nation's kitchen are often found down neon-lit alleys, beneath simple paper lanterns with standing room only.</p>
+            </div>
+            <div class="blog-card__footer">
+              <time class="blog-card__date" datetime="2026-08-04">4 August 2026</time>
+              <svg class="icon blog-card__arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" />
+              </svg>
+            </div>
+          </article>
+
+          <!-- Card 4 -->
+          <article class="blog-card" data-category="Experiences" data-destination="Dubai" data-motion="fade-in">
+            <div class="blog-card__media">
+              <span class="blog-badge">Dubai</span>
+              <img class="blog-card__img" src="assets/images/blog/blog-card-4.webp" alt="Vast golden and crimson desert sand dunes extending to the horizon" loading="lazy" decoding="async" width="405" height="220" data-motion="image-reveal" />
+            </div>
+            <div class="blog-card__body">
+              <p class="blog-card__meta">Experiences · 7 min read</p>
+              <h3 class="blog-card__title">
+                <a href="#" class="blog-card__link">A desert night, done properly</a>
+              </h3>
+              <p class="blog-card__desc">Skip the generic tourist camps. How to experience the profound stillness of the Empty Quarter under a canopy of desert stars.</p>
+            </div>
+            <div class="blog-card__footer">
+              <time class="blog-card__date" datetime="2026-08-01">1 August 2026</time>
+              <svg class="icon blog-card__arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" />
+              </svg>
+            </div>
+          </article>
+
+          <!-- Card 5 -->
+          <article class="blog-card" data-category="Neighbourhoods" data-destination="Japan" data-motion="fade-in">
+            <div class="blog-card__media">
+              <span class="blog-badge">Japan</span>
+              <img class="blog-card__img" src="assets/images/blog/blog-card-5.webp" alt="Quiet charming residential street in Tokyo with lush greenery" loading="lazy" decoding="async" width="405" height="220" data-motion="image-reveal" />
+            </div>
+            <div class="blog-card__body">
+              <p class="blog-card__meta">Neighbourhoods · 6 min read</p>
+              <h3 class="blog-card__title">
+                <a href="#" class="blog-card__link">Where to stay in Tokyo, honestly</a>
+              </h3>
+              <p class="blog-card__desc">From the sleepy wooden houses of Yanaka to the architectural high-modernism of Aoyama — matching your pace to the right district.</p>
+            </div>
+            <div class="blog-card__footer">
+              <time class="blog-card__date" datetime="2026-07-28">28 July 2026</time>
+              <svg class="icon blog-card__arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" />
+              </svg>
+            </div>
+          </article>
+
+          <!-- Card 6 -->
+          <article class="blog-card" data-category="Planning" data-destination="All" data-motion="fade-in">
+            <div class="blog-card__media">
+              <span class="blog-badge">Planning</span>
+              <img class="blog-card__img" src="assets/images/blog/blog-card-6.webp" alt="Airplane wing traversing soft clouds during high altitude flight" loading="lazy" decoding="async" width="405" height="220" data-motion="image-reveal" />
+            </div>
+            <div class="blog-card__body">
+              <p class="blog-card__meta">Planning · 4 min read</p>
+              <h3 class="blog-card__title">
+                <a href="#" class="blog-card__link">Flying from New Zealand: the routes that work</a>
+              </h3>
+              <p class="blog-card__desc">The direct paths, the strategic stopovers, and how to arrive in Tokyo or Dubai with your internal clock intact.</p>
+            </div>
+            <div class="blog-card__footer">
+              <time class="blog-card__date" datetime="2026-07-22">22 July 2026</time>
+              <svg class="icon blog-card__arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" />
+              </svg>
+            </div>
+          </article>
+        </div>
+
+        <!-- Progressive Load More Button -->
+        <div class="blog-load-more-wrap" data-motion="fade-up">
+          <button type="button" id="load-more-btn" class="blog-btn--ghost">
+            Load more stories
+            <svg class="icon icon--arrow-right" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 04 — Reader Favourites ===================== -->
+    <section class="blog-section blog-favourites" aria-labelledby="favourites-title">
+      <div class="blog-container">
+        <div class="blog-section-head">
+          <p class="blog-eyebrow" data-motion="text-reveal">Reader favourites</p>
+          <h2 class="blog-title" id="favourites-title" data-motion="text-reveal">The ones people keep coming back to.</h2>
+        </div>
+
+        <ol class="blog-favourites__list" data-motion-stagger>
+          <!-- Item 01 -->
+          <li class="favourite-row" data-motion="fade-up">
+            <span class="favourite-row__rank" aria-hidden="true">01</span>
+            <div class="favourite-row__content">
+              <h3 class="favourite-row__title">
+                <a href="journey-details.html?id=japan-slow">Ten days in Japan without rushing</a>
+              </h3>
+              <p class="favourite-row__desc">A beautifully slow-paced itinerary that stays in just three ryokans, prioritizing rest and connection over checklist ticking.</p>
+            </div>
+            <span class="favourite-row__meta">11 min read</span>
+          </li>
+
+          <!-- Item 02 -->
+          <li class="favourite-row" data-motion="fade-up">
+            <span class="favourite-row__rank" aria-hidden="true">02</span>
+            <div class="favourite-row__content">
+              <h3 class="favourite-row__title">
+                <a href="about-us.html">What a Travel AI Agent actually does for you</a>
+              </h3>
+              <p class="favourite-row__desc">How our proprietary technology works in tandem with humans to secure hyper-local bookings and manage complex transport on the fly.</p>
+            </div>
+            <span class="favourite-row__meta">5 min read</span>
+          </li>
+
+          <!-- Item 03 -->
+          <li class="favourite-row" data-motion="fade-up">
+            <span class="favourite-row__rank" aria-hidden="true">03</span>
+            <div class="favourite-row__content">
+              <h3 class="favourite-row__title">
+                <a href="journey-details.html?id=dubai-signature">Dubai in the shoulder season</a>
+              </h3>
+              <p class="favourite-row__desc">Why the quiet months of late April and October provide the perfect sweet spot for warm gulf waters and empty desert camps.</p>
+            </div>
+            <span class="favourite-row__meta">6 min read</span>
+          </li>
+
+          <!-- Item 04 -->
+          <li class="favourite-row" data-motion="fade-up">
+            <span class="favourite-row__rank" aria-hidden="true">04</span>
+            <div class="favourite-row__content">
+              <h3 class="favourite-row__title">
+                <a href="journey-details.html?id=japan-transit">Trains, passes and the myth of the rail pass</a>
+              </h3>
+              <p class="favourite-row__desc">An honest cost breakdown of regional vs. national transit tickets on the Shinkansen network — why the famous pass is rarely worth it now.</p>
+            </div>
+            <span class="favourite-row__meta">8 min read</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===================== 05 — Newsletter Signup ===================== -->
+    <section class="blog-section blog-newsletter" aria-labelledby="newsletter-heading">
+      <div class="blog-container">
+        <div class="newsletter" data-motion="fade-up">
+          <div class="newsletter__content">
+            <p class="blog-eyebrow" data-motion="text-reveal">The Journal</p>
+            <h2 class="newsletter__title" id="newsletter-heading" data-motion="text-reveal">One story a month. Nothing else.</h2>
+            <p class="newsletter__desc" data-motion="text-reveal">Our monthly letter from Kyoto, Tokyo, or Dubai with hyper-local observations, season updates, and direct recommendations. No marketing bloat.</p>
+          </div>
+
+          <div class="newsletter__form-wrap">
+            <form class="newsletter__form" id="newsletter-form" novalidate>
+              <div class="newsletter__input-group">
+                <label for="newsletter-email" class="visually-hidden">Email address</label>
+                <input type="email" id="newsletter-email" class="newsletter__input" placeholder="Enter your email address..." required autocomplete="email" />
+              </div>
+              <button type="submit" class="btn btn--pill btn--accent newsletter__btn">Subscribe</button>
+            </form>
+            <p class="newsletter__helper">Strictly monthly. Unsubscribe anytime in one click.</p>
+            <div id="newsletter-feedback" class="newsletter__feedback" role="alert" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 06 — Mountain Closing CTA ===================== -->
+    <section class="blog-cta" aria-labelledby="blog-cta-title">
+      <img class="blog-cta__bg" src="assets/images/blog/blog-cta.webp" alt="" width="1440" height="480" loading="lazy" decoding="async" data-motion="parallax" />
+      <div class="blog-cta__scrim" aria-hidden="true"></div>
+      <div class="blog-container">
+        <div class="blog-cta__content">
+          <p class="blog-cta__eyebrow" data-motion="text-reveal">Read enough. Perhaps it's time</p>
+          <h2 class="blog-cta__title" id="blog-cta-title" data-motion="text-reveal">to go somewhere extraordinary.</h2>
+          <p class="blog-cta__sub" data-motion="text-reveal">Dubai and Japan are waiting.</p>
+          <a class="btn btn--pill btn--accent blog-cta__btn" href="journeys.html" data-motion="fade-up">
+            Discover Journeys
+            <svg class="icon icon--arrow-right" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Shared Global Footer (Mounted by shell.js via site.js) -->
+  <footer id="site-footer" class="site-footer" data-motion="fade-in"></footer>
+</body>
+</html>

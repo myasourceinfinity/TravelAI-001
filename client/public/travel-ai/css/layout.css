@@ -1,0 +1,74 @@
+/* ==========================================================================
+   layout.css — containers, sections, and reusable grid rhythm
+   ========================================================================== */
+
+.container {
+  width: min(100% - (var(--container-pad) * 2), var(--container-max));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: var(--section-py);
+  border-bottom: 0.8px solid var(--color-border);
+}
+
+.section--deep {
+  background-color: var(--color-bg);
+}
+
+.section--surface {
+  background-color: var(--color-surface);
+}
+
+.section--flush {
+  border-bottom: 0;
+}
+
+/* First section on a page with no hero: clear the fixed header. */
+.page-section {
+  padding-top: calc(var(--header-h) + var(--section-py));
+}
+
+/* Two-column editorial split: heading left, supporting copy right.
+   Collapses to one column when there isn't room for two comfortable columns. */
+.split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(32px, 5vw, 64px);
+  align-items: end;
+}
+
+.split--top {
+  align-items: start;
+}
+
+/* Section header block (eyebrow + label + title) */
+.section-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.section-head .section-title {
+  margin-top: var(--space-3);
+}
+
+/* Divider */
+.divider {
+  height: 0.8px;
+  background: var(--color-border);
+  border: 0;
+  width: 100%;
+}
+
+.stack-3 > * + * {
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 720px) {
+  .split {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+}

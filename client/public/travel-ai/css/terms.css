@@ -1,0 +1,126 @@
+/* ==========================================================================
+   terms.css — Terms of Use page styles
+   Directly derived from Figma node 208:5928
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Terms Section Layout (Figma: 72px top below navbar, 96px bottom, 80px sides)
+   -------------------------------------------------------------------------- */
+.terms-section {
+  padding-top: calc(var(--header-h) + 72px);
+  padding-bottom: 96px;
+  background-color: var(--color-bg);
+  width: 100%;
+}
+
+.terms-container {
+  width: 100%;
+  max-width: 1440px;
+  padding-inline: clamp(20px, 5.55vw, 80px);
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   2. Page Header (Figma 208:5929: height 77px, gap 12px, 56px margin-bottom)
+   -------------------------------------------------------------------------- */
+.terms-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 56px;
+  border-bottom: none; /* No divider line in Figma design */
+  padding-bottom: 0;
+}
+
+.terms-title {
+  font-family: var(--font-sans);
+  font-size: clamp(32px, 2.77vw, 40px);
+  font-weight: 800;
+  line-height: 48px;
+  letter-spacing: -0.02em;
+  color: #f3f4f6;
+  margin: 0;
+}
+
+.terms-updated {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 17px;
+  color: #8b8c94;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   3. Sections Container (Figma 208:5932: gap 48px, width 1280px)
+   -------------------------------------------------------------------------- */
+.terms-content {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  width: 100%;
+  max-width: 1280px;
+}
+
+/* --------------------------------------------------------------------------
+   4. Individual Section Block (Figma 208:5933+: gap 12px)
+   -------------------------------------------------------------------------- */
+.terms-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.terms-block__title {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+  color: #f3f4f6;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.terms-block__text {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 24px;
+  color: #a1a1aa;
+  margin: 0;
+}
+
+.terms-block__text a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.terms-block__text a:hover {
+  color: var(--color-accent-hover);
+}
+
+.terms-block__text a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Motion System Delays (MOTION.md §7b)
+   -------------------------------------------------------------------------- */
+.terms-title   { --motion-delay: 0ms; }
+.terms-updated { --motion-delay: 60ms; }
+.terms-content { --motion-delay: 120ms; }
+
+/* --------------------------------------------------------------------------
+   6. Reduced Motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .terms-block__text a {
+    transition: none;
+  }
+}

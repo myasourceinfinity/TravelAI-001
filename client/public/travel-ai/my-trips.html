@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>My Trips — Travel AI</title>
+  <meta name="description" content="Your Travel AI dashboard: upcoming journeys, completed travel history, and active package inquiries across Dubai and Japan." />
+  <meta name="theme-color" content="#080b0d" />
+  <link rel="canonical" href="https://travel-ai.example/my-trips.html" />
+  <meta name="robots" content="noindex" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="My Trips — Travel AI" />
+  <meta property="og:description" content="Upcoming journeys, completed travel history, and active package inquiries." />
+  <meta property="og:image" content="assets/images/trip-dubai-signature.webp" />
+
+  <link rel="preload" as="image" href="assets/images/trip-dubai-signature.webp" fetchpriority="high" />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-400.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-600.woff2" crossorigin />
+
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/my-trips.css" />
+  <link rel="stylesheet" href="css/motion.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <!-- Motion Foundation: GSAP 3.x + ScrollTrigger (pinned CDN) & Motion Engine -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script defer src="js/motion/gsap-presets.js"></script>
+  <script defer src="js/motion/gsap-text.js"></script>
+  <script defer src="js/motion/gsap-engine.js"></script>
+  <script defer src="js/site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header id="site-header" class="site-header"></header>
+
+  <main id="main">
+    <section class="section section--deep section--flush page-section" aria-labelledby="trips-title">
+      <div class="container">
+
+        <!-- ===================== Page header ===================== -->
+        <div class="trips-head">
+          <p class="badge" data-motion="text-reveal">Dashboard</p>
+          <h1 class="section-title" id="trips-title" data-motion="text-reveal">My Trips</h1>
+          <p class="trips-head__lede" data-motion="text-reveal">View your curated upcoming journeys, completed travel histories, and active package queries.</p>
+        </div>
+
+        <!-- ===================== Status filter ===================== -->
+        <div class="trip-filter" data-trip-filter role="group" aria-label="Filter trips by status" data-motion="fade-up">
+          <button class="trip-filter__tab" type="button" data-filter="all" aria-pressed="true" aria-controls="trips-grid">All Bookings</button>
+          <button class="trip-filter__tab" type="button" data-filter="upcoming" aria-pressed="false" aria-controls="trips-grid">Upcoming <span data-count-for="upcoming">(1)</span></button>
+          <button class="trip-filter__tab" type="button" data-filter="completed" aria-pressed="false" aria-controls="trips-grid">Completed</button>
+          <button class="trip-filter__tab" type="button" data-filter="drafts" aria-pressed="false" aria-controls="trips-grid">Drafts &amp; Inquiries</button>
+        </div>
+
+        <p class="sr-only" role="status" aria-live="polite" data-trips-status></p>
+
+        <h2 class="sr-only">Your bookings</h2>
+
+        <!-- ===================== Trips grid ===================== -->
+        <div class="trips-grid" id="trips-grid" data-trips data-motion-stagger>
+
+          <article class="journey-card journey-card--trip" data-trip-status="upcoming" aria-labelledby="trip-dubai-title" data-motion="fade-in">
+            <div class="journey-card__media">
+              <img class="journey-card__img" src="assets/images/trip-dubai-signature.webp" alt="The Burj Al Arab on its island off the Dubai coastline, seen from the air." width="1200" height="667" fetchpriority="high" decoding="async" data-motion="image-reveal" />
+              <span class="badge badge--sm journey-card__status" data-status="upcoming">Upcoming</span>
+            </div>
+            <div class="journey-card__body">
+              <p class="journey-card__meta" data-motion="text-reveal">7 Days · 6 Nights</p>
+              <h3 class="journey-card__title" id="trip-dubai-title" data-motion="text-reveal">The Dubai Signature Journey</h3>
+              <p class="journey-card__date" data-motion="text-reveal">Oct 12 — Oct 19, 2026</p>
+              <div class="journey-card__footer">
+                <p class="journey-card__paid">
+                  <span class="journey-card__paid-label">Amount Paid</span>
+                  <span class="journey-card__paid-value">NZ$4,850</span>
+                </p>
+                <div class="journey-card__actions">
+                  <a class="btn btn--sm btn--accent-outline" href="journey-details.html" aria-label="View details for The Dubai Signature Journey">Details</a>
+                  <a class="btn btn--sm btn--subtle" href="contact.html" aria-label="Modify The Dubai Signature Journey">Modify</a>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="journey-card journey-card--trip" data-trip-status="completed" aria-labelledby="trip-kyoto-title" data-motion="fade-in">
+            <div class="journey-card__media">
+              <img class="journey-card__img" src="assets/images/trip-kyoto-autumn.webp" alt="A vermilion five-storey pagoda beside a temple hall, with mountains beyond." width="1200" height="667" loading="lazy" decoding="async" data-motion="image-reveal" />
+              <span class="badge badge--sm journey-card__status" data-status="completed">Completed</span>
+            </div>
+            <div class="journey-card__body">
+              <p class="journey-card__meta" data-motion="text-reveal">10 Days · 9 Nights</p>
+              <h3 class="journey-card__title" id="trip-kyoto-title" data-motion="text-reveal">Kyoto Autumn Retreat</h3>
+              <p class="journey-card__date" data-motion="text-reveal">Nov 02 — Nov 12, 2025</p>
+              <div class="journey-card__footer">
+                <p class="journey-card__paid">
+                  <span class="journey-card__paid-label">Amount Paid</span>
+                  <span class="journey-card__paid-value">NZ$6,200</span>
+                </p>
+                <div class="journey-card__actions">
+                  <a class="btn btn--sm btn--accent-outline" href="journey-details.html" aria-label="View details for Kyoto Autumn Retreat">Details</a>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="journey-card journey-card--trip" data-trip-status="cancelled" aria-labelledby="trip-tokyo-title" data-motion="fade-in">
+            <div class="journey-card__media">
+              <img class="journey-card__img" src="assets/images/trip-tokyo-tech.webp" alt="A tiered wooden pagoda rising above traditional timber townhouses at sunset." width="1200" height="667" loading="lazy" decoding="async" data-motion="image-reveal" />
+              <span class="badge badge--sm journey-card__status" data-status="cancelled">Cancelled</span>
+            </div>
+            <div class="journey-card__body">
+              <p class="journey-card__meta" data-motion="text-reveal">5 Days · 4 Nights</p>
+              <h3 class="journey-card__title" id="trip-tokyo-title" data-motion="text-reveal">Tokyo Tech &amp; Tradition</h3>
+              <p class="journey-card__date" data-motion="text-reveal">Jul 15 — Jul 20, 2025</p>
+              <div class="journey-card__footer">
+                <p class="journey-card__paid">
+                  <span class="journey-card__paid-label">Amount Paid</span>
+                  <span class="journey-card__paid-value">NZ$3,400</span>
+                </p>
+                <div class="journey-card__actions">
+                  <a class="btn btn--sm btn--accent-outline" href="journey-details.html" aria-label="View details for Tokyo Tech &amp; Tradition">Details</a>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <aside class="trip-promo" aria-labelledby="promo-title" data-motion="fade-in">
+            <div>
+              <svg class="trip-promo__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false">
+                <path d="M20.0007 2.00115V6.001M22.0009 4.00107H18.0005M11.0169 2.81556C11.0598 2.58617 11.1815 2.37899 11.361 2.2299C11.5406 2.08081 11.7666 1.9992 12 1.9992C12.2334 1.9992 12.4594 2.08081 12.639 2.2299C12.8185 2.37899 12.9402 2.58617 12.9831 2.81556L14.0342 8.37334C14.1088 8.76848 14.3009 9.13193 14.5852 9.41627C14.8696 9.70062 15.2331 9.89264 15.6283 9.96728L21.1867 11.0182C21.4162 11.0611 21.6234 11.1828 21.7725 11.3623C21.9216 11.5418 22.0032 11.7678 22.0032 12.0012C22.0032 12.2346 21.9216 12.4606 21.7725 12.6401C21.6234 12.8196 21.4162 12.9413 21.1867 12.9842L15.6283 14.0351C15.2331 14.1098 14.8696 14.3018 14.5852 14.5861C14.3009 14.8705 14.1088 15.2339 14.0342 15.6291L12.9831 21.1868C12.9402 21.4162 12.8185 21.6234 12.639 21.7725C12.4594 21.9216 12.2334 22.0032 12 22.0032C11.7666 22.0032 11.5406 21.9216 11.361 21.7725C11.1815 21.6234 11.0598 21.4162 11.0169 21.1868L9.96584 15.6291C9.89119 15.2339 9.69914 14.8705 9.41476 14.5861C9.13039 14.3018 8.76689 14.1098 8.37171 14.0351L2.81326 12.9842C2.58384 12.9413 2.37664 12.8196 2.22753 12.6401C2.07842 12.4606 1.9968 12.2346 1.9968 12.0012C1.9968 11.7678 2.07842 11.5418 2.22753 11.3623C2.37664 11.1828 2.58384 11.0611 2.81326 11.0182L8.37171 9.96728C8.76689 9.89264 9.13039 9.70062 9.41476 9.41627C9.69914 9.13193 9.89119 8.76848 9.96584 8.37334L11.0169 2.81556ZM5.99956 20.0004C5.99956 21.105 5.10406 22.0004 3.9994 22.0004C2.89474 22.0004 1.99924 21.105 1.99924 20.0004C1.99924 18.8959 2.89474 18.0005 3.9994 18.0005C5.10406 18.0005 5.99956 18.8959 5.99956 20.0004Z" />
+              </svg>
+              <h3 class="trip-promo__title" id="promo-title">Dreaming of your next escape?</h3>
+              <p class="trip-promo__text">Describe a destination or a travel mood to our intelligent Planner AI and receive a fully customized draft package validated by travel professionals.</p>
+            </div>
+            <a class="btn btn--pill btn--primary trip-promo__cta" href="index.html#how">Open AI Planner</a>
+          </aside>
+
+        </div>
+
+        <!-- Shown when a filter returns nothing -->
+        <div class="empty-state trips-empty" data-trips-empty hidden>
+          <span class="empty-state__icon" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false">
+              <path d="M15 16.6064V30.8193C14.8912 30.7793 14.7853 30.7335 14.6836 30.6807L14.6797 30.6787L2.23535 24.2783C1.84319 24.0738 1.53032 23.7871 1.31836 23.457C1.13295 23.1683 1.0284 22.8526 1.00488 22.5342L1 22.3975V9.59863C1.00009 9.52562 1.00507 9.45266 1.01367 9.37988L15 16.6064ZM30.9854 9.37988C30.994 9.4527 30.9999 9.52558 31 9.59863V22.3984C30.9995 22.7625 30.8934 23.1273 30.6816 23.457C30.4697 23.7871 30.1568 24.0738 29.7646 24.2783L17.3203 30.6787L17.3164 30.6807C17.2147 30.7335 17.1088 30.7793 17 30.8193V16.6064L24.3877 12.79C24.4329 12.771 24.4764 12.7482 24.5186 12.7227L30.9854 9.37988ZM21.8145 11.8682L15.999 14.873L2.19531 7.74023C2.20974 7.73239 2.22363 7.72343 2.23828 7.71582L8 4.75293L21.8145 11.8682ZM16 1C16.4677 1 16.9219 1.11143 17.3164 1.31641L17.3203 1.31836L29.7607 7.71582V7.7168C29.7752 7.7243 29.7895 7.73251 29.8037 7.74023L23.9941 10.7422L10.1846 3.62891L14.6797 1.31836L14.6836 1.31641C15.0781 1.11143 15.5323 1 16 1Z" />
+            </svg>
+          </span>
+          <p class="empty-state__title">Nothing in this view</p>
+          <p class="empty-state__text">You have no bookings with this status yet. Browse our journeys to plan your next one.</p>
+          <a class="btn btn--pill btn--primary empty-state__cta" href="journeys.html">Browse Packages</a>
+        </div>
+
+        <!-- ===================== Pending inquiries ===================== -->
+        <section class="trips-activity" aria-labelledby="inquiries-title">
+          <div class="trips-activity__head">
+            <h2 class="trips-activity__title" id="inquiries-title" data-motion="text-reveal">Pending Inquiries</h2>
+            <p class="trips-activity__lede" data-motion="text-reveal">Packages you have asked agents about but aren't finalized will appear below.</p>
+          </div>
+
+          <div class="empty-state" data-motion="fade-up">
+            <span class="empty-state__icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false">
+                <path d="M15 16.6064V30.8193C14.8912 30.7793 14.7853 30.7335 14.6836 30.6807L14.6797 30.6787L2.23535 24.2783C1.84319 24.0738 1.53032 23.7871 1.31836 23.457C1.13295 23.1683 1.0284 22.8526 1.00488 22.5342L1 22.3975V9.59863C1.00009 9.52562 1.00507 9.45266 1.01367 9.37988L15 16.6064ZM30.9854 9.37988C30.994 9.4527 30.9999 9.52558 31 9.59863V22.3984C30.9995 22.7625 30.8934 23.1273 30.6816 23.457C30.4697 23.7871 30.1568 24.0738 29.7646 24.2783L17.3203 30.6787L17.3164 30.6807C17.2147 30.7335 17.1088 30.7793 17 30.8193V16.6064L24.3877 12.79C24.4329 12.771 24.4764 12.7482 24.5186 12.7227L30.9854 9.37988ZM21.8145 11.8682L15.999 14.873L2.19531 7.74023C2.20974 7.73239 2.22363 7.72343 2.23828 7.71582L8 4.75293L21.8145 11.8682ZM16 1C16.4677 1 16.9219 1.11143 17.3164 1.31641L17.3203 1.31836L29.7607 7.71582V7.7168C29.7752 7.7243 29.7895 7.73251 29.8037 7.74023L23.9941 10.7422L10.1846 3.62891L14.6797 1.31836L14.6836 1.31641C15.0781 1.11143 15.5323 1 16 1Z" />
+              </svg>
+            </span>
+            <p class="empty-state__title">No active inquiries</p>
+            <p class="empty-state__text">Enquired packages will appear here after you contact an agent.</p>
+            <a class="btn btn--pill btn--primary empty-state__cta" href="journeys.html">Browse Packages</a>
+          </div>
+        </section>
+
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer" class="site-footer" data-motion="fade-in"></footer>
+</body>
+</html>

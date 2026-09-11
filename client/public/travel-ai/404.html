@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Page not found — Travel AI</title>
+  <meta name="description" content="The page you were looking for isn't here. Head back to Travel AI to keep exploring Dubai and Japan." />
+  <meta name="theme-color" content="#080b0d" />
+  <meta name="robots" content="noindex" />
+
+  <!-- Root-relative paths so the page renders correctly no matter which
+       (possibly nested) URL the host served it for. -->
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-600.woff2" crossorigin />
+
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/error.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <!-- Motion Foundation: GSAP 3.x + ScrollTrigger (pinned CDN) & Motion Engine -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script defer src="js/motion/gsap-presets.js"></script>
+  <script defer src="js/motion/gsap-text.js"></script>
+  <script defer src="js/motion/gsap-engine.js"></script>
+  <script defer src="js/site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header id="site-header" class="site-header"></header>
+
+  <main id="main">
+    <section class="error" aria-labelledby="error-title">
+      <div class="error__glow" aria-hidden="true"></div>
+      <div class="error__inner">
+        <p class="error__eyebrow">Error 404</p>
+        <p class="error__code" aria-hidden="true">404</p>
+        <h1 class="error__title" id="error-title">This page has wandered off.</h1>
+        <p class="error__text">The page you're looking for isn't here — it may have moved, or the link may be broken. Let's get you back on the journey.</p>
+
+        <div class="error__actions">
+          <a class="btn btn--primary btn--pill" href="index.html">Back to Home</a>
+          <a class="btn btn--ghost btn--pill" href="journeys.html">Browse Journeys</a>
+        </div>
+
+        <nav class="error__links" aria-label="Helpful links">
+          <a href="index.html">Home</a>
+          <a href="journeys.html">Journeys</a>
+          <a href="contact.html">Contact</a>
+          <a href="index.html#how">How it Works</a>
+        </nav>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+</body>
+</html>

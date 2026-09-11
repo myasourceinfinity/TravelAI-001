@@ -4,11 +4,10 @@ import { useAuth } from '../../context/AuthContext';
 import Navbar from '../common/Navbar';
 import PopularDestinationsCarousel from '../common/PopularDestinationsCarousel';
 import '../home/HomePage.css';
-import { getMyAttractions, getPopularDestinations, getRecentSearches } from '../../services/recentSearchService';
-import { chatWithAI } from '../../services/tripService';
-import AnimatedTripPlannerInput from '../trips/AnimatedTripPlannerInput';
-import travelAILogo from '../../assets/travelai-logo.png';
+import './TravellerDashboard.css';
+import { getMyAttractions, getRecentSearches } from '../../services/recentSearchService';
 import PlanTripWithTravelAI from '../trips/PlanTripWithTravelAI';
+import TidioWidget from '../common/TidioWidget';
 
 function formatSearchDate(value) {
   if (!value) return '';
@@ -49,10 +48,8 @@ export default function TravellerDashboard() {
   const navigate = useNavigate();
   const { user, accessToken } = useAuth();
 
-  const chatMessagesRef = useRef(null);
   const popularDeckRef = useRef(null);
   const plannerRef = useRef(null);
-  const hasMountedMessagesRef = useRef(false);
 
   const DEFAULT_POPULAR_DESTINATIONS = [
     { name: 'Burj Khalifa', subtitle: 'Skyline views · Downtown Dubai', searchCount: 0, isFeatured: true },
@@ -61,35 +58,27 @@ export default function TravellerDashboard() {
     { name: 'Dubai Frame', subtitle: 'Old and new Dubai panoramas', searchCount: 0, isFeatured: true },
   ];
 
+  function withPopularFallback(destinations) {
+    return Array.isArray(destinations) && destinations.length > 0
+      ? destinations
+      : DEFAULT_POPULAR_DESTINATIONS;
+  }
+
   const [recentSearches, setRecentSearches] = useState([]);
-  const [popularDestinations, setPopularDestinations] = useState([]);
   const [myAttractions, setMyAttractions] = useState([]);
   const [plannerQuery, setPlannerQuery] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content:
-        'Hello! I am TravelAI, your interactive travel consultant buddy. 🌍 Where are we dreaming of going for your next adventure? Tell me your destination, travel dates, number of travellers, and budget -- or we can figure it out together!',
-    },
-  ]);
-
-  const [userInput, setUserInput] = useState('');
-  const [isSending, setIsSending] = useState(false);
-  const [chatError, setChatError] = useState(null);
-
-  const [preferences, setPreferences] = useState({
-    destination: '',
-    originCity: '',
-    days: 0,
-    travelers: 0,
-    budgetLevel: '',
-    budgetAmount: 0,
-    flightBudget: 0,
-    hotelBudgetPerNight: 0,
-    departDate: '',
-    returnDate: '',
-    location_types: [],
+  const [todos, setTodos] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('travelai_dashboard_todos') || 'null') || [
+        { id: 'profile', label: 'Complete your travel profile', done: false },
+        { id: 'first-plan', label: 'Create your first AI itinerary', done: false },
+        { id: 'save-trip', label: 'Save a trip for later', done: false },
+      ];
+    } catch {
+      return [];
+    }
   });
+  const [newTodo, setNewTodo] = useState('');
 
   const refreshRecentSearches = async () => {
     if (!accessToken) return;
@@ -99,7 +88,7 @@ export default function TravellerDashboard() {
         getMyAttractions(accessToken),
       ]);
       setRecentSearches(recentData.recentSearches || []);
-      setMyAttractions(attractionsData.popularDestinations || []);
+      setMyAttractions(withPopularFallback(attractionsData.popularDestinations));
     } catch (err) {
       console.error('[TravellerDashboard] Failed to refresh recent searches:', err);
     }
@@ -111,30 +100,23 @@ export default function TravellerDashboard() {
     async function loadDashboardData() {
       if (!accessToken) {
         setRecentSearches([]);
-        setPopularDestinations([]);
         return;
       }
 
       try {
-        const [recentData, popularData, attractionsData] = await Promise.all([
+        const [recentData, attractionsData] = await Promise.all([
           getRecentSearches(accessToken),
-          getPopularDestinations(accessToken),
           getMyAttractions(accessToken),
         ]);
 
         if (!cancelled) {
           setRecentSearches(recentData.recentSearches || []);
-          setPopularDestinations(
-            popularData.popularDestinations?.length > 0
-              ? popularData.popularDestinations
-              : DEFAULT_POPULAR_DESTINATIONS
-          );
-          setMyAttractions(attractionsData.popularDestinations || DEFAULT_POPULAR_DESTINATIONS);
+          setMyAttractions(withPopularFallback(attractionsData.popularDestinations));
         }
       } catch (err) {
         console.error('[TravellerDashboard] Failed to load recent searches:', err);
         if (!cancelled) {
-          setPopularDestinations(DEFAULT_POPULAR_DESTINATIONS);
+          setMyAttractions(DEFAULT_POPULAR_DESTINATIONS);
         }
       }
     }
@@ -147,173 +129,8 @@ export default function TravellerDashboard() {
   }, [accessToken]);
 
   useEffect(() => {
-    if (!hasMountedMessagesRef.current) {
-      hasMountedMessagesRef.current = true;
-      return;
-    }
-
-    const chatBox = chatMessagesRef.current;
-    if (!chatBox) return;
-
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }, [messages]);
-
-  function parseBoldText(text) {
-    const parts = text.split(/(\*\*[^*]+\*\*)/g);
-
-    return parts.map((part, idx) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return (
-          <strong key={idx} style={{ color: '#111827', fontWeight: 700 }}>
-            {part.slice(2, -2)}
-          </strong>
-        );
-      }
-
-      return part;
-    });
-  }
-
-  function renderFormattedMessage(content) {
-    if (!content) return null;
-
-    const cleaned = content
-      .replace(/!\[([^\]]*)\]\([^)]*\)/g, '')
-      .replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
-
-    return cleaned.split('\n').map((line, lineIdx) => {
-      const t = line.trim();
-
-      if (!t) return <div key={lineIdx} style={{ height: '0.4rem' }} />;
-
-      if (t === '---') {
-        return (
-          <hr
-            key={lineIdx}
-            style={{
-              border: 'none',
-              borderTop: '1px solid rgba(15,23,42,0.1)',
-              margin: '0.75rem 0',
-            }}
-          />
-        );
-      }
-
-      if (t.startsWith('###')) {
-        return (
-          <h3
-            key={lineIdx}
-            style={{
-              fontSize: '1rem',
-              fontWeight: 700,
-              color: '#4f46e5',
-              margin: '0.75rem 0 0.4rem',
-            }}
-          >
-            {parseBoldText(t.replace(/^###\s*/, ''))}
-          </h3>
-        );
-      }
-
-      if (t.startsWith('##')) {
-        return (
-          <h4
-            key={lineIdx}
-            style={{
-              fontSize: '1.1rem',
-              fontWeight: 700,
-              color: '#6366f1',
-              margin: '0.9rem 0 0.5rem',
-            }}
-          >
-            {parseBoldText(t.replace(/^##\s*/, ''))}
-          </h4>
-        );
-      }
-
-      if (t.startsWith('#')) {
-        return (
-          <h2
-            key={lineIdx}
-            style={{
-              fontSize: '1.2rem',
-              fontWeight: 800,
-              color: '#1f2937',
-              margin: '1.1rem 0 0.6rem',
-            }}
-          >
-            {parseBoldText(t.replace(/^#\s*/, ''))}
-          </h2>
-        );
-      }
-
-      if (t.startsWith('- ') || t.startsWith('* ')) {
-        return (
-          <div
-            key={lineIdx}
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 8,
-              marginLeft: '0.5rem',
-              marginBottom: '0.3rem',
-            }}
-          >
-            <span style={{ color: '#6366f1', fontSize: '0.8rem', marginTop: 4 }}>
-              •
-            </span>
-            <span style={{ flex: 1, color: '#374151' }}>
-              {parseBoldText(t.substring(2))}
-            </span>
-          </div>
-        );
-      }
-
-      return (
-        <p
-          key={lineIdx}
-          style={{ margin: '0 0 0.5rem', lineHeight: 1.6, color: '#374151' }}
-        >
-          {parseBoldText(line)}
-        </p>
-      );
-    });
-  }
-
-  async function handleSend(prompt) {
-    const userMsg = String((typeof prompt === 'string' ? prompt : userInput) || '').trim();
-    if (!userMsg || isSending) return;
-
-    setUserInput('');
-    setIsSending(true);
-    setChatError(null);
-
-    const newMessages = [...messages, { role: 'user', content: userMsg }];
-    setMessages(newMessages);
-
-    try {
-      const data = await chatWithAI(accessToken, { messages: newMessages });
-      const assistantText =
-        data?.message || 'Sorry, I did not get a reply. Please try again.';
-
-      setMessages((prev) => [...prev, { role: 'assistant', content: assistantText }]);
-
-      if (data?.extractedPreferences) {
-        setPreferences((prev) => ({ ...prev, ...data.extractedPreferences }));
-      }
-
-      if (data?.recentSearch) {
-        setRecentSearches((prev) => [data.recentSearch, ...prev].slice(0, 5));
-        getPopularDestinations(accessToken)
-          .then((popularData) => setPopularDestinations(popularData.popularDestinations || []))
-          .catch((loadErr) => console.error('[TravellerDashboard] Failed to refresh popular destinations:', loadErr));
-      }
-    } catch (err) {
-      setChatError(err.message || 'Something went wrong while chatting with TravelAI.');
-    } finally {
-      setIsSending(false);
-    }
-  }
+    localStorage.setItem('travelai_dashboard_todos', JSON.stringify(todos));
+  }, [todos]);
 
   function handleRecentSearchClick(search) {
     const query = search?.query;
@@ -398,11 +215,48 @@ export default function TravellerDashboard() {
     navigate('/plan-trip');
   }
 
+  function addTodo(event) {
+    event.preventDefault();
+    const label = newTodo.trim();
+    if (!label) return;
+    setTodos((current) => [...current, { id: crypto.randomUUID(), label, done: false }]);
+    setNewTodo('');
+  }
+
   return (
     <div className="home-page-container">
       <Navbar />
+      <TidioWidget user={user} />
 
       <header className="traveller-home-section">
+        <div className="traveller-dashboard-heading">
+          <div>
+            <span className="traveller-dashboard-kicker">YOUR TRAVEL SPACE</span>
+            <h1>Plan something unforgettable{user?.first_name ? `, ${user.first_name}` : ''}.</h1>
+            <p>Tell TravelAI where you want to go and we will help you take it from idea to itinerary.</p>
+          </div>
+          <span className="traveller-free-chat">1-2 chats free</span>
+        </div>
+        <div className="traveller-quick-prompts" aria-label="Quick travel prompts">
+          {['Explore Dubai Marina', 'Explore Burj Khalifa', 'Explore Palm Jumeirah', 'Explore Dubai Mall', 'Explore Desert Safari'].map((prompt) => (
+            <button key={prompt} type="button" onClick={() => setPlannerQuery(prompt)}>
+              {prompt}
+            </button>
+          ))}
+        </div>
+        <div className="traveller-lyro-card">
+          <div>
+            <span className="traveller-lyro-badge">Travel AI AGENT</span>
+            <h2>Need help planning?</h2>
+            <p>Ask our AI travel agent about destinations, dates, budgets, and trip ideas.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => window.tidioChatApi?.open?.() || window.tidioChatApi?.show?.()}
+          >
+            Chat with Agent
+          </button>
+        </div>
         <div className="traveller-home-grid">
           <div ref={plannerRef} className="traveller-home-card traveller-home-hero-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column' }}>
             <PlanTripWithTravelAI isDashboardMode={true} onNewSearchSaved={refreshRecentSearches} prefillQuery={plannerQuery} />
@@ -450,6 +304,39 @@ export default function TravellerDashboard() {
           </aside>
         </div>
       </header>
+
+      <section className="traveller-todo-section" aria-labelledby="todo-title">
+        <div className="traveller-todo-header">
+          <div>
+            <span className="traveller-dashboard-kicker">YOUR CHECKLIST</span>
+            <h2 id="todo-title">Travel to-dos</h2>
+          </div>
+          <span>{todos.filter((todo) => todo.done).length}/{todos.length} complete</span>
+        </div>
+        <div className="traveller-todo-list">
+          {todos.map((todo) => (
+            <label key={todo.id} className={`traveller-todo-item${todo.done ? ' is-done' : ''}`}>
+              <input
+                type="checkbox"
+                checked={todo.done}
+                onChange={() => setTodos((current) => current.map((item) => (
+                  item.id === todo.id ? { ...item, done: !item.done } : item
+                )))}
+              />
+              <span>{todo.label}</span>
+            </label>
+          ))}
+        </div>
+        <form className="traveller-todo-form" onSubmit={addTodo}>
+          <input
+            value={newTodo}
+            onChange={(event) => setNewTodo(event.target.value)}
+            placeholder="Add a travel task..."
+            aria-label="Add a travel task"
+          />
+          <button type="submit">Add todo</button>
+        </form>
+      </section>
 
       <section className="home-dest-section" id="explore">
         <div className="home-dest-header">

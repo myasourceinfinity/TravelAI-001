@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../common/Navbar';
-import Footer from '../common/Footer';
 import './HomePage.css';
 
 // ── Images Import ─────────────────────────────────────────────────────────────
@@ -13,7 +12,8 @@ import mapKyotoImg from '../../assets/images/map-kyoto.webp';
 import portraitJamesImg from '../../assets/images/portrait-james.webp';
 import portraitSofiaImg from '../../assets/images/portrait-sofia.webp';
 import portraitDanielImg from '../../assets/images/portrait-daniel.webp';
-import portraitRachelImg from '../../assets/images/portrait-rachel.webp';
+
+
 import ctaBg from '../../assets/images/cta.webp';
 
 // Sample Journeys Data
@@ -60,24 +60,25 @@ export default function HomePage() {
     const setupHeadlessTidio = () => {
       if (window.tidioChatApi) {
         window.tidioChatApi.on('ready', () => {
-          window.tidioChatApi.hide();
-          const style = document.createElement('style');
-          style.innerHTML = '#tidio-chat, #tidio-chat-iframe, .tidio-chat-widget { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }';
-          document.head.appendChild(style);
+          window.tidioChatApi.setVisitorData?.({
+            name: user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : undefined,
+            email: user?.email,
+            phone: user?.phone,
+          });
         });
       }
     };
 
     if (!document.querySelector('script[src*="tidio.co"]')) {
       const script = document.createElement('script');
-      script.src = "//code.tidio.co/0ol3wmhhqxu6mzmhmizhkg9vpyaf5sqk.js"; 
+      script.src = "//code.tidio.co/" + process.env.TIDIO_PUBLIC_KEY; 
       script.async = true;
       script.onload = setupHeadlessTidio;
       document.body.appendChild(script);
     } else {
       setupHeadlessTidio();
     }
-  }, []);
+  }, [user]);
 
   return (
     <div className="homepage-wrapper">

@@ -69,6 +69,7 @@ export default function SignUpFlow({ onGoToLogin }) {
   const [form, setForm] = useState({
     first_name: '', last_name: '', email: '',
     password: '', confirm_password: '', phone: '',
+    living_location: '', destination: '',
   });
   const [errors,      setErrors]      = useState({});
   const [agreed,      setAgreed]      = useState(false);
@@ -108,7 +109,8 @@ export default function SignUpFlow({ onGoToLogin }) {
     setIsLoading(true);
     setServerError(null);
     try {
-      const { confirm_password: _, ...payload } = form;
+      const payload = { ...form };
+      delete payload.confirm_password;
       payload.currency = 'NZD';
       await localSignup(payload);
       setDone(true);
@@ -155,10 +157,10 @@ export default function SignUpFlow({ onGoToLogin }) {
 
       {/* Heading */}
       <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#111827', margin: '0 0 6px', fontFamily: 'Outfit, sans-serif' }}>
-        Create your account
+        Sign Up - To go ahead
       </h2>
       <p style={{ fontSize: '0.9rem', color: '#6b7280', margin: '0 0 28px' }}>
-        Set up your profile to get started with smart travel experience
+        Create your profile and get 1-2 chats free with TravelAI.
       </p>
 
       {/* Server error */}
@@ -209,6 +211,38 @@ export default function SignUpFlow({ onGoToLogin }) {
         {errors.email && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: 3, display: 'block' }}>⚠ {errors.email}</span>}
       </div>
 
+      {/* Phone */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={labelStyle}>Phone</label>
+        <input
+          name="phone" type="tel" placeholder="e.g. +1 555 000 0000"
+          value={form.phone} onChange={handleChange}
+          style={inputStyle(false)}
+          onFocus={e => e.target.style.borderColor = '#4f46e5'}
+          onBlur={e => e.target.style.borderColor = '#d1d5db'}
+        />
+      </div>
+
+      {/* Travel locations */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+        <div>
+          <label style={labelStyle}>Where do you live?</label>
+          <input
+            name="living_location" type="text" placeholder="Your city or country"
+            value={form.living_location} onChange={handleChange}
+            style={inputStyle(false)}
+          />
+        </div>
+        <div>
+          <label style={labelStyle}>Where do you want to go?</label>
+          <input
+            name="destination" type="text" placeholder="Dream destination"
+            value={form.destination} onChange={handleChange}
+            style={inputStyle(false)}
+          />
+        </div>
+      </div>
+
       {/* Password */}
       <div style={{ marginBottom: 16 }}>
         <label style={labelStyle}>Password</label>
@@ -249,18 +283,6 @@ export default function SignUpFlow({ onGoToLogin }) {
           onBlur={e => e.target.style.borderColor = errors.confirm_password ? '#dc2626' : '#d1d5db'}
         />
         {errors.confirm_password && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: 3, display: 'block' }}>⚠ {errors.confirm_password}</span>}
-      </div>
-
-      {/* Phone */}
-      <div style={{ marginBottom: 20 }}>
-        <label style={labelStyle}>Phone Number</label>
-        <input
-          name="phone" type="tel" placeholder="e.g. 021 123 4567"
-          value={form.phone} onChange={handleChange}
-          style={inputStyle(false)}
-          onFocus={e => e.target.style.borderColor = '#4f46e5'}
-          onBlur={e => e.target.style.borderColor = '#d1d5db'}
-        />
       </div>
 
       {/* Terms checkbox */}

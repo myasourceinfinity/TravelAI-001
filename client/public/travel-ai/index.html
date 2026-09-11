@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Travel AI — Journeys worth taking across Dubai & Japan</title>
+  <meta name="description" content="Travel AI is a premium travel studio with an AI advisor. Explore Dubai and Japan, discover considered journeys, and plan with a real Travel AI Agent." />
+  <meta name="theme-color" content="#080b0d" />
+  <link rel="canonical" href="https://travel-ai.example/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Travel AI — Journeys worth taking" />
+  <meta property="og:description" content="A more thoughtful way to experience Dubai and Japan, with an AI advisor and real Travel AI Agents." />
+  <meta property="og:image" content="assets/images/hero.webp" />
+
+  <!-- Preload LCP image & core fonts -->
+  <link rel="preload" as="image" href="assets/images/hero.webp" fetchpriority="high" />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-400.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-600.woff2" crossorigin />
+
+  <!-- Styles: tokens → reset → base → layout → components → page → responsive -->
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/chat.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/motion.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <!-- Motion Foundation: GSAP 3.x + ScrollTrigger (pinned CDN) & Motion Engine -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script defer src="js/motion/gsap-presets.js"></script>
+  <script defer src="js/motion/gsap-text.js"></script>
+  <script defer src="js/motion/gsap-engine.js"></script>
+  <script defer src="js/site.js"></script>
+  <script defer src="js/components/auth.js"></script>
+  <script defer type="module" src="js/components/chat.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header id="site-header" class="site-header"></header>
+
+  <main id="main">
+
+    <!-- ===================== Hero ===================== -->
+    <section class="hero" aria-labelledby="hero-title">
+      <img class="hero__bg" src="assets/images/hero.webp" alt=""
+           fetchpriority="high" decoding="async" width="2200" height="1467" data-motion="hero-image" />
+      <div class="hero__overlay" aria-hidden="true" data-motion="hero-overlay"></div>
+      <div class="hero__inner" data-motion="hero-content">
+        <h1 class="hero__title" id="hero-title" data-motion="hero-title">
+          <span class="line-mask"><span class="line-inner">Travel, made</span></span>
+          <span class="line-mask"><span class="line-inner">personal.</span></span>
+        </h1>
+        <div class="hero__text" data-motion="hero-text">
+          <p>
+            Some journeys begin with a destination.<br />
+            Others begin with a feeling.
+          </p>
+          <p>
+            Tell us what you're looking for, and discover a more<br />
+            thoughtful way to experience Dubai and Japan.
+          </p>
+        </div>
+        <a class="btn-hero hero__cta" href="#chat" data-motion="hero-cta" data-chat-trigger="true" aria-haspopup="dialog">
+          Discover
+          <span class="btn-hero__icon" aria-hidden="true">
+            <svg class="icon icon--arrow" viewBox="0 0 9 9" focusable="false"><path d="M2.25 6.75 6.75 2.25M6.75 5.76V2.25H3.24" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ===================== 02 — Introduction ===================== -->
+    <section class="section section--deep" aria-labelledby="intro-title">
+      <div class="container">
+        <div class="split" data-motion-scope>
+          <div class="section-head">
+            <p class="eyebrow" data-motion="text-reveal">02 — Introduction</p>
+            <p class="label" data-motion="text-reveal">Destinations</p>
+            <h2 class="section-title" id="intro-title" data-motion="char-scroll">Two destinations.<br />So much to discover.</h2>
+          </div>
+          <div class="stack-3 lede measure" data-motion="copy-follow">
+            <p>For now, we've chosen to focus on two extraordinary parts of the world — Dubai and Japan.</p>
+            <p>Not simply to show you where to stay or what to see, but to help you understand each destination, discover experiences worth your time, and find a journey that feels right for you.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 03 — Explore / Destinations ===================== -->
+    <section class="section section--surface" id="destinations" aria-labelledby="dest-heading">
+      <div class="container">
+        <p class="eyebrow" data-motion="text-reveal">03 — Explore</p>
+        <h2 class="sr-only" id="dest-heading">Explore our destinations</h2>
+        <div class="destinations" data-motion-stagger>
+
+          <article class="dest-card" data-motion="fade-in">
+            <img class="dest-card__img" src="assets/images/explore-dubai.webp"
+                 alt="Dubai skyline under a dramatic dusk sky" loading="lazy" decoding="async" data-motion="image-reveal" />
+            <div class="dest-card__scrim" aria-hidden="true"></div>
+            <div class="dest-card__body">
+              <p class="dest-card__eyebrow" data-motion="text-reveal">Dubai</p>
+              <h3 class="dest-card__title" data-motion="text-reveal">A city of extraordinary contrasts.</h3>
+              <p class="dest-card__text" data-motion="text-reveal">From quiet mornings in the desert to evenings overlooking one of the world's most remarkable skylines, Dubai is far more than what you see at first glance.</p>
+              <a class="btn btn--glass" href="404.html">Explore Dubai
+                <svg class="icon icon--arrow" viewBox="0 0 9 9" aria-hidden="true" focusable="false"><path d="M2.25 6.75 6.75 2.25M6.75 5.76V2.25H3.24" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </article>
+
+          <article class="dest-card" data-motion="fade-in">
+            <img class="dest-card__img" src="assets/images/explore-japan.webp"
+                 alt="Traditional pagoda in Kyoto at golden hour" loading="lazy" decoding="async" data-motion="image-reveal" />
+            <div class="dest-card__scrim" aria-hidden="true"></div>
+            <div class="dest-card__body">
+              <p class="dest-card__eyebrow" data-motion="text-reveal">Japan</p>
+              <h3 class="dest-card__title" data-motion="text-reveal">A world you'll want to understand.</h3>
+              <p class="dest-card__text" data-motion="text-reveal">Tradition and modern life exist beautifully side by side. From the energy of Tokyo to the quiet streets of Kyoto, every part of Japan tells a different story.</p>
+              <a class="btn btn--glass" href="404.html">Explore Japan
+                <svg class="icon icon--arrow" viewBox="0 0 9 9" aria-hidden="true" focusable="false"><path d="M2.25 6.75 6.75 2.25M6.75 5.76V2.25H3.24" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 04 — About ===================== -->
+    <section class="section section--surface" id="about" aria-labelledby="about-title">
+      <div class="container">
+        <div class="split split--top" data-motion-scope>
+          <div class="section-head">
+            <p class="eyebrow" data-motion="text-reveal">About</p>
+            <p class="label" data-motion="text-reveal">About Travel AI</p>
+            <h2 class="section-title" id="about-title" data-motion="char-scroll">Technology can find a place.<br />People make it a journey.</h2>
+          </div>
+          <div class="stack-3 lede" data-motion="copy-follow">
+            <p>Travel AI was created around a simple idea: planning a meaningful holiday should feel personal.</p>
+            <p>Explore freely. Ask questions. Learn about the places that interest you. And when you're ready to travel, discover carefully considered journeys created by people who understand the destination.</p>
+            <p>Behind every journey is a Travel AI Agent — a real travel professional who can listen, advise and help you take the next step.</p>
+          </div>
+        </div>
+
+        <hr class="divider divider--section" data-motion="divider" />
+
+        <div class="features" data-motion-stagger>
+          <div class="feature" data-motion="fade-in">
+            <svg class="feature__icon" viewBox="0 0 36 36" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 33C26.28 33 33 26.28 33 18 33 9.72 26.28 3 18 3 9.72 3 3 9.72 3 18 3 26.28 9.72 33 18 33Z"/>
+              <path d="M12 18H24M18 12V24"/>
+              <path d="M18 22C20.21 22 22 20.21 22 18 22 15.79 20.21 14 18 14 15.79 14 14 15.79 14 18 14 20.21 15.79 22 18 22Z"/>
+            </svg>
+            <p class="feature__label" data-motion="text-reveal">Intelligent Discovery</p>
+            <h3 class="feature__title" data-motion="text-reveal">Knowledge when you want it.</h3>
+            <p class="feature__text" data-motion="text-reveal">Ask about neighbourhoods, culture, experiences, seasons, food or simply what a place feels like. Travel AI helps you explore naturally.</p>
+          </div>
+
+          <div class="feature" data-motion="fade-in">
+            <svg class="feature__icon" viewBox="0 0 36 36" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 20C21.31 20 24 17.31 24 14 24 10.69 21.31 8 18 8 14.69 8 12 10.69 12 14 12 17.31 14.69 20 18 20Z"/>
+              <path d="M6 30C7.8 24.8 12 22 18 22 24 22 28.2 24.8 30 30"/>
+            </svg>
+            <p class="feature__label" data-motion="text-reveal">Personal Expertise</p>
+            <h3 class="feature__title" data-motion="text-reveal">A real person when it matters.</h3>
+            <p class="feature__text" data-motion="text-reveal">Our Travel AI Agents bring experience, judgement and personal attention to every curated journey.</p>
+          </div>
+        </div>
+
+        <p class="quote about-quote" data-motion="char-scroll">Because great travel should never feel automated.</p>
+      </div>
+    </section>
+
+    <!-- ===================== 05 — Packages / Journeys ===================== -->
+    <section class="section section--deep" id="journeys" aria-labelledby="journeys-title">
+      <div class="container">
+        <div class="split split--bordered">
+          <div class="section-head">
+            <p class="eyebrow" data-motion="text-reveal">05 — Packages</p>
+            <p class="label" data-motion="text-reveal">Our Journeys</p>
+            <h2 class="section-title" id="journeys-title" data-motion="line-reveal">Journeys worth taking.</h2>
+          </div>
+          <p class="lede" data-motion="fade-up">We don't believe in showing you hundreds of holidays and leaving you to choose. Instead, our Travel AI Agents bring together a considered collection of journeys across Dubai and Japan — each with its own character, pace and way of experiencing the destination.</p>
+        </div>
+
+        <div class="journeys" data-journeys="featured" data-motion-stagger></div>
+
+        <div class="center-row" data-motion="fade-up">
+          <a class="btn btn--ghost btn--pill" href="journeys.html">View all Journeys
+            <svg class="icon icon--arrow" viewBox="0 0 9 9" aria-hidden="true" focusable="false"><path d="M2.25 6.75 6.75 2.25M6.75 5.76V2.25H3.24" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 06 — Deep Exploration / Map ===================== -->
+    <section class="section section--surface" id="explore" aria-labelledby="explore-title">
+      <div class="container">
+        <div class="split split--top">
+          <div>
+            <div class="section-head">
+              <p class="eyebrow" data-motion="text-reveal">06 — Deep Exploration / Map</p>
+              <p class="label" data-motion="text-reveal">Explore</p>
+              <h2 class="section-title" id="explore-title" data-motion="line-reveal">Get to know a place<br />before you arrive.</h2>
+            </div>
+            <div class="stack-3 lede measure mt-5" data-motion="fade-up">
+              <p>Sometimes the best part of travelling begins long before the flight.</p>
+              <p>Explore neighbourhoods, landmarks, traditions, experiences and stories from Dubai and Japan — and ask Travel AI whenever something catches your curiosity.</p>
+            </div>
+
+            <div class="explore-tabs" data-region-tabs role="group" aria-label="Choose a region" data-motion="fade-up">
+              <button class="chip" type="button" aria-pressed="false">Dubai</button>
+              <button class="chip" type="button" aria-pressed="true">Japan</button>
+            </div>
+
+            <div class="explore-places" data-places aria-label="Places in Japan" data-motion="fade-up">
+              <a class="place" href="#" aria-current="false">Tokyo</a>
+              <a class="place" href="#" aria-current="true">Kyoto</a>
+              <a class="place" href="#" aria-current="false">Osaka</a>
+              <a class="place" href="#" aria-current="false">Mount Fuji</a>
+              <a class="place" href="#" aria-current="false">Nara</a>
+            </div>
+          </div>
+
+          <article class="place-card" data-motion="scale-reveal">
+            <div class="place-card__media">
+              <img class="place-card__img" src="assets/images/map-kyoto.webp"
+                   alt="Traditional pagoda and townscape at golden hour in Kyoto" loading="lazy" decoding="async" data-motion="image-reveal" data-parallax="editorial" />
+            </div>
+            <div class="place-card__body">
+              <h3 class="place-card__title">Kyoto</h3>
+              <p class="place-card__text">A city where centuries of tradition still form part of everyday life. Wander through historic neighbourhoods, discover quiet gardens and experience a slower side of Japan.</p>
+              <div class="place-card__actions">
+                <a class="btn btn--primary" href="404.html">Discover Kyoto →</a>
+                <a class="btn btn--ghost btn-spark" href="404.html">Ask about Kyoto</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 07 — How It Works ===================== -->
+    <section class="section section--deep" id="how" aria-labelledby="how-title">
+      <div class="container">
+        <div class="section-head section-head--full">
+          <p class="eyebrow" data-motion="text-reveal">07 — How It Works</p>
+          <p class="label" data-motion="text-reveal">How Travel AI Works</p>
+          <h2 class="section-title" id="how-title" data-motion="line-reveal">From an idea to somewhere unforgettable.</h2>
+        </div>
+
+        <ol class="steps" role="list" data-motion-stagger>
+          <li class="step" data-motion="fade-in">
+            <p class="step__num" data-motion="text-reveal">01</p>
+            <div class="step__rule" aria-hidden="true"></div>
+            <h3 class="step__title" data-motion="text-reveal">Start with a conversation</h3>
+            <p class="step__cue" data-motion="text-reveal">Tell us what's on your mind.</p>
+            <p class="step__text" data-motion="text-reveal">A destination, an occasion, something you've always wanted to experience — or simply a question. There's no form you need to figure out first.</p>
+          </li>
+          <li class="step" data-motion="fade-in">
+            <p class="step__num" data-motion="text-reveal">02</p>
+            <div class="step__rule" aria-hidden="true"></div>
+            <h3 class="step__title" data-motion="text-reveal">Discover what feels right</h3>
+            <p class="step__cue" data-motion="text-reveal">Explore at your own pace.</p>
+            <p class="step__text" data-motion="text-reveal">Learn about the destination and discover curated journeys that reflect the way you'd like to travel.</p>
+          </li>
+          <li class="step" data-motion="fade-in">
+            <p class="step__num" data-motion="text-reveal">03</p>
+            <div class="step__rule" aria-hidden="true"></div>
+            <h3 class="step__title" data-motion="text-reveal">Meet the person behind your journey</h3>
+            <p class="step__cue" data-motion="text-reveal">Human expertise, when you're ready.</p>
+            <p class="step__text" data-motion="text-reveal">Connect with a Travel AI Agent who can understand what matters to you, answer the practical questions and help with your journey.</p>
+          </li>
+          <li class="step" data-motion="fade-in">
+            <p class="step__num" data-motion="text-reveal">04</p>
+            <div class="step__rule" aria-hidden="true"></div>
+            <h3 class="step__title" data-motion="text-reveal">Leave the rest to us</h3>
+            <p class="step__cue" data-motion="text-reveal">Simply look forward to going.</p>
+            <p class="step__text" data-motion="text-reveal">Once you've found the right journey, your Travel AI Agent helps take care of the details from there.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===================== 08 — Testimonials ===================== -->
+    <section class="section section--surface" aria-labelledby="testimonials-title">
+      <div class="container">
+        <!-- No wrapper reveal: every child animates on its own position. A reveal here
+           would make this the only editorial heading not observed directly, slaving its
+           rise to the wrapper and firing 23 elements in one instant. -->
+        <div class="testimonials-grid">
+          <div class="testimonial-grid" data-motion-stagger>
+            <figure class="person-card" data-motion="fade-in">
+              <img class="person-card__img" src="assets/images/portrait-james.webp"
+                   alt="Portrait of James R." loading="lazy" decoding="async" data-motion="image-reveal" />
+              <div class="person-card__scrim" aria-hidden="true"></div>
+              <figcaption class="person-card__caption">
+                <p class="person-card__name" data-motion="text-reveal">James R.</p>
+                <p class="person-card__place" data-motion="text-reveal">Auckland, New Zealand</p>
+              </figcaption>
+            </figure>
+            <figure class="person-card" data-motion="fade-in">
+              <img class="person-card__img" src="assets/images/portrait-sofia.webp"
+                   alt="Portrait of Sofia M." loading="lazy" decoding="async" data-motion="image-reveal" />
+              <div class="person-card__scrim" aria-hidden="true"></div>
+              <figcaption class="person-card__caption">
+                <p class="person-card__name" data-motion="text-reveal">Sofia M.</p>
+                <p class="person-card__place" data-motion="text-reveal">Wellington, New Zealand</p>
+              </figcaption>
+            </figure>
+            <figure class="person-card" data-motion="fade-in">
+              <img class="person-card__img" src="assets/images/portrait-daniel.webp"
+                   alt="Portrait of Daniel K." loading="lazy" decoding="async" data-motion="image-reveal" />
+              <div class="person-card__scrim" aria-hidden="true"></div>
+              <figcaption class="person-card__caption">
+                <p class="person-card__name" data-motion="text-reveal">Daniel K.</p>
+                <p class="person-card__place" data-motion="text-reveal">Christchurch, New Zealand</p>
+              </figcaption>
+            </figure>
+            <figure class="person-card" data-motion="fade-in">
+              <img class="person-card__img" src="assets/images/portrait-rachel.webp"
+                   alt="Portrait of Rachel T." loading="lazy" decoding="async" data-motion="image-reveal" />
+              <div class="person-card__scrim" aria-hidden="true"></div>
+              <figcaption class="person-card__caption">
+                <p class="person-card__name" data-motion="text-reveal">Rachel T.</p>
+                <p class="person-card__place" data-motion="text-reveal">Queenstown, New Zealand</p>
+              </figcaption>
+            </figure>
+          </div>
+
+          <div class="testimonials-copy">
+            <div class="section-head">
+              <p class="eyebrow" data-motion="text-reveal">08 — Testimonials</p>
+              <p class="label" data-motion="text-reveal">What Travellers Say</p>
+              <h2 class="section-title" id="testimonials-title" data-motion="line-reveal">Words from the people who've travelled.</h2>
+            </div>
+            <div class="notes" data-motion="fade-up">
+              <div class="note">
+                <p class="note__plus" aria-hidden="true">+</p>
+                <h3 class="note__title" data-motion="text-reveal">Real journeys, real people.</h3>
+                <p class="note__text" data-motion="text-reveal">Every review comes from a traveller who experienced a journey we helped create — no templates, no guesswork.</p>
+              </div>
+              <div class="note">
+                <p class="note__plus" aria-hidden="true">+</p>
+                <p class="note__text note__text--strong" data-motion="text-reveal">We measure our success by how you feel when you return home — and whether you can't wait to go back.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CTA ===================== -->
+    <section class="cta" aria-labelledby="cta-title">
+      <img class="cta__bg" src="assets/images/cta.webp" alt="" loading="lazy" decoding="async" data-motion="parallax" />
+      <div class="cta__overlay" aria-hidden="true"></div>
+      <div data-motion-scope>
+        <p class="cta__kicker" data-motion="text-reveal">Perhaps it's time</p>
+        <h2 class="cta__title" id="cta-title" data-motion="char-scroll">to go somewhere extraordinary.</h2>
+        <p class="cta__sub" data-motion="copy-follow">Dubai and Japan are waiting.</p>
+        <a class="btn btn--glass btn--pill btn--lg cta__btn" href="#destinations" data-motion="fade-up">Discover</a>
+      </div>
+    </section>
+
+
+  </main>
+
+  <footer id="site-footer" class="site-footer" data-motion="fade-in"></footer>
+</body>
+</html>

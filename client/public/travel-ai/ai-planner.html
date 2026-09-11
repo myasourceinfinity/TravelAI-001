@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AI Planner — Travel AI</title>
+  <meta name="description" content="Plan your bespoke journey to Dubai or Japan with Travel AI. Describe your ideal itinerary and let AI craft your trip." />
+  <meta name="theme-color" content="#080b0d" />
+  <link rel="canonical" href="https://travel-ai.example/ai-planner.html" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="AI Planner — Travel AI" />
+  <meta property="og:description" content="Describe the trip you have in mind and let Travel AI draft your bespoke itinerary." />
+  <meta property="og:image" content="assets/images/journey-dubai.webp" />
+
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-400.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-600.woff2" crossorigin />
+
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/ai-planner.css" />
+  <link rel="stylesheet" href="css/motion.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <!-- Motion Foundation: GSAP 3.x + ScrollTrigger (pinned CDN) & Motion Engine -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script defer src="js/motion/gsap-presets.js"></script>
+  <script defer src="js/motion/gsap-text.js"></script>
+  <script defer src="js/motion/gsap-engine.js"></script>
+  <script defer src="js/site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header id="site-header" class="site-header"></header>
+
+  <main id="main">
+    <section class="section section--deep section--flush page-section planner-section" aria-labelledby="planner-heading">
+      <div class="container planner-container">
+
+        <!-- Header -->
+        <div class="planner__header">
+          <h1 class="planner__title" id="planner-heading" data-motion="line-reveal">Where would you like to go?</h1>
+          <p class="planner__desc" data-motion="fade-up">Describe the trip you have in mind — dates, pace, who's coming, what you'd rather avoid. Travel AI will draft it, and one of our agents can take it from there.</p>
+        </div>
+
+        <!-- Destination Toggle -->
+        <div class="planner__toggle-wrapper" data-motion="fade-up">
+          <div class="planner__toggle" role="group" aria-label="Choose destination">
+            <button class="planner__toggle-btn" type="button" data-dest="dubai" aria-pressed="true">Dubai</button>
+            <button class="planner__toggle-btn" type="button" data-dest="japan" aria-pressed="false">Japan</button>
+          </div>
+        </div>
+
+        <!-- Suggestion Chips Container -->
+        <div class="planner__chips" id="planner-chips" data-motion="fade-up" role="region" aria-label="Suggested attractions">
+          <!-- Populated by JS based on selected destination -->
+        </div>
+
+        <!-- Interactive Input Card -->
+        <form class="planner__card" id="planner-form" data-motion="fade-up" novalidate>
+          <label for="planner-input" class="sr-only">Describe your ideal trip</label>
+          <textarea id="planner-input" class="planner__textarea" rows="3" placeholder="Describe the trip you have in mind — dates, pace, style, experiences..." required>Five relaxed days in Dubai in November — good food, one desert night, no early starts.</textarea>
+
+          <div class="planner__card-footer">
+            <span class="planner__shortcut" id="planner-shortcut" aria-hidden="true">
+              <kbd id="planner-cmd-key">⌘</kbd> Enter to submit
+            </span>
+            <button class="planner__submit" type="submit" id="planner-submit-btn">
+              <span id="planner-submit-text">Submit</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Legal Disclaimer -->
+        <p class="planner__legal" data-motion="fade-up">
+          AI-powered. By using AI Mode you agree to our <a href="terms-of-use.html" class="planner__legal-link">Terms</a> &amp; <a href="privacy-policy.html" class="planner__legal-link">Privacy Policy</a>.
+        </p>
+
+      </div>
+    </section>
+  </main>
+</body>
+</html>

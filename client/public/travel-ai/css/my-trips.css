@@ -1,0 +1,211 @@
+/* ==========================================================================
+   my-trips.css — My Trips dashboard
+   Derived from the approved Figma "AI Travel / my-trips" frame (208:6305).
+
+   This frame sits on the shipped token palette, so there is no page-local
+   type ramp here. Shared primitives added for this page (.badge,
+   .empty-state, .btn--subtle, .btn--sm, .journey-card--trip) live in
+   components.css; this sheet holds page layout only.
+   ========================================================================== */
+
+/* ---- Page header --------------------------------------------------------- */
+
+.trips-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.trips-head .section-title {
+  font-size: clamp(28px, 3.6vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.trips-head__lede {
+  font-size: var(--fs-body-lg);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  max-width: 68ch;
+}
+
+/* ---- Status filter ------------------------------------------------------- */
+
+.trip-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin-top: clamp(28px, 4vw, 48px);
+  padding-bottom: var(--space-4);
+  border-bottom: 0.8px solid var(--color-border);
+  --motion-delay: 120ms;
+}
+
+.trip-filter__tab {
+  display: inline-flex;
+  align-items: center;
+  /* The label and its count are separate flex items, so the whitespace
+     between them is trimmed — restore it explicitly. */
+  gap: 4px;
+  min-height: 32px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-text-muted);
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.trip-filter__tab:hover {
+  color: var(--color-text);
+}
+
+/* Active state carries both colour and weight, and aria-pressed carries it
+   semantically — never colour alone. */
+.trip-filter__tab[aria-pressed="true"] {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+@media (pointer: coarse) {
+  .trip-filter__tab {
+    min-height: 44px;
+  }
+}
+
+/* ---- Trips grid ---------------------------------------------------------- */
+
+.trips-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6);
+  margin-top: clamp(28px, 4vw, 48px);
+  --stagger-base: var(--stagger-normal);
+}
+
+/* Hidden by the status filter. `hidden` alone loses to grid display. */
+.trips-grid > [hidden] {
+  display: none;
+}
+
+/* ---- AI Planner promo ---------------------------------------------------- */
+
+.trip-promo {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding: var(--space-8);
+  border: 0.8px dashed var(--color-accent-border);
+  border-radius: var(--radius-md);
+  background: rgba(167, 139, 250, 0.04);
+}
+
+.trip-promo__icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  color: var(--color-accent);
+}
+
+.trip-promo__title {
+  margin-top: var(--space-3);
+  font-size: clamp(18px, 1.8vw, 20px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.trip-promo__text {
+  margin-top: var(--space-3);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.trip-promo__cta {
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+
+/* ---- Zero-result state --------------------------------------------------- */
+
+.trips-empty {
+  margin-top: clamp(28px, 4vw, 48px);
+}
+
+/* .empty-state sets display:flex, which outranks the UA [hidden] rule. */
+.trips-empty[hidden] {
+  display: none;
+}
+
+/* ---- Pending inquiries --------------------------------------------------- */
+
+.trips-activity {
+  margin-top: clamp(48px, 7vw, 80px);
+}
+
+.trips-activity__head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trips-activity__title {
+  font-size: clamp(20px, 2.2vw, 22px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.trips-activity__lede {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  max-width: 68ch;
+}
+
+.trips-activity .empty-state {
+  margin-top: var(--space-6);
+}
+
+/* ==========================================================================
+   Responsive — column counts and stacking only.
+   ========================================================================== */
+
+@media (max-width: 1000px) {
+  .trips-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .trips-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+  .trip-filter {
+    gap: var(--space-4) var(--space-5);
+  }
+  .trip-promo {
+    padding: var(--space-6);
+  }
+}
+
+@media (max-width: 480px) {
+  /* Footer price and actions stop competing for one row. */
+  .journey-card--trip .journey-card__footer {
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .journey-card__actions {
+    width: 100%;
+  }
+  .journey-card__actions .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .empty-state__cta {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Contact — Travel AI</title>
+  <meta name="description" content="Get in touch with the Travel AI team. Ask about Dubai and Japan journeys, or connect with a Travel AI Agent." />
+  <meta name="theme-color" content="#080b0d" />
+  <link rel="canonical" href="https://travel-ai.example/contact.html" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Contact — Travel AI" />
+  <meta property="og:description" content="Get in touch with the Travel AI team." />
+  <meta property="og:image" content="assets/images/contact-kyoto.webp" />
+
+  <link rel="preload" as="image" href="assets/images/contact-kyoto.webp" fetchpriority="high" />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-400.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-600.woff2" crossorigin />
+
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/contact.css" />
+  <link rel="stylesheet" href="css/motion.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <!-- Motion Foundation: GSAP 3.x + ScrollTrigger (pinned CDN) & Motion Engine -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script defer src="js/motion/gsap-presets.js"></script>
+  <script defer src="js/motion/gsap-text.js"></script>
+  <script defer src="js/motion/gsap-engine.js"></script>
+  <script defer src="js/site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header id="site-header" class="site-header"></header>
+
+  <main id="main">
+    <section class="container contact-top" aria-labelledby="contact-heading">
+      <div class="contact-grid">
+
+        <div class="contact-media" data-motion="contact-image">
+          <img class="contact-media__img" src="assets/images/contact-kyoto.webp"
+               width="1150" height="767"
+               alt="A woman in a kimono walking a historic Kyoto street at sunset, with a pagoda in the distance"
+               fetchpriority="high" decoding="async" />
+        </div>
+
+        <div class="contact-form-wrap">
+          <p class="contact-eyebrow" data-motion="contact-eyebrow">Contacts</p>
+          <h1 class="contact-heading" id="contact-heading" data-motion="contact-title">Get in touch</h1>
+          <p class="contact-sub" data-motion="contact-sub">Contact the Travel AI team today!</p>
+
+          <form class="contact-form" novalidate aria-describedby="form-status" data-motion="contact-form">
+            <div class="form-row">
+              <div class="field">
+                <label class="field__label" for="cf-name">Name</label>
+                <input class="field__input" type="text" id="cf-name" name="name"
+                       placeholder="Name" autocomplete="name" required
+                       aria-describedby="cf-name-error" />
+                <p class="field__error" id="cf-name-error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label class="field__label" for="cf-email">Email</label>
+                <input class="field__input" type="email" id="cf-email" name="email"
+                       placeholder="Enter your email" autocomplete="email" required
+                       aria-describedby="cf-email-error" />
+                <p class="field__error" id="cf-email-error" role="alert"></p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="cf-message">Message</label>
+              <textarea class="field__input" id="cf-message" name="message" rows="3"
+                        placeholder="Message" required
+                        aria-describedby="cf-message-error"></textarea>
+              <p class="field__error" id="cf-message-error" role="alert"></p>
+            </div>
+
+            <div class="contact-form__actions">
+              <button class="btn-hero" type="submit">
+                Submit
+                <span class="btn-hero__icon" aria-hidden="true">
+                  <svg class="icon icon--arrow" viewBox="0 0 9 9" focusable="false"><path d="M2.25 6.75 6.75 2.25M6.75 5.76V2.25H3.24" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </button>
+              <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+</body>
+</html>

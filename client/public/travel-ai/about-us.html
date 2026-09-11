@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>About Us — Travel AI</title>
+  <meta name="description" content="A small team in Auckland planning journeys to two destinations. How Travel AI combines specialist human advisors with purpose-built AI to shape Dubai and Japan itineraries." />
+  <meta name="theme-color" content="#080b0d" />
+  <link rel="canonical" href="https://travel-ai.example/about-us.html" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="About Us — Travel AI" />
+  <meta property="og:description" content="A small team, two destinations, one idea. Human expertise, accelerated by AI." />
+  <meta property="og:image" content="assets/images/about-masthead.webp" />
+
+  <link rel="preload" as="image" href="assets/images/about-masthead.webp" fetchpriority="high" />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-400.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-600.woff2" crossorigin />
+
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/about.css" />
+  <link rel="stylesheet" href="css/motion.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <!-- Motion Foundation: GSAP 3.x + ScrollTrigger (pinned CDN) & Motion Engine -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script defer src="js/motion/gsap-presets.js"></script>
+  <script defer src="js/motion/gsap-text.js"></script>
+  <script defer src="js/motion/gsap-engine.js"></script>
+  <script defer src="js/site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header id="site-header" class="site-header"></header>
+
+  <main id="main">
+
+    <!-- ===================== 01 — Masthead ===================== -->
+    <section class="about-hero" aria-labelledby="about-hero-title">
+      <img class="about-hero__img" src="assets/images/about-masthead.webp" alt="" width="1536" height="672" fetchpriority="high" decoding="async" data-motion="about-hero-image" />
+      <div class="about-hero__scrim" aria-hidden="true"></div>
+      <div class="container">
+        <div class="about-hero__inner">
+          <p class="about-eyebrow about-hero__eyebrow" data-motion="about-hero-eyebrow">About Travel AI</p>
+          <h1 class="about-hero__title" id="about-hero-title" data-motion="about-hero-title">A small team, two destinations, one idea.</h1>
+          <p class="about-hero__lede" data-motion="about-hero-lede">We believe that planning a holiday should feel like a meaningful conversation. By combining deep human expertise with specialized AI systems, we coordinate itineraries that honor your time and pace.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 02 — Our story ===================== -->
+    <section class="section section--deep about-story" aria-labelledby="story-title">
+      <div class="container">
+        <div class="split" data-motion-scope>
+          <div class="about-section-head about-story__head">
+            <p class="about-eyebrow" data-motion="text-reveal">Where this started</p>
+            <h2 class="about-title" id="story-title" data-motion="char-scroll">We got tired of planning trips badly.</h2>
+          </div>
+          <div class="about-story__copy" data-motion="copy-follow">
+            <p>Travel AI was born in Auckland, New Zealand in 2023. Our founders wanted to solve a basic paradox: B2B booking tools were cold and algorithmic, while traditional agents were slow and expensive.</p>
+            <p>We realized that if we built specialized AI to handle the complex routing, database matching, and real-time transit checking, our human agents could focus entirely on what they do best: applying taste, empathy, and real experience.</p>
+            <p>We purposefully limited our practice to just two places—Japan and Dubai. This singular focus ensures we hold genuine, up-to-date depth in the areas we manage.</p>
+          </div>
+        </div>
+
+        <ul class="about-stats about-panel about-section-body" role="list" data-motion="fade-up">
+          <li class="about-stat">
+            <p class="about-stat__value">2</p>
+            <p class="about-stat__label">Destinations</p>
+          </li>
+          <li class="about-stat">
+            <p class="about-stat__value">12</p>
+            <p class="about-stat__label">Travel AI Agents</p>
+          </li>
+          <li class="about-stat">
+            <p class="about-stat__value">14</p>
+            <p class="about-stat__label">Years avg. experience</p>
+          </li>
+          <li class="about-stat">
+            <p class="about-stat__value">1,400+</p>
+            <p class="about-stat__label">Journeys planned</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== 03 — Principles ===================== -->
+    <section class="section section--deep" aria-labelledby="principles-title">
+      <div class="container">
+        <div class="about-section-head">
+          <p class="about-eyebrow" data-motion="text-reveal">Our principles</p>
+          <h2 class="about-title" id="principles-title" data-motion="line-reveal">Four things we won't compromise on.</h2>
+        </div>
+
+        <ul class="about-beliefs about-section-body" role="list" data-motion-stagger>
+          <li class="about-belief about-panel" data-motion="fade-up">
+            <div class="about-belief__head">
+              <span class="about-belief__icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false">
+                  <path d="M15.834 17.5V15.8333C15.834 14.9493 15.4828 14.1014 14.8576 13.4763C14.2324 12.8512 13.3844 12.5 12.5003 12.5H7.49971C6.61556 12.5 5.76761 12.8512 5.14242 13.4763C4.51723 14.1014 4.166 14.9493 4.166 15.8333V17.5M13.3337 5.83333C13.3337 7.67428 11.8412 9.16667 10 9.16667C8.15884 9.16667 6.66629 7.67428 6.66629 5.83333C6.66629 3.99238 8.15884 2.5 10 2.5C11.8412 2.5 13.3337 3.99238 13.3337 5.83333Z" />
+                </svg>
+              </span>
+              <h3 class="about-belief__title">A person, always</h3>
+            </div>
+            <p class="about-belief__text">Software can suggest. People decide. We leverage AI to handle data density, but every final journey is shaped and signed off by a human who knows the destination.</p>
+          </li>
+
+          <li class="about-belief about-panel" data-motion="fade-up">
+            <div class="about-belief__head">
+              <span class="about-belief__icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                  <path d="M10 18.334C14.6027 18.334 18.334 14.6027 18.334 10C18.334 5.39726 14.6027 1.666 10 1.666C5.39726 1.666 1.666 5.39726 1.666 10C1.666 14.6027 5.39726 18.334 10 18.334Z" />
+                  <path d="M13.5333 6.4667L11.7667 11.7667L6.4667 13.5333L8.2333 8.2333L13.5333 6.4667Z" />
+                </svg>
+              </span>
+              <h3 class="about-belief__title">Depth over breadth</h3>
+            </div>
+            <p class="about-belief__text">Two places, known well. We only plan journeys to Japan and Dubai. We don't branch out, and we don't scale globally, because authentic deep knowledge can't be rushed.</p>
+          </li>
+
+          <li class="about-belief about-panel" data-motion="fade-up">
+            <div class="about-belief__head">
+              <span class="about-belief__icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false">
+                  <path d="M10 4.9996V10L13.3336 11.6668M18.334 10C18.334 14.6027 14.6027 18.334 10 18.334C5.39726 18.334 1.666 14.6027 1.666 10C1.666 5.39726 5.39726 1.666 10 1.666C14.6027 1.666 18.334 5.39726 18.334 10Z" />
+                </svg>
+              </span>
+              <h3 class="about-belief__title">Your pace</h3>
+            </div>
+            <p class="about-belief__text">No pressure, no countdown timers. Holidays are about space and stillness. We structure itineraries with deliberate blank spaces to let serendipity happen.</p>
+          </li>
+
+          <li class="about-belief about-panel" data-motion="fade-up">
+            <div class="about-belief__head">
+              <span class="about-belief__icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false">
+                  <path d="M2.57081 14.5908C2.6423 14.2661 2.61502 13.9274 2.49247 13.6183C1.63971 11.8489 1.43927 9.83528 1.92651 7.93256C2.41374 6.02985 3.55735 4.36035 5.15555 3.21864C6.75376 2.07693 8.70385 1.53636 10.6618 1.69233C12.6197 1.84829 14.4596 2.69075 15.8569 4.07108C17.2542 5.45141 18.1191 7.28089 18.299 9.23675C18.4788 11.1926 17.9621 13.1491 16.84 14.7612C15.7179 16.3732 14.0625 17.5371 12.1659 18.0475C10.2692 18.558 8.25325 18.3821 6.47362 17.5511C6.18154 17.4402 5.86417 17.4136 5.55772 17.4744L2.71333 18.3061C2.57612 18.3425 2.43188 18.3433 2.29429 18.3083C2.15671 18.2734 2.03033 18.2038 1.92715 18.1063C1.82397 18.0088 1.74741 17.8866 1.70473 17.7512C1.66204 17.6158 1.65465 17.4718 1.68324 17.3327L2.57081 14.5908Z" />
+                </svg>
+              </span>
+              <h3 class="about-belief__title">Straight answers</h3>
+            </div>
+            <p class="about-belief__text">We'll tell you when it's a bad idea. If a route is too ambitious, a neighbourhood too noisy, or a season too humid, we'll give you clear, unvarnished truth.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== 04 — How we work ===================== -->
+    <section class="section section--deep" aria-labelledby="craft-title">
+      <div class="container">
+        <div class="about-craft" data-motion-scope>
+          <div class="about-craft__media">
+            <img class="about-craft__img" src="assets/images/about-craft.webp" alt="Two Travel AI advisors marking routes on a large printed map spread across a studio table." width="1152" height="896" loading="lazy" decoding="async" data-motion="image-reveal" data-parallax="editorial" />
+          </div>
+
+          <div class="about-craft__text">
+            <p class="about-eyebrow" data-motion="text-reveal">Behind the journeys</p>
+            <h2 class="about-title" id="craft-title" data-motion="line-reveal">Every itinerary is written by someone who has been there.</h2>
+            <div class="about-craft__copy" data-motion="fade-up">
+              <p>Our agents are not just booking processors. They are deep local specialists who spend months every year on the ground in Kyoto, Shinjuku, or the Dubai desert.</p>
+              <p>When you consult with us, our proprietary Travel AI platform structures the core logistics instantly—flight routes, rail timetables, and room availability. This allows your human advisor to spend their energy tailoring the fine details.</p>
+              <p>The result is a highly tailored, stress-free holiday managed continuously via our companion app. No automated templates, just human taste accelerated by technology.</p>
+            </div>
+            <a class="btn btn--pill btn--accent about-craft__cta" href="index.html#how" data-motion="fade-up">
+              See how it works
+              <svg class="icon icon--arrow-right" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+                <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" stroke-linecap="round" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 05 — Focus ===================== -->
+    <section class="section section--deep" aria-labelledby="focus-title">
+      <div class="container">
+        <div class="about-section-head">
+          <p class="about-eyebrow" data-motion="text-reveal">Focus</p>
+          <h2 class="about-title" id="focus-title" data-motion="line-reveal">Two places, chosen on purpose.</h2>
+        </div>
+
+        <div class="about-focus__grid about-section-body" data-motion-stagger>
+          <article class="about-place" data-motion="fade-in">
+            <img class="about-place__img" src="assets/images/about-dubai.webp" alt="The Dubai skyline at dusk, with the Burj Khalifa above lit highway interchanges." width="1184" height="864" loading="lazy" decoding="async" data-motion="image-reveal" />
+            <div class="about-place__scrim" aria-hidden="true"></div>
+            <div class="about-place__body">
+              <h3 class="about-place__title">Dubai</h3>
+              <p class="about-place__text">A city of extraordinary contrasts. From high-modernism architecture and private shorelines to the silent, starry expanses of the desert.</p>
+            </div>
+          </article>
+
+          <article class="about-place" data-motion="fade-in">
+            <img class="about-place__img" src="assets/images/about-japan.webp" alt="A tiered wooden pagoda rising from dense green forest in the Japanese mountains." width="1184" height="864" loading="lazy" decoding="async" data-motion="image-reveal" />
+            <div class="about-place__scrim" aria-hidden="true"></div>
+            <div class="about-place__body">
+              <h3 class="about-place__title">Japan</h3>
+              <p class="about-place__text">A world you'll want to understand. Deep heritage ryokans, high-speed regional rail, moss-covered forests, and legendary food alleys.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 06 — A short history ===================== -->
+    <section class="section section--deep" aria-labelledby="history-title">
+      <div class="container">
+        <div class="about-section-head">
+          <p class="about-eyebrow" data-motion="text-reveal">A short history</p>
+          <h2 class="about-title" id="history-title" data-motion="line-reveal">Three years, quietly built.</h2>
+        </div>
+
+        <ol class="about-timeline about-section-body" role="list" data-motion-stagger>
+          <li class="about-timeline__row" data-motion="fade-up">
+            <p class="about-timeline__year">2023</p>
+            <div class="about-timeline__body">
+              <h3 class="about-timeline__title">Founded in Auckland</h3>
+              <p class="about-timeline__text">A clean slate. Two founders set out to rebuild bespoke travel planning using custom models combined with direct local expertise.</p>
+            </div>
+          </li>
+          <li class="about-timeline__row" data-motion="fade-up">
+            <p class="about-timeline__year">2024</p>
+            <div class="about-timeline__body">
+              <h3 class="about-timeline__title">First Travel AI Agents</h3>
+              <p class="about-timeline__text">We hired our first localized expert advisors in Tokyo and Kyoto, merging human taste with tech acceleration.</p>
+            </div>
+          </li>
+          <li class="about-timeline__row" data-motion="fade-up">
+            <p class="about-timeline__year">2025</p>
+            <div class="about-timeline__body">
+              <h3 class="about-timeline__title">Dubai opens to travelers</h3>
+              <p class="about-timeline__text">After 18 months of rigorous scouting, we launched our second destination, bringing our unique depth-led style to the Emirates.</p>
+            </div>
+          </li>
+          <li class="about-timeline__row" data-motion="fade-up">
+            <p class="about-timeline__year">2026</p>
+            <div class="about-timeline__body">
+              <h3 class="about-timeline__title">1,400 journeys planned</h3>
+              <p class="about-timeline__text">Our small team successfully coordinates complex, slow-paced custom itineraries with an average 4.9/5 stars satisfaction score.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===================== 07 — Careers ===================== -->
+    <section class="section section--deep section--flush" aria-labelledby="careers-title">
+      <div class="container">
+        <div class="about-join about-panel" data-motion="fade-up">
+          <div class="about-join__text">
+            <p class="about-eyebrow">Careers</p>
+            <h2 class="about-join__title" id="careers-title">Are you a travel professional?</h2>
+            <p class="about-join__copy">We are expanding our agent network for both Tokyo and Dubai routes. If you have deep residency experience in these locations, apply to join our Auckland office or remote team.</p>
+          </div>
+          <a class="btn btn--pill btn--accent" href="404.html">
+            Become a Travel AI Agent
+            <svg class="icon icon--arrow-right" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+              <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" stroke-linecap="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 08 — Closing CTA ===================== -->
+    <section class="cta about-cta" aria-labelledby="about-cta-title">
+      <img class="cta__bg" src="assets/images/about-cta.webp" alt="" width="1536" height="672" loading="lazy" decoding="async" data-motion="parallax" />
+      <div class="cta__overlay" aria-hidden="true"></div>
+      <div data-motion-scope>
+        <p class="cta__kicker" data-motion="text-reveal">Now you know us. Perhaps it's time</p>
+        <h2 class="cta__title" id="about-cta-title" data-motion="char-scroll">to go somewhere extraordinary.</h2>
+        <p class="cta__sub" data-motion="copy-follow">Dubai and Japan are waiting.</p>
+        <a class="btn btn--pill btn--accent cta__btn" href="journeys.html" data-motion="fade-up">
+          Discover Journeys
+          <svg class="icon icon--arrow-right" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+            <path d="M2.9162 7H11.0838M7 11.0838L11.0838 7L7 2.9162" stroke-linecap="round" />
+          </svg>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="site-footer" class="site-footer" data-motion="fade-in"></footer>
+</body>
+</html>

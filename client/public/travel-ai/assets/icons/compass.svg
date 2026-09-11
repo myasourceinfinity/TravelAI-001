@@ -1,0 +1,10 @@
+<!-- Circle path exported from Figma (node 208:5384). The needle is absent from that
+     export, so it is restored from the Lucide "compass" source geometry (ISC), scaled
+     by 5/6 from Lucide's 24-unit grid onto this 20-unit grid so both parts share the
+     same centre (10,10) and radius (8.334). -->
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="compass">
+<path id="Vector" d="M10 18.334C14.6027 18.334 18.334 14.6027 18.334 10C18.334 5.39726 14.6027 1.666 10 1.666C5.39726 1.666 1.666 5.39726 1.666 10C1.666 14.6027 5.39726 18.334 10 18.334Z" stroke="#A08CFF" stroke-width="2" stroke-linecap="round"/>
+<path id="Vector_2" d="M13.5333 6.4667L11.7667 11.7667L6.4667 13.5333L8.2333 8.2333L13.5333 6.4667Z" stroke="#A08CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>

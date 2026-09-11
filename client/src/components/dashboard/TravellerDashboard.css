@@ -1,0 +1,425 @@
+.home-page-container {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #f7f8fc;
+  color: #172033;
+}
+
+.home-page-container .home-nav {
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #e7e9f2;
+}
+
+.traveller-home-section {
+  padding: 112px clamp(16px, 5vw, 72px) 36px;
+  background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
+}
+
+.traveller-home-grid,
+.traveller-dashboard-heading,
+.traveller-quick-prompts,
+.traveller-lyro-card {
+  width: min(1280px, 100%);
+  box-sizing: border-box;
+}
+
+.traveller-home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.8fr);
+  gap: 24px;
+  margin: 0 auto;
+}
+
+.traveller-home-card {
+  min-width: 0;
+  border: 1px solid #e8eaf2;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(37, 48, 81, 0.07);
+}
+
+.traveller-home-hero-card {
+  padding: 20px !important;
+}
+
+.traveller-recent-card {
+  padding: 24px;
+}
+
+.traveller-recent-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.traveller-recent-header h2 {
+  margin: 6px 0 0;
+  color: #172033;
+  font: 700 1.45rem Georgia, serif;
+}
+
+.traveller-recent-list {
+  display: grid;
+  gap: 10px;
+}
+
+.traveller-recent-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #eceef5;
+  border-radius: 12px;
+  background: #fafbfe;
+  text-align: left;
+  cursor: pointer;
+}
+
+.traveller-recent-item:hover {
+  border-color: #c9c6ff;
+  background: #f5f4ff;
+}
+
+.traveller-recent-text {
+  min-width: 0;
+}
+
+.traveller-recent-text strong {
+  display: block;
+  overflow: hidden;
+  color: #273044;
+  font-size: .92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.traveller-recent-text small {
+  color: #8991a3;
+  font-size: .75rem;
+}
+
+.home-dest-section {
+  padding: 40px clamp(16px, 5vw, 72px) 80px;
+  background: #f7f8fc;
+}
+
+.home-dest-header {
+  width: min(1280px, 100%);
+  margin: 0 auto 20px;
+}
+
+.home-dest-header .home-section-title {
+  margin: 0;
+  color: #172033;
+  font: 700 clamp(1.55rem, 3vw, 2.3rem) Georgia, serif;
+}
+
+.traveller-popular-carousel {
+  position: relative;
+  width: min(1280px, 100%);
+  margin: 0 auto;
+}
+
+.traveller-popular-deck {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 4px 4px 18px;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.traveller-popular-deck::-webkit-scrollbar { display: none; }
+
+.traveller-popular-card {
+  position: relative;
+  flex: 0 0 280px;
+  height: 330px;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  background: #3028dc;
+  box-shadow: 0 12px 26px rgba(38, 43, 92, .14);
+  cursor: pointer;
+  scroll-snap-align: start;
+  text-align: left;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.traveller-popular-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 32px rgba(38, 43, 92, .22);
+}
+
+.traveller-popular-image {
+  display: block;
+  width: 100%;
+  height: 68%;
+  object-fit: cover;
+}
+
+.traveller-popular-content {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  min-height: 42%;
+  padding: 28px 18px 16px;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(48, 40, 220, .78), #3028dc 34%);
+}
+
+.traveller-popular-content .home-dest-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.traveller-popular-content .home-dest-name {
+  color: #fff;
+  font: 700 1.15rem Georgia, serif;
+}
+
+.traveller-popular-content .home-dest-country {
+  display: block;
+  color: rgba(255,255,255,.8);
+  font-size: .78rem;
+  line-height: 1.35;
+}
+
+.traveller-popular-action {
+  display: inline-block;
+  margin-top: 12px;
+  color: #ffe16a;
+  font-size: .75rem;
+  font-weight: 700;
+}
+
+.traveller-popular-arrow {
+  position: absolute;
+  top: 45%;
+  z-index: 2;
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: #3028dc;
+  box-shadow: 0 8px 18px rgba(38, 43, 92, .2);
+  cursor: pointer;
+  font-size: 1.5rem;
+  transform: translateY(-50%);
+}
+
+.traveller-popular-arrow:hover { background: #1f1aaf; }
+.traveller-popular-arrow-left { left: -12px; }
+.traveller-popular-arrow-right { right: -12px; }
+
+.traveller-popular-empty {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
+  padding: 20px;
+  border: 1px dashed #cfd4e4;
+  border-radius: 16px;
+  color: #687189;
+  background: #fff;
+  text-align: center;
+}
+
+.traveller-dashboard-heading h1,
+.traveller-todo-header h2,
+.traveller-lyro-card h2 {
+  font-family: Georgia, serif;
+}
+
+.traveller-dashboard-heading,
+.traveller-todo-header {
+  max-width: 1280px;
+  margin: 0 auto 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.traveller-dashboard-heading h1,
+.traveller-todo-header h2 {
+  margin: 6px 0;
+  color: #172033;
+  font-family: Georgia, serif;
+  font-weight: 700;
+}
+
+.traveller-dashboard-heading h1 { font-size: clamp(2rem, 4vw, 3.6rem); }
+.traveller-todo-header h2 { font-size: clamp(1.6rem, 3vw, 2.3rem); }
+
+.traveller-dashboard-heading p {
+  margin: 0;
+  color: #7b8190;
+  font-size: 1.05rem;
+}
+
+.traveller-dashboard-kicker {
+  color: #3028dc;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+
+.traveller-free-chat {
+  padding: 10px 16px;
+  border: 1px solid #d9d7f8;
+  border-radius: 999px;
+  color: #3028dc;
+  background: #f1f0ff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.traveller-quick-prompts {
+  max-width: 1280px;
+  margin: 0 auto 28px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.traveller-quick-prompts button {
+  border: 1px solid #dedbd4;
+  border-radius: 999px;
+  padding: 12px 22px;
+  color: #374151;
+  background: #fff;
+  font: 600 1rem Georgia, serif;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.traveller-quick-prompts button:hover {
+  color: #3028dc;
+  border-color: #aaa5f5;
+  transform: translateY(-2px);
+}
+
+.traveller-lyro-card {
+  max-width: 1280px;
+  margin: 0 auto 24px;
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-radius: 20px;
+  color: #fff;
+  background: linear-gradient(115deg, #3028dc 0%, #5148ee 55%, #786bf2 100%);
+  box-shadow: 0 14px 30px rgba(48, 40, 220, .2);
+}
+
+.traveller-lyro-card h2 { margin: 6px 0 4px; font-size: 1.35rem; }
+.traveller-lyro-card p { margin: 0; color: rgba(255,255,255,.82); }
+.traveller-lyro-badge { font-size: .68rem; font-weight: 800; letter-spacing: .15em; }
+.traveller-lyro-card button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 20px;
+  color: #3028dc;
+  background: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.traveller-todo-section {
+  max-width: 1280px;
+  margin: 18px auto 40px;
+  padding: 26px 5%;
+  background: #fff;
+  border: 1px solid #e8e5df;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(22, 32, 51, .06);
+}
+
+.traveller-todo-header { margin-bottom: 18px; }
+.traveller-todo-header > span { color: #7b8190; font-size: .85rem; }
+.traveller-todo-list { display: grid; gap: 10px; }
+
+.traveller-todo-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border-radius: 12px;
+  background: #f8f8fc;
+  color: #273044;
+}
+
+.traveller-todo-item input { accent-color: #3028dc; width: 18px; height: 18px; }
+.traveller-todo-item.is-done span { color: #9ca3af; text-decoration: line-through; }
+
+.traveller-todo-form { display: flex; gap: 10px; margin-top: 16px; }
+.traveller-todo-form input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #dedbd4;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font: inherit;
+}
+.traveller-todo-form button {
+  border: 0;
+  border-radius: 10px;
+  padding: 0 18px;
+  color: #fff;
+  background: #3028dc;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .traveller-home-section {
+    padding: 96px 14px 24px;
+  }
+
+  .traveller-home-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .traveller-dashboard-heading { flex-direction: column; }
+  .traveller-lyro-card { align-items: flex-start; flex-direction: column; }
+  .traveller-todo-form { flex-direction: column; }
+  .traveller-todo-form button { min-height: 44px; }
+  .home-dest-section {
+    padding: 28px 14px 56px;
+  }
+
+  .traveller-recent-card,
+  .traveller-home-hero-card {
+    padding: 16px !important;
+    border-radius: 16px;
+  }
+
+  .traveller-popular-deck {
+    gap: 12px;
+    padding-inline: 0;
+  }
+
+  .traveller-popular-card {
+    flex-basis: min(280px, calc(100vw - 48px));
+    height: 300px;
+  }
+
+  .traveller-popular-arrow-left { left: -7px; }
+  .traveller-popular-arrow-right { right: -7px; }
+}

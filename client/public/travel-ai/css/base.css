@@ -1,0 +1,64 @@
+/* ==========================================================================
+   base.css — element defaults & shared typographic primitives
+   ========================================================================== */
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg);
+  font-feature-settings: "cv11", "ss01";
+}
+
+/* ---- Headings ---------------------------------------------------------- */
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-text);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* ---- Section intro primitives (repeated pattern across the page) ------- */
+.eyebrow {
+  font-size: var(--fs-eyebrow);
+  font-weight: 400;
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+}
+
+.label {
+  font-size: var(--fs-label);
+  font-weight: 600;
+  color: var(--color-accent);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-size: var(--fs-h2);
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+}
+
+.lede {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+  line-height: 1.75;
+}
+
+.quote {
+  font-style: italic;
+  color: var(--color-text-muted);
+  letter-spacing: -0.01em;
+}
+
+/* ---- Links (inline text links) ---------------------------------------- */
+a:not([class]) {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
